@@ -1949,10 +1949,32 @@ window.MC = (function(){
     $('pbPay').addEventListener('click', function(){ calc.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(function(){ pay.click(); }, reduce ? 0 : 450); });
     mirror();
   }
+
+  /* — API бэкенда. На статике (Vercel, артефакт, file://) /api нет — страницы работают в демо-режиме — */
+  var API = window.MC_API || '/api', liveP = null;
+  function isLive(){
+    if (!liveP) liveP = (location.protocol === 'file:' || !window.fetch) ? Promise.resolve(false)
+      : fetch(API + '/health', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){ return !!(j && j.ok); }).catch(function(){ return false; });
+    return liveP;
+  }
+  function api(method, path, body){
+    return fetch(API + path, { method: method, credentials: 'same-origin', headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
+      .then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(j){
+          if (r.ok) return j;
+          var d = j.data || {}, e = new Error(r.status >= 500 ? 'Что-то пошло не так. Попробуйте ещё раз.' : (j.message || 'Ошибка запроса'));
+          e.status = r.status; e.code = d.code || 'error'; e.data = d; throw e;
+        });
+      }, function(){ var e = new Error('Нет связи с сервером. Проверьте интернет.'); e.code = 'network'; throw e; });
+  }
+  function kop(v){ return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: v % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(v / 100) + ' ₽'; }
+  function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
   initPaybar();
   initTheme();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid };
 })();
 
 </script>

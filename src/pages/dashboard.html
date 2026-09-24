@@ -204,12 +204,13 @@
 
     <!-- ===== Платежи и возвраты ===== -->
     <section class="cab-screen" id="s-payments" hidden>
-      <header class="cab-head"><div><span class="eyebrow">Деньги</span><h1>Платежи и возвраты</h1></div></header>
+      <header class="cab-head"><div><span class="eyebrow">Деньги</span><h1>Платежи и возвраты</h1></div><button type="button" class="btn btn-primary cab-head-btn" id="payTopup" hidden><svg class="bi"><use href="#i-plus"/></svg>Пополнить баланс</button></header>
       <div class="tabs" role="tablist" id="payTabs">
         <button type="button" role="tab" aria-selected="true" data-pt="pays">Платежи</button>
         <button type="button" role="tab" aria-selected="false" data-pt="refunds">Возвраты<span class="n" id="refN"></span></button>
       </div>
       <div id="payPane">
+        <div class="bal-line" id="balLine" hidden></div>
         <div class="tbl-wrap"><table class="table" id="payTable"><thead><tr><th>Дата</th><th>Заказ</th><th>Способ</th><th class="num">Сумма</th><th>Статус</th><th></th></tr></thead><tbody></tbody></table></div>
         <p class="hint">Платёж живёт отдельно от заказа: у него свой номер, статус и квитанция. Возврат оформляется на платёж.</p>
       </div>

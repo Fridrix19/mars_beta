@@ -292,4 +292,4 @@ create table audit_log (
 );
 create index audit_time on audit_log (created_at desc);
 
-create table schema_migrations (version text primary key, applied_at timestamptz not null default now());
+create table if not exists schema_migrations (version text primary key, applied_at timestamptz not null default now());

@@ -1,0 +1,158 @@
+// Интеграционные тесты API: нужен запущенный сервер (API_URL) с NUXT_DEV_CODES=true и доступ к той же базе (DATABASE_URL)
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import pg from 'pg'
+
+const API = process.env.API_URL || 'http://localhost:3100'
+const db = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+const uniq = () => `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}@example.ru`
+
+function client() {
+  let cookie = ''
+  return async function call(method, path, body) {
+    const r = await fetch(API + path, {
+      method, headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}), 'x-forwarded-for': '10.0.' + Math.floor(Math.random() * 250) + '.' + Math.floor(Math.random() * 250) },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    const sc = r.headers.get('set-cookie'); if (sc) cookie = sc.split(';')[0].includes('=;') ? '' : sc.split(';')[0]
+    const j = await r.json().catch(() => null)
+    return { status: r.status, body: j, code: j?.data?.code }
+  }
+}
+async function register(call, email, password = 'Secret123') {
+  const s = await call('POST', '/api/auth/register/start', { email })
+  assert.equal(s.status, 200); assert.match(s.body.dev_code, /^\d{6}$/)
+  const c = await call('POST', '/api/auth/register/complete', { email, password, code: s.body.dev_code, agree: true })
+  assert.equal(c.status, 200, JSON.stringify(c.body)); return c.body.user
+}
+const plan = async (slug, label) => (await db.query(`select pp.id from product_plans pp join products p on p.id = pp.product_id where p.slug = $1 and pp.label = $2`, [slug, label])).rows[0].id
+
+test('регистрация: код → аккаунт, занятая почта, неверный код', async () => {
+  const call = client(), email = uniq()
+  const s = await call('POST', '/api/auth/register/start', { email })
+  assert.equal((await call('POST', '/api/auth/register/start', { email })).code, 'resend_too_soon')
+  const wrong = s.body.dev_code === '111111' ? '222222' : '111111'
+  const w = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: wrong, agree: true })
+  assert.equal(w.code, 'code_wrong'); assert.equal(w.body.data.attempts_left, 4)
+  assert.equal((await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: false })).code, 'offer_required')
+  assert.equal((await call('POST', '/api/auth/register/complete', { email, password: 'short', code: s.body.dev_code, agree: true })).code, 'weak_password')
+  const ok = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: true })
+  assert.equal(ok.status, 200); assert.equal(ok.body.user.email, email); assert.equal(ok.body.user.balance_kop, 0)
+  assert.equal((await call('GET', '/api/auth/me')).body.user.email, email)
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: email.toUpperCase() })).code, 'email_taken')
+  const h = (await db.query(`select password_hash from users where email = $1`, [email])).rows[0].password_hash
+  assert.match(h, /^scrypt\$16384\$8\$1\$/)
+})
+
+test('вход: пароль, блокировка после 5 ошибок, выход', async () => {
+  const email = uniq(); await register(client(), email)
+  const call = client()
+  assert.equal((await call('POST', '/api/auth/login', { email: 'nobody-' + email, password: 'x' })).code, 'bad_credentials')
+  for (let i = 1; i <= 4; i++) {
+    const r = await call('POST', '/api/auth/login', { email, password: 'Wrong1234' })
+    assert.equal(r.code, 'bad_credentials'); assert.equal(r.body.data.attempts_left, 5 - i)
+  }
+  assert.equal((await call('POST', '/api/auth/login', { email, password: 'Wrong1234' })).code, 'locked')
+  assert.equal((await call('POST', '/api/auth/login', { email, password: 'Secret123' })).code, 'locked')
+  await db.query(`update users set locked_until = null where email = $1`, [email])
+  const ok = await call('POST', '/api/auth/login', { email, password: 'Secret123' })
+  assert.equal(ok.status, 200)
+  assert.equal((await call('POST', '/api/auth/logout')).status, 200)
+  assert.equal((await call('GET', '/api/auth/me')).body.user, null)
+  assert.equal((await call('GET', '/api/balance')).status, 401)
+})
+
+test('вход по коду и восстановление пароля', async () => {
+  const email = uniq(); await register(client(), email)
+  const call = client()
+  assert.equal((await call('POST', '/api/auth/login/code-start', { email: uniq() })).code, 'not_registered')
+  const s = await call('POST', '/api/auth/login/code-start', { email })
+  assert.equal((await call('POST', '/api/auth/login/code', { email, code: s.body.dev_code })).status, 200)
+  assert.equal((await call('POST', '/api/auth/login/code', { email, code: s.body.dev_code })).code, 'code_missing')
+
+  const other = client()
+  const r = await other('POST', '/api/auth/reset/start', { email })
+  const v = await other('POST', '/api/auth/reset/verify', { email, code: r.body.dev_code })
+  assert.ok(v.body.ticket)
+  const c = await other('POST', '/api/auth/reset/complete', { ticket: v.body.ticket, password: 'NewSecret99' })
+  assert.equal(c.status, 200)
+  assert.equal((await other('POST', '/api/auth/reset/complete', { ticket: v.body.ticket, password: 'NewSecret99' })).code, 'ticket_invalid')
+  assert.equal((await call('GET', '/api/auth/me')).body.user, null, 'старые сессии завершены')
+  assert.equal((await client()('POST', '/api/auth/login', { email, password: 'NewSecret99' })).status, 200)
+  assert.equal((await client()('POST', '/api/auth/reset/start', { email: uniq() })).status, 200, 'не выдаёт, есть ли аккаунт')
+})
+
+test('деньги: пополнение, KYC, недостача, покупка, идемпотентность, пополнение под заказ', async () => {
+  const call = client(), email = uniq(); const u = await register(call, email)
+  const chat = await plan('chatgpt', 'Plus')         // $20 → (20+5)×1.2 = $30 → 2 406,76 ₽
+  const card = await plan('virtual-card', 'Своя сумма')
+
+  assert.equal((await call('POST', '/api/topups', { amount_kop: 50 })).code, 'bad_amount')
+  const t = await call('POST', '/api/topups', { amount_kop: 1000_00 })
+  assert.equal(t.status, 200)
+  const paid = await call('POST', `/api/topups/${t.body.payment.id}/test`, { action: 'succeed' })
+  assert.equal(paid.body.status, 'succeeded')
+  await call('POST', `/api/topups/${t.body.payment.id}/test`, { action: 'succeed' })   // повтор вебхука
+  assert.equal((await call('GET', '/api/balance')).body.balance_kop, 1000_00)
+  assert.equal((await client()('POST', `/api/topups/${t.body.payment.id}/test`, {})).status, 401)
+
+  const noKyc = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-kyc-1', fields: { account_email: 'a@b.ru' } })
+  assert.equal(noKyc.code, 'kyc_required')
+  await db.query(`update users set kyc_status = 'approved' where id = $1`, [u.id])
+
+  assert.equal((await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-f-1', fields: {} })).code, 'bad_fields')
+  const short = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-s-1', fields: { account_email: 'a@b.ru' } })
+  assert.equal(short.code, 'insufficient_funds'); assert.equal(short.body.data.shortfall_kop, 240676 - 100000)
+
+  await call('POST', `/api/topups/${(await call('POST', '/api/topups', { amount_kop: 2000_00 })).body.payment.id}/test`, {})
+  const o1 = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-ok-1', fields: { account_email: 'a@b.ru' } })
+  const o2 = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-ok-1', fields: { account_email: 'a@b.ru' } })
+  assert.equal(o1.status, 200); assert.match(o1.body.order.id, /^MC-[A-HJKMNP-Z2-9]{8}$/)
+  assert.equal(o2.body.order.id, o1.body.order.id); assert.equal(o1.body.order.amount_kop, 240676)
+  assert.equal((await call('GET', '/api/balance')).body.balance_kop, 3000_00 - 240676)
+
+  assert.equal((await call('POST', '/api/orders', { plan_id: card, idem: 'idem-c-1', amount_cents: 4000 })).code, 'amount_out_of_range')
+  const t2 = await call('POST', '/api/topups', { amount_kop: 15000_00, for_order: { plan_id: card, amount_cents: 12000 } })
+  const r2 = await call('POST', `/api/topups/${t2.body.payment.id}/test`, {})
+  assert.match(r2.body.order_id, /^MC-/)
+  const d = await call('GET', `/api/orders/${r2.body.order_id}`)
+  assert.equal(d.body.order.plan_label, '$120'); assert.equal(d.body.order.charged_cents, 15600)
+  assert.equal(d.body.events[0].kind, 'created')
+  assert.equal((await client()('GET', `/api/orders/${r2.body.order_id}`)).status, 401)
+  assert.equal((await call('GET', '/api/orders')).body.orders.length, 2)
+  const n = await call('GET', '/api/notifications'); assert.ok(n.body.notifications.length >= 3)
+})
+
+test('каталог', async () => {
+  const c = await client()('GET', '/api/catalog?category=ai')
+  assert.ok(c.body.products.length > 10); assert.ok(c.body.products.every(p => p.category === 'ai'))
+  const all = await client()('GET', '/api/catalog'); assert.equal(all.body.products.length, 140)
+  const p = await client()('GET', '/api/catalog/chatgpt'); assert.equal(p.body.plans[0].charged_kop, 240676)
+  assert.equal((await client()('GET', '/api/catalog/nope')).status, 404)
+})
+
+test('кабинет: профиль, сессии, смена пароля, KYC-загрузка', async () => {
+  const a = client(), email = uniq(); await register(a, email)
+  const b = client(); assert.equal((await b('POST', '/api/auth/login', { email, password: 'Secret123' })).status, 200)
+  const pr = await a('PATCH', '/api/profile', { name: 'Фёдор', phone: '8 (900) 123-45-67' })
+  assert.equal(pr.body.user.name, 'Фёдор'); assert.equal(pr.body.user.phone, '+79001234567')
+  assert.equal((await a('PATCH', '/api/profile', { phone: '123' })).code, 'bad_phone')
+  const ss = await a('GET', '/api/auth/sessions'); assert.equal(ss.body.sessions.length, 2)
+  const mine = ss.body.sessions.find(x => x.current); assert.ok(mine); assert.ok(!/\//.test(mine.ip || ''))
+  assert.equal((await a('DELETE', '/api/auth/sessions/' + mine.id)).code, 'current_session')
+  assert.equal((await a('POST', '/api/auth/password', { old: 'nope', new: 'Another123' })).code, 'bad_password')
+  assert.equal((await a('POST', '/api/auth/password', { old: 'Secret123', new: 'Another123' })).status, 200)
+  assert.equal((await b('GET', '/api/auth/me')).body.user, null, 'вторая сессия завершена')
+  assert.equal((await client()('POST', '/api/auth/login', { email, password: 'Another123' })).status, 200)
+
+  const cookie = await (async () => { const r = await fetch(API + '/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: 'Another123' }) }); return r.headers.get('set-cookie').split(';')[0] })()
+  const up = async (name, type, bytes) => { const fd = new FormData(); fd.append('files', new Blob([bytes], { type }), name); const r = await fetch(API + '/api/kyc', { method: 'POST', body: fd, headers: { cookie } }); return { status: r.status, body: await r.json() } }
+  const bad = await up('x.png', 'image/png', Buffer.from('not a png')); assert.equal(bad.body.data.code, 'bad_type')
+  const ok = await up('passport.png', 'image/png', Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex')); assert.equal(ok.status, 200)
+  assert.equal((await up('again.png', 'image/png', Buffer.from('89504e470d0a1a0a', 'hex'))).body.data.code, 'kyc_pending')
+  const st = await fetch(API + '/api/kyc', { headers: { cookie } }).then(r => r.json()); assert.equal(st.status, 'pending'); assert.equal(st.last.files, 1)
+  const f = await db.query(`select f.size_bytes, f.purpose from files f join users u on u.id = f.owner_user where u.email = $1`, [email])
+  assert.equal(f.rows[0].purpose, 'kyc'); assert.equal(f.rows[0].size_bytes, 16)
+})
+
+test.after(() => db.end())

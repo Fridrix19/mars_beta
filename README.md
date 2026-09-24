@@ -18,6 +18,8 @@ build/           сборка: build.py, galaxy-bg.v58.js (фон), icon-lum.jso
 source-site/     снимок исходного сайта — источник логотипов, каталога (search.js) и тарифов (payment-flow.v2.js)
 design-system/   дизайн-система отдельным пакетом (index.html + src/)
 docs/            PROJECT-DOC.md — рабочий документ проекта: решения, правила, артефакты, очередь
+web/             бэкенд: Nuxt 4 + Nitro, PostgreSQL (миграции, API, тесты) — см. web/README.md
+render.yaml      тестовый стенд на Render + Neon
 ```
 
 ## Сборка
@@ -31,6 +33,10 @@ python3 build/build.py cursor chatgpt   # только указанные сер
 
 Результат пишется в `_proto/`. Пути переопределяются переменными `MC_SOURCE` (исходный сайт), `MC_SRC` (исходники), `MC_OUT` (куда собирать).
 Проверка вёрстки: `NODE_PATH=$(npm root -g) node build/shot.js _proto/dashboard.html out/dash overview` — скриншоты 1400 и 390 px и ошибки консоли.
+
+## Бэкенд
+
+`web/` отдаёт `_proto/` как статику и API `/api/*` (вход по почте, баланс, пополнение через тестовый провайдер, заказы, KYC-загрузка). Вход и кабинет сами переключаются на настоящие данные, когда рядом есть API; на Vercel работают в демо-режиме. Запуск, переменные и список API — в `web/README.md`.
 
 ## Деплой на Vercel
 

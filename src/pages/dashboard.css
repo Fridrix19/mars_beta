@@ -334,3 +334,11 @@
   .cardp-btns .btn{font-size:13.5px; padding-inline:8px}
   .refc .badge{grid-column:1; justify-self:start}
 }
+
+/* баланс (сервер) */
+.bal-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.bal-line .k{color:var(--text-3);font-size:13px}
+.bal-line b{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600}
+.bal-line .d{margin-left:auto;color:var(--text-3);font-size:13px}
+.testpay{display:grid;gap:10px;padding:14px;border:1px dashed var(--line-strong);border-radius:12px}
+.testpay b{font-family:'JetBrains Mono',monospace;font-size:22px}

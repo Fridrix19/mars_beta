@@ -1,0 +1,30 @@
+# Тестовый стенд: Render (web) + Neon (PostgreSQL). Прототип отдаётся статикой, API — /api/*.
+services:
+  - type: web
+    name: marscap
+    runtime: node
+    plan: free
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    # миграции идемпотентны — применяются при каждом старте
+    startCommand: node scripts/migrate.mjs && node .output/server/index.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NUXT_DATABASE_URL          # строка подключения Neon (…?sslmode=require)
+        sync: false
+      - key: NUXT_SECRET                # HMAC кодов и ключ шифрования выдач — не менять после запуска
+        generateValue: true
+      - key: NUXT_COOKIE_SECURE
+        value: "true"
+      - key: NUXT_PAYMENT_PROVIDER
+        value: test
+      - key: NUXT_MAIL_PROVIDER         # log → коды в логах; unisender — после DNS marscap.ru
+        value: log
+      - key: NUXT_UNISENDER_KEY
+        sync: false
+      - key: NUXT_MAIL_FROM
+        value: noreply@marscap.ru
+      - key: NUXT_DEV_CODES             # только стенд: код приходит в ответе и показывается на экране
+        value: "true"

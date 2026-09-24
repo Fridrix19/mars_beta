@@ -934,14 +934,14 @@ a:hover{color:var(--accent-hover)}
       <div class="hero-copy auth-copy">
         <span class="eyebrow">Личный кабинет</span>
         <h1>Войдите или создайте аккаунт</h1>
-        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по телефону или почте, подтверждение кодом.</p>
+        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по почте и паролю или по коду из письма.</p>
         <ul class="check-marks auth-perks">
           <li>Статусы заказов и реквизиты карт без писем</li>
           <li>Пополнение карты и история платежей</li>
           <li>Квитанции, акты и принятые документы</li>
           <li>Поддержка видит ваш заказ — не нужно пересылать данные</li>
         </ul>
-        <div class="note auth-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Пароли и коды проверяются на сервере, сессия защищена. Подозрительный вход — подтверждение вторым фактором.</span></div>
+        <div class="note auth-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Пароли и коды проверяются на сервере, сессия защищена. Пароль хранится только в виде хеша.</span></div>
       </div>
 
       <div class="auth-card" id="authCard" aria-live="polite">
@@ -954,16 +954,15 @@ a:hover{color:var(--accent-hover)}
         <!-- вход -->
         <form class="auth-screen tabpanel" id="scrLogin" role="tabpanel" novalidate>
           <div class="field">
-            <label for="loginId">Телефон или почта</label>
-            <input id="loginId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
-            <p class="hint" id="loginIdHint">Тот, что указывали при заказе.</p>
+            <label for="loginId">Почта</label>
+            <input id="loginId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
+            <p class="hint" id="loginIdHint">Та, что указывали при регистрации.</p>
           </div>
           <div class="field">
             <div class="auth-lbl"><label for="loginPass">Пароль</label><button type="button" class="auth-link" id="toRecover">Забыли пароль?</button></div>
             <div class="input-wrap"><input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••"><button type="button" class="input-btn" data-eye="loginPass" aria-label="Показать пароль"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
             <p class="hint" id="loginPassHint"></p>
           </div>
-          <label class="check"><input type="checkbox" id="remember" checked><span class="box"></span><span>Запомнить это устройство<span class="sub">Не спрашивать код 30 дней</span></span></label>
           <div class="alert alert-err" id="loginErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="loginErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="loginBtn">Войти</button>
           <div class="divider">или</div>
@@ -974,8 +973,8 @@ a:hover{color:var(--accent-hover)}
         <!-- регистрация -->
         <form class="auth-screen tabpanel" id="scrReg" role="tabpanel" hidden novalidate>
           <div class="field">
-            <label for="regId">Телефон или почта</label>
-            <input id="regId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
+            <label for="regId">Почта</label>
+            <input id="regId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
             <p class="hint" id="regIdHint">Сюда придёт код подтверждения и реквизиты карт.</p>
           </div>
           <div class="field">
@@ -1013,7 +1012,7 @@ a:hover{color:var(--accent-hover)}
           <div class="alert alert-err" id="otpErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="otpErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="otpBtn" disabled>Подтвердить</button>
           <p class="auth-foot"><button type="button" class="auth-link" id="otpResend" disabled>Отправить ещё раз <span class="mono" id="otpTimer">через 0:59</span></button></p>
-          <p class="hint auth-center auth-demo">Прототип: подходит любой код, кроме 000000.</p>
+          <p class="hint auth-center auth-demo" id="otpDemo">Прототип: подходит любой код, кроме 000000.</p>
         </form>
 
         <!-- второй фактор -->
@@ -1046,13 +1045,14 @@ a:hover{color:var(--accent-hover)}
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
             <h2>Восстановление доступа</h2>
-            <p>Укажите телефон или почту аккаунта — пришлём код, после него зададите новый пароль.</p>
+            <p>Укажите почту аккаунта — пришлём код, после него зададите новый пароль.</p>
           </div>
           <div class="field">
-            <label for="recId">Телефон или почта</label>
-            <input id="recId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
+            <label for="recId">Почта</label>
+            <input id="recId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
             <p class="hint" id="recIdHint"></p>
           </div>
+          <div class="alert alert-err" id="recErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="recErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit">Получить код</button>
         </form>
 
@@ -1734,10 +1734,32 @@ window.MC = (function(){
     $('pbPay').addEventListener('click', function(){ calc.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(function(){ pay.click(); }, reduce ? 0 : 450); });
     mirror();
   }
+
+  /* — API бэкенда. На статике (Vercel, артефакт, file://) /api нет — страницы работают в демо-режиме — */
+  var API = window.MC_API || '/api', liveP = null;
+  function isLive(){
+    if (!liveP) liveP = (location.protocol === 'file:' || !window.fetch) ? Promise.resolve(false)
+      : fetch(API + '/health', { credentials: 'same-origin' }).then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){ return !!(j && j.ok); }).catch(function(){ return false; });
+    return liveP;
+  }
+  function api(method, path, body){
+    return fetch(API + path, { method: method, credentials: 'same-origin', headers: body ? { 'content-type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined })
+      .then(function(r){
+        return r.json().catch(function(){ return {}; }).then(function(j){
+          if (r.ok) return j;
+          var d = j.data || {}, e = new Error(r.status >= 500 ? 'Что-то пошло не так. Попробуйте ещё раз.' : (j.message || 'Ошибка запроса'));
+          e.status = r.status; e.code = d.code || 'error'; e.data = d; throw e;
+        });
+      }, function(){ var e = new Error('Нет связи с сервером. Проверьте интернет.'); e.code = 'network'; throw e; });
+  }
+  function kop(v){ return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: v % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(v / 100) + ' ₽'; }
+  function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
   initPaybar();
   initTheme();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid };
 })();
 
 </script>
@@ -1747,31 +1769,43 @@ window.MC = (function(){
   var screens = ['scrLogin','scrReg','scrOtp','scrMfa','scrRecover','scrNewPass','scrDone'];
   var tabs = $('authTabs'), flow = null, target = '', history = [];
 
-  /* — контакт: телефон или почта — */
+  /* — контакт: только почта — */
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   function digits(v){ return String(v || '').replace(/\D/g, ''); }
-  function isPhone(v){ return /^[+\d\s()\-]+$/.test(v.trim()) && digits(v).length >= 10; }
-  function normPhone(v){ var d = digits(v); if (d.length === 11 && (d[0] === '8' || d[0] === '7')) d = '7' + d.slice(1); if (d.length === 10) d = '7' + d; return d.length === 11 ? '+' + d : null; }
-  function fmtPhone(d){ return '+' + d[0] + ' ' + d.slice(1,4) + ' ' + d.slice(4,7) + '-' + d.slice(7,9) + '-' + d.slice(9,11); }
   function parseId(v){
-    v = String(v || '').trim();
-    if (!v) return { err: 'Укажите телефон или почту.' };
-    if (v.indexOf('@') >= 0) return EMAIL.test(v) ? { kind: 'email', value: v.toLowerCase(), pretty: v.toLowerCase() } : { err: 'Проверьте почту — например, mail@example.ru.' };
-    if (isPhone(v)) { var p = normPhone(v); return p ? { kind: 'phone', value: p, pretty: fmtPhone(p.slice(1)) } : { err: 'Номер должен содержать 11 цифр: +7 900 000-00-00.' }; }
-    return { err: 'Похоже ни на телефон, ни на почту.' };
+    v = String(v || '').trim().toLowerCase();
+    if (!v) return { err: 'Укажите почту.' };
+    return EMAIL.test(v) ? { kind: 'email', value: v, pretty: v } : { err: 'Проверьте почту — например, mail@example.ru.' };
   }
-  function maskId(id){ return id.kind === 'email' ? id.value.replace(/^(.{2})[^@]*(@.*)$/, '$1•••$2') : id.pretty.replace(/(\+\d \d{3}) \d{3}-\d{2}/, '$1 •••-••'); }
-  // живое форматирование телефона при вводе цифр
-  ['loginId','regId','recId'].forEach(function(id){
-    var el = $(id);
-    el.addEventListener('input', function(){
-      var v = el.value; if (v.indexOf('@') >= 0 || /[a-zA-Zа-яА-Я]/.test(v)) return;
-      var d = digits(v); if (!d) return;
-      if (d[0] === '8') d = '7' + d.slice(1); if (d[0] !== '7' && d.length <= 10) d = '7' + d;
-      d = d.slice(0, 11); var out = '+' + d[0];
-      if (d.length > 1) out += ' ' + d.slice(1,4); if (d.length > 4) out += ' ' + d.slice(4,7); if (d.length > 7) out += '-' + d.slice(7,9); if (d.length > 9) out += '-' + d.slice(9,11);
-      el.value = out;
-    });
+  function maskId(id){ return id.value.replace(/^(.{2})[^@]*(@.*)$/, '$1•••$2'); }
+
+  /* — «сервер»: настоящий API, если он есть, иначе демо-правила прототипа — */
+  var LIVE = false, pending = null;   // pending — что подтверждаем кодом: {purpose, id, password, agree, news}
+  function wait(v){ return new Promise(function(res){ setTimeout(function(){ res(v); }, reduce ? 0 : 650); }); }
+  function err(code, message, data){ var e = new Error(message); e.code = code; e.data = data || {}; return e; }
+  var demo = {
+    login: function(id, pass){ return wait().then(function(){ if (/^wrong/i.test(pass)) throw err('bad_credentials', 'Неверная почта или пароль. После 5 попыток вход блокируется на 15 минут.'); return { mfa: /mfa/i.test(id.value) }; }); },
+    codeStart: function(purpose, id){ return wait().then(function(){ if (purpose === 'register' && /taken/i.test(id.value)) throw err('email_taken', 'Аккаунт уже зарегистрирован. Войдите или восстановите пароль.'); return {}; }); },
+    codeVerify: function(p, code){ return wait().then(function(){ if (code === '000000') throw err('code_wrong', 'Код не подошёл. Осталось попыток: 2.'); return p.purpose === 'reset' ? { ticket: 'demo' } : {}; }); },
+    resetComplete: function(){ return wait({}); },
+    mfa: function(code){ return wait().then(function(){ if (code === '000000') throw err('code_wrong', 'Код не подошёл. Проверьте время на устройстве или запросите код на почту.'); return {}; }); }
+  };
+  var live = {
+    login: function(id, pass){ return MC.api('POST', '/auth/login', { email: id.value, password: pass }); },
+    codeStart: function(purpose, id){ return MC.api('POST', purpose === 'register' ? '/auth/register/start' : purpose === 'login' ? '/auth/login/code-start' : '/auth/reset/start', { email: id.value }); },
+    codeVerify: function(p, code){
+      if (p.purpose === 'register') return MC.api('POST', '/auth/register/complete', { email: p.id.value, password: p.password, code: code, agree: p.agree, news: p.news });
+      if (p.purpose === 'login') return MC.api('POST', '/auth/login/code', { email: p.id.value, code: code });
+      return MC.api('POST', '/auth/reset/verify', { email: p.id.value, code: code });
+    },
+    resetComplete: function(ticket, pass){ return MC.api('POST', '/auth/reset/complete', { ticket: ticket, password: pass }); }
+  };
+  function srv(){ return LIVE ? live : demo; }
+  MC.isLive().then(function(on){
+    LIVE = on;
+    document.documentElement.classList.toggle('mc-live', on);
+    $('otpDemo').hidden = on;
+    if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user) toast('Вы уже вошли', String(r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
   });
 
   /* — экраны — */
@@ -1818,8 +1852,6 @@ window.MC = (function(){
   function alertBox(id, msg){ var a = $(id); a.hidden = !msg; if (msg) $(id + 'Text').textContent = msg; }
   function busy(btn, on, text){ btn.classList.toggle('is-loading', on); btn.disabled = on; if (text && !on) btn.textContent = text; }
 
-  /* — прототип «сервера»: аккаунты с 2FA — те, где в контакте есть «mfa» или телефон оканчивается на 77 — */
-  function hasMfa(id){ return /mfa/i.test(id.value) || /77$/.test(id.value); }
 
   /* — вход по паролю — */
   $('scrLogin').addEventListener('submit', function(e){
@@ -1827,14 +1859,13 @@ window.MC = (function(){
     var id = parseId($('loginId').value);
     if (!fieldErr('loginId', 'loginIdHint', id.err)) return;
     $('loginIdHint').textContent = 'Тот, что указывали при заказе.';
-    if (!fieldErr('loginPass', 'loginPassHint', $('loginPass').value.length < 8 ? 'Пароль не короче 8 символов.' : '')) return;
+    if (!fieldErr('loginPass', 'loginPassHint', !$('loginPass').value ? 'Введите пароль.' : '')) return;
     var btn = $('loginBtn'); busy(btn, true);
-    setTimeout(function(){
+    srv().login(id, $('loginPass').value).then(function(r){
       busy(btn, false, 'Войти');
-      if (/^wrong/i.test($('loginPass').value)) { alertBox('loginErr', 'Неверный пароль. После 5 попыток вход блокируется на 15 минут.'); return; }
       target = id.pretty; flow = 'login';
-      if (hasMfa(id)) { show('scrMfa'); resetOtp('mfaBoxes'); } else done('Вы вошли', 'Сессия создана. Переходим в кабинет…');
-    }, reduce ? 0 : 700);
+      if (r && r.mfa) { show('scrMfa'); resetOtp('mfaBoxes'); } else done('Вы вошли', 'Сессия создана. Переходим в кабинет…', r && r.user);
+    }, function(e){ busy(btn, false, 'Войти'); alertBox('loginErr', e.message); });
   });
 
   /* — вход по коду — */
@@ -1842,7 +1873,7 @@ window.MC = (function(){
     alertBox('loginErr', '');
     var id = parseId($('loginId').value);
     if (!fieldErr('loginId', 'loginIdHint', id.err)) return;
-    flow = 'login-otp'; target = id.pretty; startOtp(id, 'Код для входа');
+    flow = 'login-otp'; target = id.pretty; requestCode({ purpose: 'login', id: id }, 'Код для входа', $('loginOtp'), 'loginErr');
   });
 
   /* — регистрация — */
@@ -1854,8 +1885,8 @@ window.MC = (function(){
     if (!fieldErr('regPass', 'regPassHint', score($('regPass').value) < 2 ? 'Пароль слишком простой: от 8 символов, буквы и цифры.' : '')) return;
     var agree = $('agreeOffer'); agree.closest('.check').classList.toggle('is-invalid', !agree.checked);
     if (!agree.checked) { alertBox('regErr', 'Без согласия с офертой создать аккаунт нельзя.'); return; }
-    if (/taken/i.test(id.value)) { alertBox('regErr', 'Такой контакт уже зарегистрирован. Войдите или восстановите пароль.'); return; }
-    flow = 'register'; target = id.pretty; startOtp(id, 'Подтвердите контакт');
+    flow = 'register'; target = id.pretty;
+    requestCode({ purpose: 'register', id: id, password: $('regPass').value, agree: true, news: $('agreeNews').checked }, 'Подтвердите почту', e.submitter || $('scrReg').querySelector('[type=submit]'), 'regErr');
   });
 
   /* — восстановление — */
@@ -1863,12 +1894,19 @@ window.MC = (function(){
     e.preventDefault();
     var id = parseId($('recId').value);
     if (!fieldErr('recId', 'recIdHint', id.err)) return;
-    flow = 'recover'; target = id.pretty; startOtp(id, 'Код для восстановления');
+    flow = 'recover'; target = id.pretty; requestCode({ purpose: 'reset', id: id }, 'Код для восстановления', e.submitter || $('scrRecover').querySelector('[type=submit]'), 'recErr');
   });
   $('scrNewPass').addEventListener('submit', function(e){
     e.preventDefault();
     if (!fieldErr('newPass', 'newPassHint', score($('newPass').value) < 2 ? 'Пароль слишком простой: от 8 символов, буквы и цифры.' : '')) return;
-    done('Пароль обновлён', 'Все прежние сессии завершены. Вы вошли на этом устройстве.');
+    var btn = $('scrNewPass').querySelector('[type=submit]'), label = btn.textContent; busy(btn, true);
+    srv().resetComplete(resetTicket, $('newPass').value).then(function(r){
+      busy(btn, false, label); done('Пароль обновлён', 'Все прежние сессии завершены. Вы вошли на этом устройстве.', r && r.user);
+    }, function(e){
+      busy(btn, false, label);
+      if (e.code === 'ticket_invalid') { toast('Код устарел', 'Запросите новый код.'); show('scrRecover'); return; }
+      fieldErr('newPass', 'newPassHint', e.message);
+    });
   });
 
   /* — OTP: 6 полей, автопереход, вставка, таймер повтора — */
@@ -1894,55 +1932,86 @@ window.MC = (function(){
   }
   function resetOtp(gid){ boxes(gid).forEach(function(b){ b.value = ''; b.classList.remove('is-filled'); }); $(gid).classList.remove('is-err', 'is-ok'); }
   var timer = null, left = 0;
-  function startTimer(){
-    left = 59; $('otpResend').disabled = true; tick();
+  function startTimer(sec){
+    left = sec || 59; $('otpResend').disabled = true; tick();
     clearInterval(timer); timer = setInterval(function(){ left--; tick(); if (left <= 0) { clearInterval(timer); $('otpResend').disabled = false; $('otpTimer').textContent = ''; } }, 1000);
   }
   function stopTimer(){ clearInterval(timer); }
   function tick(){ $('otpTimer').textContent = left > 0 ? 'через 0:' + ('0' + left).slice(-2) : ''; }
-  function startOtp(id, title){
+  var resetTicket = null;
+  // просим код у сервера; при успехе — экран ввода
+  function requestCode(p, title, btn, errBox){
+    if (errBox && $(errBox)) alertBox(errBox, '');
+    var label = btn ? btn.textContent : ''; if (btn) busy(btn, true);
+    srv().codeStart(p.purpose, p.id).then(function(r){
+      if (btn) busy(btn, false, label);
+      pending = p; startOtp(p.id, title, r || {});
+    }, function(e){
+      if (btn) busy(btn, false, label);
+      if (e.code === 'email_taken') { $('loginId').value = p.id.value; show('scrLogin'); alertBox('loginErr', e.message); $('loginPass').focus(); return; }
+      if (e.code === 'not_registered') { $('regId').value = p.id.value; alertBox(errBox, e.message); return; }
+      if (errBox && $(errBox)) alertBox(errBox, e.message); else toast('Не получилось', e.message);
+    });
+  }
+  function startOtp(id, title, r){
     $('otpTitle').textContent = title; $('otpTarget').textContent = maskId(id);
-    $('otpText').firstChild.textContent = (id.kind === 'phone' ? 'Отправили SMS с 6 цифрами на ' : 'Отправили письмо с 6 цифрами на ');
-    alertBox('otpErr', ''); resetOtp('otpBoxes'); show('scrOtp'); startTimer();
-    toast(id.kind === 'phone' ? 'SMS отправлено' : 'Письмо отправлено', 'Прототип: код не приходит, введите любые 6 цифр.');
+    $('otpText').firstChild.textContent = 'Отправили письмо с 6 цифрами на ';
+    alertBox('otpErr', ''); resetOtp('otpBoxes'); show('scrOtp'); startTimer(r.resend_after);
+    if (!LIVE) toast('Письмо отправлено', 'Прототип: код не приходит, введите любые 6 цифр.');
+    else if (r.dev_code) toast('Код на стенде: ' + r.dev_code, 'Почта ещё не подключена — код показан здесь.');
+    else toast('Письмо отправлено', 'Если его нет — проверьте «Спам».');
   }
   var otp = wireOtp('otpBoxes', 'otpBtn', function(){ $('scrOtp').requestSubmit(); });
   $('scrOtp').addEventListener('submit', function(e){
     e.preventDefault(); var c = otp.code(); if (c.length !== 6) return;
-    var btn = $('otpBtn'); busy(btn, true);
-    setTimeout(function(){
+    var btn = $('otpBtn'); if (btn.classList.contains('is-loading') || !pending) return; busy(btn, true);
+    srv().codeVerify(pending, c).then(function(r){
       busy(btn, false, 'Подтвердить');
-      if (c === '000000') { $('otpBoxes').classList.add('is-err'); alertBox('otpErr', 'Код не подошёл. Осталось попыток: 2.'); boxes('otpBoxes')[0].focus(); return; }
       $('otpBoxes').classList.add('is-ok'); stopTimer();
-      if (flow === 'recover') show('scrNewPass');
-      else if (flow === 'register') done('Аккаунт создан', 'Контакт подтверждён, сессия создана. Реквизиты будущих карт будут приходить сюда и в кабинет.');
-      else done('Вы вошли', 'Сессия создана. Переходим в кабинет…');
-    }, reduce ? 0 : 600);
+      if (pending.purpose === 'reset') { resetTicket = r.ticket; show('scrNewPass'); }
+      else if (pending.purpose === 'register') done('Аккаунт создан', 'Почта подтверждена, вы вошли. Реквизиты карт и статусы заказов будут приходить сюда и в кабинет.', r.user);
+      else done('Вы вошли', 'Сессия создана. Переходим в кабинет…', r.user);
+    }, function(e){
+      busy(btn, false, 'Подтвердить');
+      $('otpBoxes').classList.add('is-err'); alertBox('otpErr', e.message);
+      if (e.code === 'code_attempts' || e.code === 'code_expired' || e.code === 'code_missing') { stopTimer(); $('otpResend').disabled = false; $('otpTimer').textContent = ''; }
+      if (e.code === 'email_taken') { $('loginId').value = pending.id.value; show('scrLogin'); alertBox('loginErr', e.message); return; }
+      resetOtp('otpBoxes'); $('otpBoxes').classList.add('is-err'); boxes('otpBoxes')[0].focus();
+    });
   });
-  $('otpResend').addEventListener('click', function(){ resetOtp('otpBoxes'); alertBox('otpErr', ''); startTimer(); toast('Код отправлен повторно', 'Предыдущий код больше не действует.'); boxes('otpBoxes')[0].focus(); });
+  $('otpResend').addEventListener('click', function(){
+    if (!pending) return; var b = $('otpResend'); b.disabled = true;
+    srv().codeStart(pending.purpose, pending.id).then(function(r){
+      resetOtp('otpBoxes'); alertBox('otpErr', ''); startTimer(r && r.resend_after);
+      toast(r && r.dev_code ? 'Новый код на стенде: ' + r.dev_code : 'Код отправлен повторно', 'Предыдущий код больше не действует.'); boxes('otpBoxes')[0].focus();
+    }, function(e){
+      if (e.data && e.data.retry_after) startTimer(e.data.retry_after); else b.disabled = false;
+      alertBox('otpErr', e.message);
+    });
+  });
 
   /* — 2FA — */
   var mfa = wireOtp('mfaBoxes', 'mfaBtn', function(){ $('scrMfa').requestSubmit(); });
   $('scrMfa').addEventListener('submit', function(e){
     e.preventDefault(); var c = mfa.code(); if (c.length !== 6) return;
     var btn = $('mfaBtn'); busy(btn, true);
-    setTimeout(function(){
-      busy(btn, false, 'Подтвердить');
-      if (c === '000000') { $('mfaBoxes').classList.add('is-err'); alertBox('mfaErr', 'Код не подошёл. Проверьте время на устройстве или запросите SMS.'); return; }
-      $('mfaBoxes').classList.add('is-ok'); done('Вы вошли', 'Вход подтверждён вторым фактором. Устройство запомнено на 30 дней.');
-    }, reduce ? 0 : 600);
+    demo.mfa(c).then(function(){
+      busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-ok'); done('Вы вошли', 'Вход подтверждён вторым фактором. Устройство запомнено на 30 дней.');
+    }, function(e){ busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-err'); alertBox('mfaErr', e.message); });
   });
-  $('mfaSms').addEventListener('click', function(){ var id = parseId($('loginId').value); flow = 'login-otp'; startOtp(id, 'Код для входа'); });
+  $('mfaSms').addEventListener('click', function(){ var id = parseId($('loginId').value); flow = 'login-otp'; requestCode({ purpose: 'login', id: id }, 'Код для входа', null, 'mfaErr'); });
   $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Прототип: введите любые 6 цифр в поля выше.'); boxes('mfaBoxes')[0].focus(); });
 
   /* — успех — */
-  function done(title, text){
+  function done(title, text, user){
     $('doneTitle').textContent = title; $('doneText').textContent = text;
     var ua = navigator.userAgent, dev = /iPhone|Android/i.test(ua) ? 'Телефон' : /Mac/i.test(ua) ? 'Mac' : /Windows/i.test(ua) ? 'Windows' : 'Браузер';
     $('doneDevice').textContent = dev + ' · ' + (/Chrome/i.test(ua) ? 'Chrome' : /Safari/i.test(ua) ? 'Safari' : /Firefox/i.test(ua) ? 'Firefox' : 'браузер');
     $('doneTime').textContent = new Date().toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + ' · ' + target;
-    $('mfaOffer').hidden = flow !== 'register';
-    try { localStorage.setItem('mc-session', JSON.stringify({ id: target, at: Date.now() })); } catch (e) {}
+    $('mfaOffer').hidden = LIVE || flow !== 'register';
+    // демо-сессия для прототипа; на сервере сессия — httpOnly-кука
+    if (!LIVE) { try { localStorage.setItem('mc-session', JSON.stringify({ id: target, at: Date.now() })); } catch (e) {} }
+    if (LIVE && flow !== 'register') setTimeout(function(){ location.href = (window.MC_BASE || '') + 'dashboard.html'; }, reduce ? 300 : 1400);
     stopTimer(); show('scrDone');
   }
   $('mfaOn').addEventListener('change', function(){ toast(this.checked ? '2FA будет включена' : '2FA выключена', this.checked ? 'В кабинете покажем QR для приложения-аутентификатора.' : 'Вход только по паролю или коду.'); });

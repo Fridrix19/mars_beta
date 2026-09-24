@@ -4,14 +4,14 @@
       <div class="hero-copy auth-copy">
         <span class="eyebrow">Личный кабинет</span>
         <h1>Войдите или создайте аккаунт</h1>
-        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по телефону или почте, подтверждение кодом.</p>
+        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по почте и паролю или по коду из письма.</p>
         <ul class="check-marks auth-perks">
           <li>Статусы заказов и реквизиты карт без писем</li>
           <li>Пополнение карты и история платежей</li>
           <li>Квитанции, акты и принятые документы</li>
           <li>Поддержка видит ваш заказ — не нужно пересылать данные</li>
         </ul>
-        <div class="note auth-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Пароли и коды проверяются на сервере, сессия защищена. Подозрительный вход — подтверждение вторым фактором.</span></div>
+        <div class="note auth-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>Пароли и коды проверяются на сервере, сессия защищена. Пароль хранится только в виде хеша.</span></div>
       </div>
 
       <div class="auth-card" id="authCard" aria-live="polite">
@@ -24,16 +24,15 @@
         <!-- вход -->
         <form class="auth-screen tabpanel" id="scrLogin" role="tabpanel" novalidate>
           <div class="field">
-            <label for="loginId">Телефон или почта</label>
-            <input id="loginId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
-            <p class="hint" id="loginIdHint">Тот, что указывали при заказе.</p>
+            <label for="loginId">Почта</label>
+            <input id="loginId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
+            <p class="hint" id="loginIdHint">Та, что указывали при регистрации.</p>
           </div>
           <div class="field">
             <div class="auth-lbl"><label for="loginPass">Пароль</label><button type="button" class="auth-link" id="toRecover">Забыли пароль?</button></div>
             <div class="input-wrap"><input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••"><button type="button" class="input-btn" data-eye="loginPass" aria-label="Показать пароль"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
             <p class="hint" id="loginPassHint"></p>
           </div>
-          <label class="check"><input type="checkbox" id="remember" checked><span class="box"></span><span>Запомнить это устройство<span class="sub">Не спрашивать код 30 дней</span></span></label>
           <div class="alert alert-err" id="loginErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="loginErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="loginBtn">Войти</button>
           <div class="divider">или</div>
@@ -44,8 +43,8 @@
         <!-- регистрация -->
         <form class="auth-screen tabpanel" id="scrReg" role="tabpanel" hidden novalidate>
           <div class="field">
-            <label for="regId">Телефон или почта</label>
-            <input id="regId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
+            <label for="regId">Почта</label>
+            <input id="regId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
             <p class="hint" id="regIdHint">Сюда придёт код подтверждения и реквизиты карт.</p>
           </div>
           <div class="field">
@@ -83,7 +82,7 @@
           <div class="alert alert-err" id="otpErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="otpErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="otpBtn" disabled>Подтвердить</button>
           <p class="auth-foot"><button type="button" class="auth-link" id="otpResend" disabled>Отправить ещё раз <span class="mono" id="otpTimer">через 0:59</span></button></p>
-          <p class="hint auth-center auth-demo">Прототип: подходит любой код, кроме 000000.</p>
+          <p class="hint auth-center auth-demo" id="otpDemo">Прототип: подходит любой код, кроме 000000.</p>
         </form>
 
         <!-- второй фактор -->
@@ -116,13 +115,14 @@
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
             <h2>Восстановление доступа</h2>
-            <p>Укажите телефон или почту аккаунта — пришлём код, после него зададите новый пароль.</p>
+            <p>Укажите почту аккаунта — пришлём код, после него зададите новый пароль.</p>
           </div>
           <div class="field">
-            <label for="recId">Телефон или почта</label>
-            <input id="recId" type="text" inputmode="email" autocomplete="username" placeholder="+7 900 000-00-00 или mail@example.ru" autocapitalize="off" spellcheck="false">
+            <label for="recId">Почта</label>
+            <input id="recId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
             <p class="hint" id="recIdHint"></p>
           </div>
+          <div class="alert alert-err" id="recErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="recErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit">Получить код</button>
         </form>
 
