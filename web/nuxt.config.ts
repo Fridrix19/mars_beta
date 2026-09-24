@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     secret: '',                 // NUXT_SECRET — HMAC кодов и ключ шифрования выдач
     mailProvider: 'log',        // NUXT_MAIL_PROVIDER: log | unisender
     unisenderKey: '',           // NUXT_UNISENDER_KEY
-    unisenderUrl: 'https://go1.unisender.ru/ru/transactional/api/v1', // NUXT_UNISENDER_URL (go1/go2 — из кабинета)
+    unisenderUrl: 'https://goapi.unisender.ru/ru/transactional/api/v1', // NUXT_UNISENDER_URL (или go1/go2 — как в кабинете)
     mailFrom: 'noreply@marscap.ru',
     mailFromName: 'Marscap',
     paymentProvider: 'test',    // NUXT_PAYMENT_PROVIDER: test | … (боевой — позже)

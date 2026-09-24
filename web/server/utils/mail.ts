@@ -20,9 +20,11 @@ export async function sendMail(m: Mail) {
       },
     }),
   })
-  if (!res.ok) {
-    console.error('[mail] unisender', res.status, await res.text().catch(() => ''))
-    return { ok: false, provider: 'unisender' }
+  const j: any = await res.json().catch(() => ({}))
+  const failed = j?.failed_emails && Object.keys(j.failed_emails).length ? j.failed_emails : null
+  if (!res.ok || j?.status !== 'success' || failed) {
+    console.error('[mail] unisender', res.status, JSON.stringify(j).slice(0, 500))
+    return { ok: false, provider: 'unisender', error: failed ? JSON.stringify(failed) : (j?.message || res.status) }
   }
   return { ok: true, provider: 'unisender' }
 }

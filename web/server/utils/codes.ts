@@ -21,7 +21,11 @@ export async function issueCode(e: H3Event, email: string, purpose: CodePurpose)
   await q(`update email_codes set consumed_at = now() where email = $1 and purpose = $2 and consumed_at is null`, [email, purpose])
   await q(`insert into email_codes (email, purpose, code_hash, expires_at, ip) values ($1, $2, $3, now() + interval '${TTL_MIN} minutes', $4)`,
     [email, purpose, codeHash(email, purpose, code), ip])
-  await sendMail(codeMail(email, purpose, code))
+  const sent = await sendMail(codeMail(email, purpose, code))
+  if (!sent.ok) {
+    await q(`update email_codes set consumed_at = now() where email = $1 and purpose = $2 and consumed_at is null`, [email, purpose])
+    fail(502, 'mail_failed', 'Не удалось отправить письмо. Проверьте адрес или попробуйте через минуту.')
+  }
   const dev = useRuntimeConfig().devCodes === true || String(useRuntimeConfig().devCodes) === 'true'
   return { sent: true, resend_after: RESEND_SEC, ttl_min: TTL_MIN, ...(dev ? { dev_code: code } : {}) }
 }
