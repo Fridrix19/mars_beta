@@ -14,7 +14,7 @@ async function loadMe() {
   if (r.admin && isLogin.value) return navigateTo('/admin')
 }
 async function loadCounts() { if (me.value.admin) counts.value = await api('GET', '/summary', undefined, { quiet: true }).catch(() => ({})) }
-onMounted(async () => { await loadMe(); ready.value = true; loadCounts() })
+onMounted(async () => { await loadMe(); ready.value = true; if (me.value.admin?.must_change) pw.open = true; else loadCounts() })
 watch(() => route.path, () => { if (!isLogin.value) loadCounts() })
 
 const nav = computed(() => [
@@ -33,7 +33,7 @@ async function logout() { await $fetch('/api/admin/auth/logout', { method: 'POST
 const pw = reactive({ open: false, old: '', new: '', busy: false })
 async function changePw() {
   pw.busy = true
-  try { await api('POST', '/auth/password', { old: pw.old, new: pw.new }); pw.open = false; pw.old = pw.new = ''; await loadMe() } finally { pw.busy = false }
+  try { await api('POST', '/auth/password', { old: pw.old, new: pw.new }); pw.open = false; pw.old = pw.new = ''; await loadMe(); loadCounts() } finally { pw.busy = false }
 }
 </script>
 
@@ -60,7 +60,7 @@ async function changePw() {
         <span>Вы вошли с временным паролем{{ me.admin.login === 'admin' ? ' admin/admin' : '' }}. Смените его, прежде чем работать дальше.</span>
         <Button size="small" label="Сменить пароль" @click="pw.open = true" />
       </div>
-      <NuxtPage @changed="loadCounts" />
+      <NuxtPage v-if="!me.admin.must_change" @changed="loadCounts" />
     </main>
   </div>
   <Dialog v-model:visible="pw.open" modal header="Смена пароля" :style="{ width: 'min(420px, 94vw)' }">

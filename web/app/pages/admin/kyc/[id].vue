@@ -22,7 +22,7 @@ async function decide(action: string) {
 <template>
   <div v-if="s">
     <div class="adm-head"><div><span class="eyebrow"><NuxtLink to="/admin/kyc">Верификация</NuxtLink></span><h1>{{ s.email }}</h1></div><Tag :value="KYC_ST[s.status][0]" :severity="KYC_ST[s.status][1]" /></div>
-    <div class="grid g2" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)">
+    <div class="grid g-wide">
       <div class="grid">
         <div v-for="f in r.files" :key="f.id" class="panel">
           <div class="adm-head" style="margin-bottom:10px"><span class="mono muted">{{ f.name }} · {{ (f.size_bytes / 1024 / 1024).toFixed(1) }} МБ</span><a :href="fileUrl(f)" target="_blank" rel="noopener">Открыть отдельно</a></div>
@@ -31,7 +31,7 @@ async function decide(action: string) {
         </div>
       </div>
       <div class="grid" style="align-content:start">
-        <div class="panel"><dl class="kv" style="grid-template-columns:120px 1fr">
+        <div class="panel"><dl class="kv kv-narrow">
           <dt>Имя</dt><dd>{{ s.name || '—' }}</dd><dt>Аккаунт с</dt><dd>{{ d(s.user_created) }}</dd><dt>Отправлено</dt><dd>{{ dt(s.created_at) }}</dd>
           <dt>Профиль</dt><dd><NuxtLink :to="'/admin/users/' + s.user_id">открыть</NuxtLink></dd>
           <template v-if="s.status !== 'pending'"><dt>Решение</dt><dd>{{ dt(s.reviewed_at) }}{{ s.reason ? ' · ' + s.reason : '' }}</dd></template>

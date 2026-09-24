@@ -164,6 +164,21 @@ def build_service(slug, base='../../'):
         after={'TL3_TITLE':f'Привязка к {short}','TL3_TEXT':f'Где ввести карту в {short}, какой адрес и индекс указать.'})
     return emit(f'service/{slug}/index.html',out)
 
+def build_service_template():
+    # общая страница для товаров, добавленных в админке: тексты и тарифы подставляет service.js из API
+    cat=categories[0]
+    body=read('pages/service.html')
+    for k,v in {'SVC_NAME':'Сервис','SVC_SHORT':'сервису','SVC_LEAD':'Загружаем описание…','CAT_ICON':cat['icon'],'CAT_NAME':cat['name'],'CAT_ID':cat['id'],
+                'ORDER_TITLE':'Выберите тариф Сервис','STEP1_TITLE':'Тариф','ORDER_LEAD':'Выберите тариф и укажите почту — итог в рублях считается сразу.',
+                'ROW_PLAN_LABEL':'Стоимость','STEP1_HINT':'Цены и тарифы — актуальные, из каталога Marscap.','SVC_ICON':'','LOGO_CLASS':'',
+                'FACT1_B':'—','FACT1_S':'минимальная цена','FACT3_B':'—','FACT3_S':'тарифы на выбор'}.items():
+        body=body.replace('{{'+k+'}}',v)
+    js=read('pages/service.js').replace('/*__SERVICE__*/','null')
+    out=assemble('Сервис — Marscap', body, js, nav='catalog', m_cy='0.21', m_size='0.9', galaxy={'cx':'0.66','cy':'0.42','dx':'0','dy':'0','size':'2.4'}, base='../../',
+        showcase={'SHOWCASE_TITLE':'Другие сервисы','SHOWCASE_TEXT':'Все оплачиваются той же картой.'},
+        after={'TL3_TITLE':'Привязка к сервису','TL3_TEXT':'Где ввести карту, какой адрес и индекс указать.'})
+    return emit('service/_new/index.html',out)
+
 PV_LIBS=['https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js','https://cdn.jsdelivr.net/npm/primevue@4.5.5/umd/primevue.min.js','https://cdn.jsdelivr.net/npm/@primeuix/themes@1.2.5/umd/aura.js']
 def build_vc_pv():
     out=assemble('Виртуальная карта · PrimeVue', read('pages/virtual-card-pv.html'), read('pages/virtual-card-pv.js'), nav='vc',
@@ -333,6 +348,7 @@ if __name__=='__main__':
     build_index()
     for cid in ['ai','games','entertainment','design','work','international']: build_section(cid)
     build_catalog()
+    build_service_template()
     build_how()
     build_support()
     build_faq()

@@ -9,7 +9,9 @@
   function svc(name){ var c = MC.CATALOG.services; for (var i = 0; i < c.length; i++) if (c[i].n === name) return c[i]; return null; }
   function svcImg(name, cls){ var s = svc(name); return s ? '<img class="' + (cls || 'ord-ico') + (s.d ? ' on-dark' : '') + '" src="' + s.l + '" alt="">' : ''; }
   function svcHref(name){ var s = svc(name); return s ? BASE + s.h : BASE + 'catalog.html'; }
-  function total(u){ return MC.charged(u) * RATE; }
+  var VCP = null, VMIN = 50, VMAX = 200;   // цены карты с сервера (курс и комиссия из админки)
+  function total(u){ return VCP ? VCP.total(u) : MC.charged(u) * RATE; }
+  function rate(){ return VCP ? VCP.rate : RATE; }
   function amt(o){ return o.rubv != null ? o.rubv : total(o.usd); }
   function money(o){ return o.rubv != null ? MC.kop(Math.round(o.rubv * 100)) : rub(total(o.usd)); }
 
@@ -215,7 +217,7 @@
   function renderQuick(){
     $('qDenoms').innerHTML = DENOMS.map(function(d){ return '<button type="button" aria-pressed="' + (d === qUsd) + '" data-d="' + d + '">$' + d + '</button>'; }).join('');
     $('qDenoms').querySelectorAll('button').forEach(function(b){ b.addEventListener('click', function(){ qUsd = +b.getAttribute('data-d'); renderQuick(); }); });
-    $('qNom').textContent = usdf(qUsd); $('qFee').textContent = rub(total(qUsd) - qUsd * RATE); $('qTot').textContent = rub(total(qUsd)); MC.bump($('qTot'));
+    $('qNom').textContent = usdf(qUsd); $('qFee').textContent = rub(total(qUsd) - qUsd * rate()); $('qTot').textContent = rub(total(qUsd)); MC.bump($('qTot'));
   }
   $('qTabs').querySelectorAll('[role="tab"]').forEach(function(t){ t.addEventListener('click', function(){ $('qTabs').querySelectorAll('[role="tab"]').forEach(function(x){ x.setAttribute('aria-selected', x === t); }); var s = t.getAttribute('data-q') === 'svc'; $('qCard').hidden = s; $('qSvc').hidden = !s; if (s) $('qSearch').focus(); }); });
   $('qGo').addEventListener('click', function(){ W = { prod: LIVE ? 'issue' : 'topup', card: 'c1', usd: qUsd, step: 3 }; go('new'); });
@@ -248,11 +250,11 @@
     $('wDenoms').querySelectorAll('button').forEach(function(b){ b.addEventListener('click', function(){ W.usd = +b.getAttribute('data-d'); $('wCustom').value = ''; wizStep2(); }); });
     if (!isD) $('wCustom').value = W.usd;
   }
-  $('wCustom').addEventListener('input', function(){ var v = Math.round(+this.value); if (v >= 50 && v <= 200){ W.usd = v; $('wDenoms').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', 'false'); }); } });
+  $('wCustom').addEventListener('input', function(){ var v = Math.round(+this.value); if (v >= VMIN && v <= VMAX){ W.usd = v; $('wDenoms').querySelectorAll('button').forEach(function(b){ b.setAttribute('aria-pressed', 'false'); }); } });
   function wizStep3(){
     var u = W.usd, c = card(W.card);
     $('wqProd').textContent = W.prod === 'issue' ? 'Новая виртуальная карта' : 'Пополнение ' + (c ? c.brand + ' •• ' + c.last4 : 'карты');
-    $('wqNom').textContent = usdf(u); $('wqFee').textContent = rub(total(u) - u * RATE) + ' (' + Math.round((MC.charged(u) / u - 1) * 100) + '%)'; $('wqRate').textContent = RATE.toFixed(2) + ' ₽/$'; $('wqTot').textContent = rub(total(u));
+    $('wqNom').textContent = usdf(u); $('wqFee').textContent = rub(total(u) - u * rate()) + ' (' + Math.round((total(u) / (u * rate()) - 1) * 100) + '%)'; $('wqRate').textContent = rate().toFixed(2) + ' ₽/$'; $('wqTot').textContent = rub(total(u));
     var reqs = [
       ['ok', 'Оферта 2.3 принята', 'Действующая редакция, акцепт ' + fmtD(DOCS[0].at)],
       [USER.kyc === 'none' ? 'no' : 'ok', 'Базовая верификация', USER.kyc === 'none' ? 'Подтвердите телефон и почту' : 'Телефон и почта подтверждены'],
@@ -275,7 +277,7 @@
   $('wiz').addEventListener('click', function(e){
     var b = e.target.closest('[data-wiz]'); if (!b) return;
     var d = b.getAttribute('data-wiz');
-    if (d === 'next'){ if (W.step === 2 && W.prod !== 'svc' && !(W.usd >= 50 && W.usd <= 200)){ toast('Сумма', 'От $50 до $200 за один заказ.', 'err'); return; } wizShow(Math.min(6, W.step + 1)); }
+    if (d === 'next'){ if (W.step === 2 && W.prod !== 'svc' && !(W.usd >= VMIN && W.usd <= VMAX)){ toast('Сумма', 'От $' + VMIN + ' до $' + VMAX + ' за один заказ.', 'err'); return; } wizShow(Math.min(6, W.step + 1)); }
     else wizShow(Math.max(1, W.step - 1));
   });
   document.querySelectorAll('.pick-grid .pick').forEach(function(b){ b.addEventListener('click', function(){ W.prod = b.getAttribute('data-prod'); document.querySelectorAll('.pick-grid .pick').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); }); });
@@ -405,6 +407,7 @@
   var kycFiles = [];
   R.kyc = function(){
     counters();
+    if (LIVE) { liveKyc(); return; }
     var k = USER.kyc, map = { none: ['Не пройдена', 'badge-err', 10, 'Подтвердите телефон и почту, чтобы оформлять заказы.'], basic: ['Базовая', 'badge-info', 45, 'Телефон и почта подтверждены. Для сумм от $150 и третьей карты нужна расширенная проверка.'], pending: ['На проверке', 'badge-warn', 75, 'Документы у провайдера. Обычно 3–5 минут, максимум — 1 рабочий день. Заказы можно оплачивать, зачислим после подтверждения.'], full: ['Расширенная', 'badge-ok', 100, 'Все лимиты открыты. Повторная проверка не потребуется.'], more: ['Нужны данные', 'badge-warn', 60, 'Провайдер запросил дополнительный документ.'] }[k];
     $('kycStatus').innerHTML = '<div class="row"><h3>Статус: ' + map[0] + '</h3>' + badge([map[0], map[1]]) + '</div><p>' + map[3] + '</p><div class="progress"><i style="--v:' + map[2] + '%"></i></div>' +
       (k === 'more' ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Нужен документ, подтверждающий адрес</b>Выписка из банка или квитанция ЖКУ не старше 3 месяцев.<div class="alert-actions"><button type="button" class="auth-link" id="kycMore">Загрузить</button></div></div></div>' : '') +
@@ -715,6 +718,29 @@
     }, fail);
   }
 
+
+  // верификация на сервере: одна проверка (паспорт + селфи), ручная, отказ — с причиной
+  function liveKyc(){
+    var k = USER.kyc, st = {
+      basic: ['Не пройдена', 'badge-plain', 10, 'Покупки открываются после проверки документов. Пополнить баланс можно уже сейчас.'],
+      pending: ['На проверке', 'badge-warn', 70, 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). Покупки откроются сразу после одобрения — придёт письмо.'],
+      full: ['Пройдена', 'badge-ok', 100, 'Покупки открыты. Повторно проходить не нужно.'],
+      more: ['Отклонена', 'badge-err', 30, 'Причина: ' + (USER.kycReason || 'не указана') + '. Исправьте и загрузите документы ещё раз.']
+    }[k] || ['—', 'badge-plain', 0, ''];
+    $('kycStatus').innerHTML = '<div class="row"><h3>Статус: ' + st[0] + '</h3>' + badge([st[0], st[1]]) + '</div><p>' + esc(st[3]) + '</p><div class="progress"><i style="--v:' + st[2] + '%"></i></div>' +
+      (k === 'pending' ? '<button type="button" class="btn btn-ghost" id="kycFake">' + ico('refresh') + 'Обновить статус</button>' : '');
+    $('kycLevels').innerHTML = '<div class="lvl ' + (k === 'full' ? 'ok' : 'cur') + '">' + ico(k === 'full' ? 'check' : 'shield') + '<b>Проверка личности</b><span>Фото разворота паспорта с фотографией и селфи с паспортом в руке. Данные видит только модератор.</span>' + badge(k === 'full' ? ['Пройдена', 'badge-ok'] : k === 'pending' ? ['На проверке', 'badge-warn'] : ['Нужна для покупок', 'badge-info']) + '</div>';
+    $('kycFiles').innerHTML = kycFiles.map(function(f){ return '<li>' + ico('doc') + esc(f.n) + '<span class="mono">' + f.s + '</span></li>'; }).join('');
+    var ff = $('kycFake'); if (ff) ff.addEventListener('click', function(){ ff.classList.add('is-loading'); load().then(function(){ R.kyc(); }); });
+    var can = k === 'basic' || k === 'more';
+    $('kycStart').disabled = !can; $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы';
+    var drop = $('kycDrop'); if (drop) { drop.hidden = !can; }
+    $('kycLvlH').textContent = 'Что нужно'; $('kycOr').hidden = true;
+    $('kycIntro').textContent = 'Загрузите 2 фото: разворот паспорта с фотографией и селфи, где вы держите паспорт рядом с лицом. Всё должно читаться, без бликов. Проверяет модератор Marscap вручную.';
+    $('kycDropHint').textContent = 'Паспорт и селфи с паспортом · JPG, PNG, HEIC или PDF до 10 МБ, до 4 файлов';
+    $('kycNote').textContent = 'Файлы хранятся в закрытом хранилище, их видит только модератор. Нужны один раз — для открытия покупок.';
+  }
+
   /* ——— выход ——— */
   function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} var to = function(){ location.href = BASE + 'login.html'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
   $('logout').addEventListener('click', logout); $('logoutM').addEventListener('click', logout);
@@ -728,7 +754,10 @@
     $('ovTopup').hidden = false;
     var qt = $('qTabs').querySelector('[data-q]:not([data-q="svc"])'); if (qt) qt.textContent = 'Виртуальная карта'; $('qGo').textContent = 'Оформить карту';
     var wantCheckout = location.hash === '#checkout'; if (wantCheckout) history.replaceState(null, '', '#overview');
-    load().then(function(ok){ if (!ok) return; route(); if (wantCheckout) runCheckout(); });
+    Promise.all([load(), MC.vcPricing().catch(function(){ return null; })]).then(function(x){
+      var v = x[1]; if (v && !v.unavailable) { VCP = v; VMIN = v.min; VMAX = v.max; if (v.denoms.length) { DENOMS.length = 0; [].push.apply(DENOMS, v.denoms); if (DENOMS.indexOf(qUsd) < 0) qUsd = DENOMS[0]; } }
+      if (!x[0]) return; route(); if (wantCheckout) runCheckout();
+    });
   });
   MC.initReveal();
 })();

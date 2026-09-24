@@ -34,10 +34,13 @@ export default defineNuxtConfig({
     paymentProvider: 'test',    // NUXT_PAYMENT_PROVIDER: test | … (боевой — позже)
     cookieSecure: false,        // NUXT_COOKIE_SECURE=true за HTTPS
     devCodes: false,            // NUXT_DEV_CODES=true — код приходит в ответе API (только стенд)
-    public: { siteUrl: '' },
+    adminNotifyEmail: '',       // NUXT_ADMIN_NOTIFY_EMAIL — куда слать о новых заказах, KYC и возвратах
+    public: { siteUrl: '' },    // NUXT_PUBLIC_SITE_URL — для ссылок в письмах, напр. https://mars-beta.onrender.com
   },
   nitro: {
     // прототип отдаётся как статика; API — /api/*; админка — /admin (Nuxt + PrimeVue)
+    // общая страница сервиса для товаров из админки (см. server/routes/service)
+    serverAssets: [{ baseName: 'tpl', dir: root + '_proto/service/_new' }],
     publicAssets: [
       { dir: root + '_proto', baseURL: '/', maxAge: 0 },
       { dir: root + 'source-site/assets', baseURL: '/assets', maxAge: 60 * 60 * 24 },

@@ -10,15 +10,15 @@ export default defineEventHandler(async (e) => {
     if (!note) fail(422, 'note_required', 'Укажите причину отказа — её увидит клиент.')
     if (!['new', 'approved'].includes(r.status)) fail(409, 'closed', 'Заявка уже закрыта.')
     await q(`update refund_requests set status = 'rejected', admin_id = $2, admin_note = $3, decided_at = now() where id = $1`, [r.id, a.id, note])
-    await q(`insert into notifications (user_id, title, body, link) values ($1, 'Возврат отклонён', $2, '/dashboard.html#payments:refunds')`, [r.user_id, note])
+    await notifyUser(r.user_id, 'Возврат отклонён', note, '/dashboard.html#payments:refunds')
   } else if (action === 'approve') {
     if (r.status !== 'new') fail(409, 'closed', 'Заявка уже рассмотрена.')
     if (r.destination === 'balance' && r.order_id) {
-      await one(`select * from refund_order($1, $2, $3)`, [r.order_id, a.id, note || 'Возврат по заявке'])
+      await refundOrderSafe(r.order_id, a.id, note || 'Возврат по заявке')
       await q(`update refund_requests set status = 'done', admin_id = $2, admin_note = $3, decided_at = now() where id = $1`, [r.id, a.id, note || null])
     } else {
       await q(`update refund_requests set status = 'approved', admin_id = $2, admin_note = $3, decided_at = now() where id = $1`, [r.id, a.id, note || null])
-      await q(`insert into notifications (user_id, title, body, link) values ($1, 'Возврат одобрен', 'Деньги вернутся на карту, с которой вы платили, обычно за 1–5 рабочих дней', '/dashboard.html#payments:refunds')`, [r.user_id])
+      await notifyUser(r.user_id, 'Возврат одобрен', 'Деньги вернутся на карту, с которой вы платили, обычно за 1–5 рабочих дней.', '/dashboard.html#payments:refunds')
     }
   } else if (action === 'done') {
     if (r.status !== 'approved' || r.destination !== 'card') fail(409, 'bad_state', 'Отметить выполненным можно одобренный возврат на карту.')

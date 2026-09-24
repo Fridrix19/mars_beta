@@ -98,7 +98,7 @@ const planName = (id: string) => r.value.plans.find((x: any) => x.id === id)?.la
           <div class="field"><label>От, $</label><InputNumber v-model="plan.cmin" :max-fraction-digits="2" fluid /></div><div class="field"><label>До, $</label><InputNumber v-model="plan.cmax" :max-fraction-digits="2" fluid /></div>
         </div>
         <div v-else class="field"><label>Цена, {{ plan.currency === 'rub' ? '₽ (итог без комиссии)' : '$ (номинал сервиса)' }}</label><InputNumber v-model="plan.price" :min-fraction-digits="0" :max-fraction-digits="2" locale="ru-RU" fluid /></div>
-        <div class="field"><label>Как показывать цену (например, $20/month)</label><InputText v-model="plan.price_text" fluid /></div>
+        <div class="field"><label>Как показывать цену (например, $20/month) — при смене цены сумма в подписи обновится сама</label><InputText v-model="plan.price_text" fluid /></div>
         <div class="field"><label>Описание</label><Textarea v-model="plan.description" rows="2" auto-resize fluid /></div>
         <div style="display:flex;gap:18px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center"><ToggleSwitch v-model="plan.active" /> Активен</label><label style="display:flex;gap:8px;align-items:center"><ToggleSwitch v-model="plan.free" /> Бесплатный (не продаётся)</label></div>
       </div>

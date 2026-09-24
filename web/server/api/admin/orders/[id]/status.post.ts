@@ -11,8 +11,7 @@ export default defineEventHandler(async (e) => {
     [getRouterParam(e, 'id'), status, a.id])
   if (!o) fail(409, 'order_closed', 'Заказ уже закрыт.')
   await q(`insert into order_events (order_id, kind, status, text, by_admin) values ($1, 'status', $2, $3, $4)`, [o.id, status, text, a.id])
-  if (status === 'need_info') await q(`insert into notifications (user_id, title, body, link) values ($1, $2, $3, $4)`,
-    [o.user_id, `Заказ ${o.id}: нужны данные`, text, '/dashboard.html#order:' + o.id])
+  if (status === 'need_info') await notifyUser(o.user_id, `Заказ ${o.id}: нужны данные`, text, '/dashboard.html#order:' + o.id)
   await audit(e, a, 'order.status', o.id, { status, text })
   return { ok: true }
 })

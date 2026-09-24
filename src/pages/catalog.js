@@ -15,7 +15,7 @@
     var logos = m.top.map(function(n){ var s = CAT.services.find(function(x){ return x.n === n; }); return s ? '<img alt="' + s.n + '" title="' + s.n + '"' + (s.d ? ' class="on-dark"' : '') + ' src="' + s.l + '">' : ''; }).join('');
     var rest = c.count - m.top.length;
     var a = document.createElement('a'); a.className = 'card card-link cat-card'; a.href = 'section/' + c.id + '/index.html';
-    a.innerHTML = '<div class="cat-head"><span class="cat-ico"><img alt="" src="' + c.icon + '"></span><h3>' + c.name + '</h3><span class="cat-count">' + c.count + ' ' + MC.plural(c.count, ['сервис','сервиса','сервисов']) + '</span></div><p>' + m.text + '</p><div class="cat-logos">' + logos + (rest > 0 ? '<span class="more">+' + rest + '</span>' : '') + '</div>' + (m.from ? '<span class="cat-from">от <b>$' + m.from + '</b>' + (m.monthly ? ' в месяц' : '') + '</span>' : '') + '<span class="arrow-link">Открыть раздел' + ARROW + '</span>';
+    a.innerHTML = '<div class="cat-head"><span class="cat-ico"><img alt="" src="' + c.icon + '"></span><h3>' + c.name + '</h3><span class="cat-count">' + c.count + ' ' + MC.plural(c.count, ['сервис','сервиса','сервисов']) + '</span></div><p>' + m.text + '</p><div class="cat-logos">' + logos + (rest > 0 ? '<span class="more">+' + rest + '</span>' : '') + '</div>' + (m.from ? '<span class="cat-from" data-price-cat="' + c.id + '">от <b>$' + m.from + '</b>' + (m.monthly ? ' в месяц' : '') + '</span>' : '') + '<span class="arrow-link">Открыть раздел' + ARROW + '</span>';
     dirs.appendChild(a);
   });
 

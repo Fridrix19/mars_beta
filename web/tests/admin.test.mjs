@@ -22,27 +22,34 @@ async function user(call) {
   const c = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: true })
   return c.body.user
 }
+const ADMIN_PW = 'AdminTest2026x'
 async function admin() {
   const a = client()
-  const r = await a('POST', '/api/admin/auth/login', { login: 'admin', password: process.env.ADMIN_PW || 'admin' })
-  assert.equal(r.status, 200, JSON.stringify(r.body))
+  let r = await a('POST', '/api/admin/auth/login', { login: 'admin', password: ADMIN_PW })
+  if (r.status !== 200) {
+    r = await a('POST', '/api/admin/auth/login', { login: 'admin', password: 'admin' })
+    assert.equal(r.status, 200, JSON.stringify(r.body))
+    assert.equal((await a('GET', '/api/admin/summary')).code, 'must_change_password', 'с временным паролем работать нельзя')
+    assert.equal((await a('POST', '/api/admin/auth/password', { old: 'admin', new: ADMIN_PW })).status, 200)
+  }
   return a
 }
 
 test('вход в админку, права ролей, аудит', async () => {
   assert.equal((await client()('GET', '/api/admin/summary')).status, 401)
-  assert.equal((await client()('POST', '/api/admin/auth/login', { login: 'admin', password: 'nope' })).code, 'bad_credentials')
   const a = await admin()
+  assert.equal((await client()('POST', '/api/admin/auth/login', { login: 'admin', password: 'nope' })).code, 'bad_credentials')
   const me = await a('GET', '/api/admin/auth/me'); assert.equal(me.body.admin.role, 'owner'); assert.ok(me.body.perms.includes('balance.adjust'))
   const s = await a('GET', '/api/admin/summary'); assert.equal(s.status, 200); assert.equal(s.body.days.length, 14)
   // модератор KYC не видит пользователей
   const login = 'kyc' + Date.now().toString(36)
   assert.equal((await a('POST', '/api/admin/admins', { login, name: 'Модератор', role: 'kyc', password: 'TempPass12345' })).status, 200)
   const k = client(); assert.equal((await k('POST', '/api/admin/auth/login', { login, password: 'TempPass12345' })).body.admin.must_change, true)
-  assert.equal((await k('GET', '/api/admin/users')).code, 'forbidden')
-  assert.equal((await k('GET', '/api/admin/kyc')).status, 200)
+  assert.equal((await k('GET', '/api/admin/kyc')).code, 'must_change_password')
   assert.equal((await k('POST', '/api/admin/auth/password', { old: 'TempPass12345', new: 'short' })).code, 'weak_password')
   assert.equal((await k('POST', '/api/admin/auth/password', { old: 'TempPass12345', new: 'NewKycPass2026' })).status, 200)
+  assert.equal((await k('GET', '/api/admin/users')).code, 'forbidden')
+  assert.equal((await k('GET', '/api/admin/kyc')).status, 200)
   const au = await a('GET', '/api/admin/audit?q=admin.create'); assert.ok(au.body.entries.some(x => x.data?.login === login))
   // последнего владельца не отключить
   const list = (await a('GET', '/api/admin/admins')).body.admins
@@ -144,6 +151,60 @@ test('товары: цена в ₽, своя комиссия, новые це�
   await a('PATCH', '/api/admin/products/' + p.id, { active: false })
   assert.equal((await client()('GET', '/api/catalog/' + slug)).status, 404)
   const au = (await a('GET', '/api/admin/audit?q=plan.update')).body.entries[0]; assert.deepEqual(au.data.changed.price_kop, ['100000', '200000'].map(Number).map(String).length ? au.data.changed.price_kop : null)
+})
+
+test('цены из админки сразу на сайте, новый товар получает страницу, выключенный — скрыт', async () => {
+  const a = await admin()
+  const prod = (await a('GET', '/api/admin/products/chatgpt')).body
+  const plus = prod.plans.find(x => x.label === 'Plus')
+  await a('PATCH', '/api/admin/plans/' + plus.id, { price_cents: 2500 })
+  const cat = (await client()('GET', '/api/catalog/chatgpt')).body
+  assert.equal(cat.plans.find(x => x.label === 'Plus').charged_kop, Math.round(3600 * cat.rate))   // (25+5)×1.2 = $36
+  const list = (await client()('GET', '/api/catalog')).body.products.find(x => x.slug === 'chatgpt')
+  assert.equal(list.from_cents, 2500); assert.match(list.from_text, /month/)
+  await a('PATCH', '/api/admin/plans/' + plus.id, { price_cents: 2000 })
+  // новый товар → общая страница /service/<slug>/
+  const slug = 'dyn-' + Date.now().toString(36)
+  const np = (await a('POST', '/api/admin/products', { slug, name: 'Динамический', category_id: 'work', delivery: 'manual' })).body.product
+  await a('POST', `/api/admin/products/${np.id}/plans`, { label: 'Месяц', currency: 'usd', price_cents: 1000, price_text: '$10/month' })
+  const page = await client()('GET', `/service/${slug}/`, null, true)
+  assert.equal(page.status, 200); assert.match(page.text, /var SVC = null/)
+  assert.equal((await client()('GET', `/service/${slug}`, null, true)).status, 200, 'без слэша — редирект')
+  await a('PATCH', '/api/admin/products/' + np.id, { active: false })
+  assert.notEqual((await client()('GET', `/service/${slug}/`, null, true)).status, 200)
+  assert.ok(!(await client()('GET', '/api/catalog')).body.products.some(x => x.slug === slug))
+  assert.equal((await client()('GET', '/service/cursor/', null, true)).status, 200, 'статичные страницы на месте')
+})
+
+test('возврат заказа на карту списывает сумму с карты; потраченную — не вернуть', async () => {
+  const a = await admin()
+  const u = client(); const me = await user(u)
+  await db.query(`update users set kyc_status = 'approved' where id = $1`, [me.id])
+  await a('POST', `/api/admin/users/${me.id}/adjust`, { amount_kop: 3000000, comment: 'тест карт', idem: 'adj-card-' + me.id.slice(0, 8) })
+  const p50 = (await db.query(`select pp.id from product_plans pp join products p on p.id = pp.product_id where p.slug='virtual-card' and pp.label='$50'`)).rows[0].id
+  const o = (await u('POST', '/api/orders', { plan_id: p50, idem: 'card-ref-1' })).body.order
+  const card = (await u('GET', '/api/cards')).body.cards[0]; assert.equal(card.balance_cents, 5000)
+  const bal = (await u('GET', '/api/balance')).body.balance_kop
+  assert.equal((await a('POST', `/api/admin/orders/${o.id}/refund`, { reason: 'тест' })).status, 200)
+  assert.equal((await u('GET', '/api/cards')).body.cards[0].balance_cents, 0)
+  assert.equal((await u('GET', '/api/balance')).body.balance_kop, bal + o.amount_kop)
+  // карта потрачена — возврат запрещён
+  const o2 = (await u('POST', '/api/orders', { plan_id: p50, card_id: card.id, idem: 'card-ref-2' })).body.order
+  await db.query(`update cards set balance_cents = 1000 where id = $1`, [card.id])
+  assert.equal((await a('POST', `/api/admin/orders/${o2.id}/refund`, { reason: 'тест' })).code, 'card_spent')
+})
+
+test('курс: вручную и по ЦБ с наценкой', async () => {
+  const a = await admin()
+  assert.equal((await a('POST', '/api/admin/rate', { rate: 5 })).code, 'bad_rate')
+  const auto = await a('POST', '/api/admin/rate', { auto: true, markup_pct: 2 })
+  if (auto.status === 200) {
+    const cbr = auto.body.auto.cbr; assert.ok(cbr > 10)
+    assert.ok(Math.abs(auto.body.rate - cbr * 1.02) < 0.001)
+    assert.equal((await client()('GET', '/api/catalog/chatgpt')).body.rate, auto.body.rate)
+  } else assert.equal(auto.code, 'cbr_unavailable')
+  const man = await a('POST', '/api/admin/rate', { rate: 80.2254 })
+  assert.equal(man.body.rate, 80.2254); assert.equal(man.body.auto.on, false)
 })
 
 test.after(() => db.end())

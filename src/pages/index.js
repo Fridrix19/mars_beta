@@ -20,7 +20,7 @@
   HOME.popular.forEach(function(p){
     var s = CAT.services.find(function(x){ return x.n === p.n; }); if (!s) return;
     var art = document.createElement('article'); art.className = 'card svc-card';
-    art.innerHTML = '<div class="svc-head"><img class="svc-logo-sm' + (s.d ? ' on-dark' : '') + '" alt="" src="' + s.l + '"><span class="badge badge-plain">' + CAT.catName[s.c] + '</span></div><h3>' + s.n + '</h3><p>' + p.text + '</p><span class="svc-price">' + p.price + '</span><div class="card-foot"><a class="btn btn-ghost btn-sm" href="' + s.h + '">Оплатить</a></div>';
+    art.innerHTML = '<div class="svc-head"><img class="svc-logo-sm' + (s.d ? ' on-dark' : '') + '" alt="" src="' + s.l + '"><span class="badge badge-plain">' + CAT.catName[s.c] + '</span></div><h3>' + s.n + '</h3><p>' + p.text + '</p><span class="svc-price" data-price-slug="' + MC.slugOf(s.h) + '">' + p.price + '</span><div class="card-foot"><a class="btn btn-ghost btn-sm" href="' + s.h + '">Оплатить</a></div>';
     pop.appendChild(art);
   });
 

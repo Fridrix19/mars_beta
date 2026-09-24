@@ -21,5 +21,6 @@ export default defineEventHandler(async (e) => {
     fail(409, 'already_requested', 'Заявка уже на рассмотрении.')
   const r = await one(`insert into refund_requests (user_id, order_id, payment_id, amount_kop, destination, reason) values ($1, $2, $3, $4, $5, $6) returning *`,
     [u.id, orderId, paymentId, amount, destination, reason])
+  notifyAdmins('Заявка на возврат', `${u.email}: ${(amount / 100).toFixed(2)} ₽, ${destination === 'card' ? 'на карту' : 'на баланс'}. Причина: ${reason}`, '/admin/refunds')
   return { refund: r }
 })

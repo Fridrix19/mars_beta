@@ -30,3 +30,7 @@ services:
         value: noreply@marscap.ru
       - key: NUXT_DEV_CODES             # только стенд: код приходит в ответе и показывается на экране
         value: "true"
+      - key: NUXT_PUBLIC_SITE_URL       # для ссылок в письмах
+        value: https://mars-beta.onrender.com
+      - key: NUXT_ADMIN_NOTIFY_EMAIL    # кому писать о новых заказах, KYC и возвратах (через запятую)
+        sync: false

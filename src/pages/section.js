@@ -2,6 +2,7 @@
   var MC = window.MC, $ = MC.$, CAT = MC.CATALOG, reduce = MC.reduce;
   var SEC = /*__SECTION__*/;
   var all = CAT.services.filter(function(s){ return s.c === SEC.cat; });
+  document.addEventListener('mc:catalog', function(){ all = CAT.services.filter(function(s){ return s.c === SEC.cat; }); shown = 0; render(false); var n = document.querySelector('[data-sec-count]'); if (n) n.textContent = all.length; });
   var grid = $('secGrid'), sub = $('secSub'), q = $('secSearch'), more = $('secMore'), count = $('secCount');
   var active = 'all', query = '', shown = 0, PAGE = 18;
   var SUBS = [['all', 'Все']].concat(SEC.subcats);
@@ -20,7 +21,7 @@
   function card(s){
     var m = SEC.items[s.n] || ['', ''], p = SEC.prices[s.n], subName = (SEC.subcats.find(function(x){ return x[0] === m[0]; }) || ['', ''])[1];
     var a = document.createElement('article'); a.className = 'card svc-card'; a.setAttribute('role', 'listitem');
-    a.innerHTML = '<div class="svc-head"><img class="svc-logo-sm' + (s.d ? ' on-dark' : '') + '" alt="" src="' + s.l + '">' + (subName ? '<span class="badge badge-plain">' + subName + '</span>' : '') + '</div><h3>' + s.n + '</h3><p>' + (m[1] || '') + '</p><span class="svc-price">' + (p ? 'от <b>$' + p.v + '</b>' + (p.m ? ' / мес' : '') : 'по запросу') + '</span><div class="card-foot"><a class="btn btn-ghost btn-sm" href="' + (window.MC_BASE || '') + s.h + '">Оплатить</a></div>';
+    a.innerHTML = '<div class="svc-head"><img class="svc-logo-sm' + (s.d ? ' on-dark' : '') + '" alt="" src="' + s.l + '">' + (subName ? '<span class="badge badge-plain">' + subName + '</span>' : '') + '</div><h3>' + s.n + '</h3><p>' + (m[1] || s.desc || '') + '</p><span class="svc-price" data-price-slug="' + MC.slugOf(s.h) + '">' + (p ? 'от <b>$' + p.v + '</b>' + (p.m ? ' / мес' : '') : 'по запросу') + '</span><div class="card-foot"><a class="btn btn-ghost btn-sm" href="' + (window.MC_BASE || '') + s.h + '">Оплатить</a></div>';
     return a;
   }
   function render(swap){

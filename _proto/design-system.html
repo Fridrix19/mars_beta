@@ -2380,6 +2380,11 @@ window.MC = (function(){
   });
   var start = Math.max(0, CATS.findIndex(function(c){ return c.id === (opts.cat || 'all'); }));
   selectCat(start, false);
+  document.addEventListener('mc:catalog', function(){
+    CATS[0].count = CATALOG.services.length;
+    [].forEach.call(cats.children, function(b, k){ var n = b.querySelector('.n'); if (n && CATS[k]) n.textContent = CATS[k].count; });
+    shown = 0; renderTiles(false);
+  });
   }
 
   /* — появление панелей и линии таймлайна — */
@@ -2484,6 +2489,70 @@ window.MC = (function(){
       document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard.html'; a.lastChild.textContent = 'Личный кабинет'; });
     });
   }
+  /* — живой каталог: цены, скрытые и новые товары из админки (только когда рядом есть сервер) — */
+  var catP = null, LIVE_CAT = null;
+  function liveCatalog(){ if (!catP) catP = isLive().then(function(on){ return on ? api('GET', '/catalog').catch(function(){ return null; }) : null; }); return catP; }
+  function slugOf(h){ return String(h || '').replace(/^.*service\//, '').replace(/\/.*$/, ''); }
+  function fmtUsd(c){ var v = c / 100; return v % 1 ? v.toFixed(2) : String(v); }
+  function priceHtml(p){
+    if (!p) return 'недоступно';
+    var mo = /month|\/mo\b|мес/i.test(p.from_text || '');
+    if (p.currency === 'usd' && p.from_cents) return 'от <b>$' + fmtUsd(p.from_cents) + '</b>' + (mo ? ' / мес' : '');
+    if (p.currency === 'rub' && p.from_kop) return 'от <b>' + kop(p.from_kop) + '</b>' + (mo ? ' / мес' : '');
+    return 'по запросу';
+  }
+  function applyPrices(root){
+    if (!LIVE_CAT) return;
+    (root.querySelectorAll ? root : document).querySelectorAll('[data-price-slug]').forEach(function(el){
+      var p = LIVE_CAT.bySlug[el.getAttribute('data-price-slug')];
+      el.innerHTML = priceHtml(p);
+      var card = el.closest('.svc-card, .pop-card, article'); if (card && !p) card.hidden = true;
+    });
+    (root.querySelectorAll ? root : document).querySelectorAll('[data-price-cat]').forEach(function(el){
+      var cid = el.getAttribute('data-price-cat'), best = null;
+      LIVE_CAT.products.forEach(function(p){ if (p.category === cid && p.currency === 'usd' && p.from_cents && (!best || p.from_cents < best.from_cents)) best = p; });
+      if (best) el.innerHTML = priceHtml(best).replace(' / мес', ' в месяц');
+    });
+  }
+  function syncCatalog(){
+    liveCatalog().then(function(r){
+      if (!r) return;
+      var bySlug = {}; r.products.forEach(function(p){ bySlug[p.slug] = p; });
+      LIVE_CAT = { bySlug: bySlug, products: r.products, rate: r.rate };
+      var known = {};
+      for (var i = CATALOG.services.length - 1; i >= 0; i--) { var sl = slugOf(CATALOG.services[i].h); known[sl] = 1; if (!bySlug[sl]) CATALOG.services.splice(i, 1); }
+      r.products.forEach(function(p){
+        if (known[p.slug] || p.category === 'cards' || !CATALOG.catName[p.category]) return;
+        CATALOG.services.unshift({ n: String(p.name).replace(/[<>&"]/g, ''), l: /^(\/|https:)/.test(p.icon || '') ? p.icon : CATALOG.allIcon, h: 'service/' + p.slug + '/', c: p.category, d: 0, desc: String(p.description || '').replace(/[<>&"]/g, '') });   // новые — первыми
+      });
+      CATALOG.categories.forEach(function(c){ c.count = CATALOG.services.filter(function(s){ return s.c === c.id; }).length; });
+      MC.RATE = r.rate;
+      applyPrices(document);
+      if (window.MutationObserver) new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if (n.nodeType === 1) applyPrices(n.parentNode || n); }); }); }).observe(document.body, { childList: true, subtree: true });
+      document.dispatchEvent(new CustomEvent('mc:catalog', { detail: LIVE_CAT }));
+    });
+  }
+  /* — цены виртуальной карты с сервера (номиналы, своя сумма, курс и комиссия из админки) — */
+  var vcP = null;
+  function vcPricing(){
+    if (!vcP) vcP = isLive().then(function(on){
+      if (!on) return null;
+      return api('GET', '/catalog/virtual-card').then(function(r){
+        var pct = r.product.commission_pct, cu = r.plans.filter(function(p){ return p.custom; })[0];
+        return {
+          rate: r.rate, plans: r.plans, min: cu ? cu.custom.min_cents / 100 : 50, max: cu ? cu.custom.max_cents / 100 : 200,
+          denoms: r.plans.filter(function(p){ return !p.custom && p.purchasable && p.currency === 'usd'; }).map(function(p){ return p.price_cents / 100; }),
+          total: function(usd){
+            var cents = Math.round(usd * 100), fx = r.plans.filter(function(p){ return !p.custom && p.price_cents === cents && p.charged_kop != null; })[0];
+            if (fx) return fx.charged_kop / 100;
+            var u = cents / 100, c = pct == null ? Math.round((u <= 45 ? (u + 5) * 1.2 : u * 1.3) * 100) : Math.round(cents * (1 + pct / 100));
+            return Math.round(c * r.rate) / 100;
+          }
+        };
+      }, function(e){ return e.status === 404 ? { unavailable: true } : null; });
+    });
+    return vcP;
+  }
   /* — покупка со страницы сервиса/карты: запоминаем выбор и ведём в кабинет (без входа — через вход) — */
   function checkout(o){
     try { sessionStorage.setItem('mc-checkout', JSON.stringify(o)); } catch (e) {}
@@ -2496,8 +2565,9 @@ window.MC = (function(){
   initPaybar();
   initTheme();
   initSession();
+  syncCatalog();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing };
 })();
 
 </script>

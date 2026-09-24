@@ -241,19 +241,19 @@
       <div class="cab-cols">
         <div class="cab-col">
           <div class="card kyc-status" id="kycStatus"></div>
-          <div class="cab-block-head"><h2>Уровни</h2></div>
+          <div class="cab-block-head"><h2 id="kycLvlH">Уровни</h2></div>
           <div class="kyc-levels" id="kycLevels"></div>
         </div>
         <div class="cab-col">
           <div class="cab-block-head"><h2>Документы</h2></div>
           <div class="card">
-            <p>Проверку проводит партнёр по защищённой странице: паспорт и селфи не сохраняются у нас, мы получаем только результат.</p>
+            <p id="kycIntro">Проверку проводит партнёр по защищённой странице: паспорт и селфи не сохраняются у нас, мы получаем только результат.</p>
             <button type="button" class="btn btn-primary" id="kycStart">Пройти проверку</button>
-            <div class="divider">или загрузите вручную</div>
-            <label class="drop" id="kycDrop"><input type="file" hidden id="kycFile" accept="image/*,.pdf" multiple><svg><use href="#i-up"/></svg><b>Перетащите файлы или нажмите</b><span>Разворот паспорта с фото, JPG/PNG/PDF до 10 МБ</span></label>
+            <div class="divider" id="kycOr">или загрузите вручную</div>
+            <label class="drop" id="kycDrop"><input type="file" hidden id="kycFile" accept="image/*,.pdf" multiple><svg><use href="#i-up"/></svg><b>Перетащите файлы или нажмите</b><span id="kycDropHint">Разворот паспорта с фото, JPG/PNG/PDF до 10 МБ</span></label>
             <ul class="file-list" id="kycFiles"></ul>
           </div>
-          <div class="note"><svg><use href="#i-shield"/></svg><span>Собираем только то, что требуется для конкретного заказа. Данные хранятся у провайдера проверки, доступ по запросу.</span></div>
+          <div class="note"><svg><use href="#i-shield"/></svg><span id="kycNote">Собираем только то, что требуется для конкретного заказа. Данные хранятся у провайдера проверки, доступ по запросу.</span></div>
         </div>
       </div>
     </section>

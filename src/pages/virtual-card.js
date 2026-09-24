@@ -2,7 +2,7 @@
   var MC = window.MC, $ = MC.$, usd = MC.usd, rub = MC.rub, reduce = MC.reduce;
   var RATE = MC.RATE, MIN = 50, MAX = 200;
   var den = 50, mode = 'fixed';
-  var total = function(d){ return MC.charged(d) * RATE; };  // как на сайте: номинал × 1.3 (≥ $50)
+  var total = function(d){ return MC.charged(d) * RATE; };  // как на сайте: номинал × 1.3 (≥ $50); на сервере — цены из админки (ниже)
   var pay = $('pay'), status = $('status'), email = $('email'), emailHint = $('emailHint');
 
   function render(){
@@ -31,6 +31,14 @@
   $('tabCustom').addEventListener('click', function(){ setMode('custom'); });
   $('customAmount').addEventListener('input', function(){ den = Math.min(MAX, Math.max(MIN, +this.value || 0)); render(); });
 
+  MC.vcPricing().then(function(v){
+    if (!v) return;
+    if (v.unavailable) { pay.disabled = true; pay.textContent = 'Выпуск карт временно недоступен'; return; }
+    total = v.total; MIN = v.min; MAX = v.max;
+    $('customAmount').min = MIN; $('customAmount').max = MAX;
+    document.querySelectorAll('.denom').forEach(function(b){ var d = +b.dataset.den; b.hidden = v.denoms.indexOf(d) < 0; b.querySelector('span').textContent = rub(total(d)); });
+    render();
+  });
   pay.addEventListener('click', function(){
     var v = email.value.trim(), ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
     if (!ok) {

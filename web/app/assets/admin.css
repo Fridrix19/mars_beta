@@ -23,12 +23,12 @@ a { color:#699FFF; text-decoration:none } a:hover { text-decoration:underline }
 .adm-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px }
 .adm-head .eyebrow { display:block; font:600 11px Inter, 'Golos Text', sans-serif; letter-spacing:.12em; text-transform:uppercase; color:#699FFF; margin-bottom:6px }
 .panel { background:var(--ink-900); border:1px solid var(--line); border-radius:16px; padding:18px 20px }
-.grid { display:grid; gap:14px } .g2 { grid-template-columns:repeat(2, minmax(0,1fr)) } .g3 { grid-template-columns:repeat(3, minmax(0,1fr)) } .g4 { grid-template-columns:repeat(4, minmax(0,1fr)) }
+.grid { display:grid; gap:14px } .grid > * { min-width:0 } .g-wide { grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) } .g2 { grid-template-columns:repeat(2, minmax(0,1fr)) } .g3 { grid-template-columns:repeat(3, minmax(0,1fr)) } .g4 { grid-template-columns:repeat(4, minmax(0,1fr)) }
 .kpi { background:var(--ink-900); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:grid; gap:4px; text-decoration:none; color:inherit }
 .kpi .k { font:600 11px Inter, sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3) }
-.kpi .v { font:600 24px var(--mono); color:var(--text) }
+.kpi .v { font:600 clamp(17px, 4.4vw, 24px) var(--mono); color:var(--text); overflow-wrap:anywhere }
 .kpi.hot { border-color:color-mix(in oklab, var(--warn) 55%, var(--line)) }
-.kv { display:grid; grid-template-columns:160px 1fr; gap:8px 14px; margin:0 } .kv dt { color:var(--text-3) } .kv dd { margin:0; color:var(--text); min-width:0; overflow-wrap:anywhere }
+.kv.kv-narrow { grid-template-columns:120px 1fr } .kv { display:grid; grid-template-columns:160px 1fr; gap:8px 14px; margin:0 } .kv dt { color:var(--text-3) } .kv dd { margin:0; color:var(--text); min-width:0; overflow-wrap:anywhere }
 .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px }
 .toolbar .grow { flex:1; min-width:220px }
 .tl { list-style:none; margin:0; padding:0; display:grid; gap:10px } .tl li { border-left:2px solid var(--line-strong); padding:0 0 0 12px } .tl time { display:block; font-size:12px; color:var(--text-3) }
@@ -46,8 +46,16 @@ a { color:#699FFF; text-decoration:none } a:hover { text-decoration:underline }
 .p-datatable .p-datatable-tbody > tr { cursor:default } .p-datatable .p-datatable-tbody > tr.clickable { cursor:pointer }
 .p-datatable-table-container { border:1px solid var(--line); border-radius:14px }
 .row-actions { display:flex; gap:8px; flex-wrap:wrap }
+html, body { overflow-x:hidden }
+.p-selectbutton { flex-wrap:wrap } .p-datatable-table-container { overflow-x:auto }
+.adm-main > * { max-width:100% }
 @media (max-width: 900px) {
-  .adm { grid-template-columns:1fr } .adm-side { position:static; height:auto; flex-direction:row; flex-wrap:wrap; padding:10px }
-  .adm-brand { padding:6px 10px; width:100% } .adm-nav { display:flex; flex-wrap:wrap; gap:4px } .adm-me { display:none }
-  .adm-main { padding:18px 14px 40px } .g2, .g3, .g4 { grid-template-columns:1fr 1fr } .kv { grid-template-columns:1fr }
+  .adm { grid-template-columns:minmax(0,1fr) } .adm-side { min-width:0; position:static; height:auto; flex-direction:row; flex-wrap:wrap; padding:10px }
+  .adm-brand { padding:6px 10px; width:100% } .adm-nav { display:flex; flex-wrap:nowrap; gap:4px; overflow-x:auto; width:100%; scrollbar-width:none } .adm-nav a { white-space:nowrap; flex:none }
+  .adm-me { margin:0; width:100%; padding:8px 4px 0; display:flex; flex-wrap:wrap; align-items:center; gap:6px } .adm-me > div { flex:1; min-width:140px }
+  .adm-main { padding:18px 14px 40px } .g3, .g4 { grid-template-columns:1fr 1fr } .g2, .g-wide { grid-template-columns:1fr } .kv, .kv.kv-narrow { grid-template-columns:1fr; gap:2px 0 } .kv dd { margin-bottom:8px }
+  .kpi { padding:12px } .panel { padding:14px } h1 { font-size:22px } .toolbar .grow { min-width:0; width:100% } .toolbar > * { max-width:100% }
+  .adm-head { align-items:flex-start } .chart { gap:3px } .chart .lbl { font-size:9px }
 }
+
+@media (max-width: 380px) { .g3, .g4 { grid-template-columns:1fr } }

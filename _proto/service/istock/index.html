@@ -1538,6 +1538,11 @@ window.MC = (function(){
   });
   var start = Math.max(0, CATS.findIndex(function(c){ return c.id === (opts.cat || 'all'); }));
   selectCat(start, false);
+  document.addEventListener('mc:catalog', function(){
+    CATS[0].count = CATALOG.services.length;
+    [].forEach.call(cats.children, function(b, k){ var n = b.querySelector('.n'); if (n && CATS[k]) n.textContent = CATS[k].count; });
+    shown = 0; renderTiles(false);
+  });
   }
 
   /* — появление панелей и линии таймлайна — */
@@ -1642,6 +1647,70 @@ window.MC = (function(){
       document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard.html'; a.lastChild.textContent = 'Личный кабинет'; });
     });
   }
+  /* — живой каталог: цены, скрытые и новые товары из админки (только когда рядом есть сервер) — */
+  var catP = null, LIVE_CAT = null;
+  function liveCatalog(){ if (!catP) catP = isLive().then(function(on){ return on ? api('GET', '/catalog').catch(function(){ return null; }) : null; }); return catP; }
+  function slugOf(h){ return String(h || '').replace(/^.*service\//, '').replace(/\/.*$/, ''); }
+  function fmtUsd(c){ var v = c / 100; return v % 1 ? v.toFixed(2) : String(v); }
+  function priceHtml(p){
+    if (!p) return 'недоступно';
+    var mo = /month|\/mo\b|мес/i.test(p.from_text || '');
+    if (p.currency === 'usd' && p.from_cents) return 'от <b>$' + fmtUsd(p.from_cents) + '</b>' + (mo ? ' / мес' : '');
+    if (p.currency === 'rub' && p.from_kop) return 'от <b>' + kop(p.from_kop) + '</b>' + (mo ? ' / мес' : '');
+    return 'по запросу';
+  }
+  function applyPrices(root){
+    if (!LIVE_CAT) return;
+    (root.querySelectorAll ? root : document).querySelectorAll('[data-price-slug]').forEach(function(el){
+      var p = LIVE_CAT.bySlug[el.getAttribute('data-price-slug')];
+      el.innerHTML = priceHtml(p);
+      var card = el.closest('.svc-card, .pop-card, article'); if (card && !p) card.hidden = true;
+    });
+    (root.querySelectorAll ? root : document).querySelectorAll('[data-price-cat]').forEach(function(el){
+      var cid = el.getAttribute('data-price-cat'), best = null;
+      LIVE_CAT.products.forEach(function(p){ if (p.category === cid && p.currency === 'usd' && p.from_cents && (!best || p.from_cents < best.from_cents)) best = p; });
+      if (best) el.innerHTML = priceHtml(best).replace(' / мес', ' в месяц');
+    });
+  }
+  function syncCatalog(){
+    liveCatalog().then(function(r){
+      if (!r) return;
+      var bySlug = {}; r.products.forEach(function(p){ bySlug[p.slug] = p; });
+      LIVE_CAT = { bySlug: bySlug, products: r.products, rate: r.rate };
+      var known = {};
+      for (var i = CATALOG.services.length - 1; i >= 0; i--) { var sl = slugOf(CATALOG.services[i].h); known[sl] = 1; if (!bySlug[sl]) CATALOG.services.splice(i, 1); }
+      r.products.forEach(function(p){
+        if (known[p.slug] || p.category === 'cards' || !CATALOG.catName[p.category]) return;
+        CATALOG.services.unshift({ n: String(p.name).replace(/[<>&"]/g, ''), l: /^(\/|https:)/.test(p.icon || '') ? p.icon : CATALOG.allIcon, h: 'service/' + p.slug + '/', c: p.category, d: 0, desc: String(p.description || '').replace(/[<>&"]/g, '') });   // новые — первыми
+      });
+      CATALOG.categories.forEach(function(c){ c.count = CATALOG.services.filter(function(s){ return s.c === c.id; }).length; });
+      MC.RATE = r.rate;
+      applyPrices(document);
+      if (window.MutationObserver) new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if (n.nodeType === 1) applyPrices(n.parentNode || n); }); }); }).observe(document.body, { childList: true, subtree: true });
+      document.dispatchEvent(new CustomEvent('mc:catalog', { detail: LIVE_CAT }));
+    });
+  }
+  /* — цены виртуальной карты с сервера (номиналы, своя сумма, курс и комиссия из админки) — */
+  var vcP = null;
+  function vcPricing(){
+    if (!vcP) vcP = isLive().then(function(on){
+      if (!on) return null;
+      return api('GET', '/catalog/virtual-card').then(function(r){
+        var pct = r.product.commission_pct, cu = r.plans.filter(function(p){ return p.custom; })[0];
+        return {
+          rate: r.rate, plans: r.plans, min: cu ? cu.custom.min_cents / 100 : 50, max: cu ? cu.custom.max_cents / 100 : 200,
+          denoms: r.plans.filter(function(p){ return !p.custom && p.purchasable && p.currency === 'usd'; }).map(function(p){ return p.price_cents / 100; }),
+          total: function(usd){
+            var cents = Math.round(usd * 100), fx = r.plans.filter(function(p){ return !p.custom && p.price_cents === cents && p.charged_kop != null; })[0];
+            if (fx) return fx.charged_kop / 100;
+            var u = cents / 100, c = pct == null ? Math.round((u <= 45 ? (u + 5) * 1.2 : u * 1.3) * 100) : Math.round(cents * (1 + pct / 100));
+            return Math.round(c * r.rate) / 100;
+          }
+        };
+      }, function(e){ return e.status === 404 ? { unavailable: true } : null; });
+    });
+    return vcP;
+  }
   /* — покупка со страницы сервиса/карты: запоминаем выбор и ведём в кабинет (без входа — через вход) — */
   function checkout(o){
     try { sessionStorage.setItem('mc-checkout', JSON.stringify(o)); } catch (e) {}
@@ -1654,55 +1723,67 @@ window.MC = (function(){
   initPaybar();
   initTheme();
   initSession();
+  syncCatalog();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing };
 })();
 
 </script>
 <script>
 (function(){
   var MC = window.MC, $ = MC.$, usd = MC.usd, rub = MC.rub;
-  var SVC = {"name": "iStock", "short": "iStock", "cat": "design", "href": "service/istock/index.html", "groups": [{"name": "iStock", "plans": [{"label": "Basic — annual 10 downloads/month", "usd": 29.0, "priceText": "$29/month ($2.90 per download)", "description": "Базовая annual-подписка iStock для небольшого потока изображений, когда нужен минимальный месячный порог и доступ только к Essentials-коллекции.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• lowest image pricing\n• standard license\n• boards + plugins supported", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 25 downloads/month", "usd": 49.0, "priceText": "$49/month ($1.96 per download)", "description": "Annual-план iStock Basic на 25 загрузок в месяц для регулярной работы с Essentials-изображениями по более низкой цене за файл.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• better unit economics vs 10-plan\n• standard license", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 50 downloads/month", "usd": 99.0, "priceText": "$99/month ($1.98 per download)", "description": "Расширенный annual-план iStock Basic на 50 загрузок в месяц для стабильного image-использования без перехода в Premium.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• mid-volume basic subscription\n• standard license", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 750 downloads/month", "usd": 199.0, "priceText": "$199/month ($0.27 per download)", "description": "Крупный annual-план iStock Basic для heavy-volume сценария, где нужен максимальный объем Essentials-контента по минимальной цене за загрузку.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• highest volume in Basic branch\n• best basic cost per download", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Premium — annual 10 downloads/month", "usd": 45.0, "priceText": "$45/month promo (was $70/month)", "description": "Стартовый annual-план iStock Premium для доступа ко всей библиотеке изображений, включая Signature, в низком объеме.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• promo for new customers shown\n• standard license\n• lowest image pricing", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 25 downloads/month", "usd": 79.0, "priceText": "$79/month promo (was $120/month)", "description": "Annual-план iStock Premium на 25 загрузок в месяц для регулярной работы с full image library и улучшенной экономикой на файл.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• promo for new customers shown\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 50 downloads/month", "usd": 149.0, "priceText": "$149/month promo (was $199/month)", "description": "Расширенный annual-план iStock Premium на 50 загрузок в месяц для команд, которым уже нужна Signature-библиотека в заметном объеме.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• better unit economics vs lower tiers\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 750 downloads/month", "usd": 249.0, "priceText": "$249/month promo (was $333.25/month)", "description": "Максимальный annual-план iStock Premium для high-volume image workflow с полным доступом к библиотеке изображений.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• highest Premium volume shown\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium + Video — annual 10 downloads/month", "usd": 99.0, "priceText": "$99/month promo (was $125/month)", "description": "Стартовый annual-план iStock Premium + Video для доступа к изображениям, видео и музыкальным трекам в одном download pool.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• best video pricing branch\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — annual 25 downloads/month", "usd": 165.0, "priceText": "$165/month promo (was $205/month)", "description": "Annual-план iStock Premium + Video на 25 загрузок в месяц для mixed-media production-сценария с единым лимитом на все типы файлов.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• mixed-media workflow\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — annual 50 downloads/month", "usd": 265.0, "priceText": "$265/month promo (was $333/month)", "description": "Расширенный annual-план iStock Premium + Video для активной mixed-media команды, где используются и изображения, и видео, и музыка.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• best value on video branch\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — 750+ / custom", "usd": null, "priceText": "Contact sales / custom", "description": "Кастомный сценарий iStock Premium + Video для больших потребностей сверх стандартных annual-лимитов.", "features": "• branch for larger needs\n• contact sales instead of fixed public price\n• images + videos + music tracks / sound effects\n• enterprise-like volume handling", "billingNote": "partially_verified\npublic screenshot shows contact flow instead of fixed price"}, {"label": "Credit Packs — 1 credit", "usd": 12.0, "priceText": "$12", "description": "Минимальный пакет кредитов iStock для точечной покупки отдельных файлов без подписки и без обязательств.", "features": "• pay as you go\n• no commitment\n• credits do not expire (per official credit-packs page)\n• access to full image library + videos\n• standard license\n• extended licenses can be added", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 3 credits", "usd": 33.0, "priceText": "$33 (save $3)", "description": "Малый пакет кредитов iStock для единичных дополнительных загрузок с небольшим дисконтом относительно покупки по одному кредиту.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 6 credits", "usd": 60.0, "priceText": "$60 (save $12)", "description": "Небольшой кредитный пакет iStock для эпизодических задач, когда нужен запас credits и гибкость без подписки.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 12 credits", "usd": 115.0, "priceText": "$115 (save $29)", "description": "Средний малый пакет кредитов iStock для нескольких premium-файлов без перехода на подписочную модель.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 18 credits", "usd": 170.0, "priceText": "$170 (save $46)", "description": "Расширенный пакет кредитов iStock для малого проекта с более выраженной экономией на bundle-покупке.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 24 credits", "usd": 220.0, "priceText": "$220 (save $68)", "description": "Стартовый пакет кредитов iStock для более крупных проектов и для покупки файлов вне подписочного лимита.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 36 credits", "usd": 325.0, "priceText": "$325 (save $107)", "description": "Кредитный пакет iStock среднего объема для команд, которым нужен predictable запас credits для разнородных ассетов.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 60 credits", "usd": 520.0, "priceText": "$520 (save $200)", "description": "Крупный пакет кредитов iStock для регулярных покупок видео и изображений без привязки к monthly subscription limit.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 150 credits", "usd": 1.0, "priceText": "$1,250 (save $550)", "description": "Большой пакет кредитов iStock для production-команд, которым нужен высокий запас гибких кредитов на premium-assets.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 300 credits", "usd": 2.0, "priceText": "$2,400 (save $1,200)", "description": "Максимальный публичный пакет кредитов iStock в этой сетке для большого объема разовых покупок и смешанного использования изображений и видео.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available\n• screenshot example: up to 300 images or 50 videos or a mix", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}]}]};
+  var SVC = {"name": "iStock", "short": "iStock", "cat": "design", "href": "service/istock/index.html", "groups": [{"name": "iStock", "plans": [{"label": "Basic — annual 10 downloads/month", "usd": 29.0, "priceText": "$29/month ($2.90 per download)", "description": "Базовая annual-подписка iStock для небольшого потока изображений, когда нужен минимальный месячный порог и доступ только к Essentials-коллекции.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• lowest image pricing\n• standard license\n• boards + plugins supported", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 25 downloads/month", "usd": 49.0, "priceText": "$49/month ($1.96 per download)", "description": "Annual-план iStock Basic на 25 загрузок в месяц для регулярной работы с Essentials-изображениями по более низкой цене за файл.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• better unit economics vs 10-plan\n• standard license", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 50 downloads/month", "usd": 99.0, "priceText": "$99/month ($1.98 per download)", "description": "Расширенный annual-план iStock Basic на 50 загрузок в месяц для стабильного image-использования без перехода в Premium.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• mid-volume basic subscription\n• standard license", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Basic — annual 750 downloads/month", "usd": 199.0, "priceText": "$199/month ($0.27 per download)", "description": "Крупный annual-план iStock Basic для heavy-volume сценария, где нужен максимальный объем Essentials-контента по минимальной цене за загрузку.", "features": "• Essentials images are one download\n• photos + illustrations only\n• unused downloads rollover\n• highest volume in Basic branch\n• best basic cost per download", "billingNote": "partially_verified\nannual screenshot price captured; monthly billing not finalized"}, {"label": "Premium — annual 10 downloads/month", "usd": 45.0, "priceText": "$45/month promo (was $70/month)", "description": "Стартовый annual-план iStock Premium для доступа ко всей библиотеке изображений, включая Signature, в низком объеме.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• promo for new customers shown\n• standard license\n• lowest image pricing", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 25 downloads/month", "usd": 79.0, "priceText": "$79/month promo (was $120/month)", "description": "Annual-план iStock Premium на 25 загрузок в месяц для регулярной работы с full image library и улучшенной экономикой на файл.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• promo for new customers shown\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 50 downloads/month", "usd": 149.0, "priceText": "$149/month promo (was $199/month)", "description": "Расширенный annual-план iStock Premium на 50 загрузок в месяц для команд, которым уже нужна Signature-библиотека в заметном объеме.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• better unit economics vs lower tiers\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium — annual 750 downloads/month", "usd": 249.0, "priceText": "$249/month promo (was $333.25/month)", "description": "Максимальный annual-план iStock Premium для high-volume image workflow с полным доступом к библиотеке изображений.", "features": "• all images are one download\n• full image library incl. Signature\n• unused downloads rollover\n• highest Premium volume shown\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; offer nuance may change"}, {"label": "Premium + Video — annual 10 downloads/month", "usd": 99.0, "priceText": "$99/month promo (was $125/month)", "description": "Стартовый annual-план iStock Premium + Video для доступа к изображениям, видео и музыкальным трекам в одном download pool.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• best video pricing branch\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — annual 25 downloads/month", "usd": 165.0, "priceText": "$165/month promo (was $205/month)", "description": "Annual-план iStock Premium + Video на 25 загрузок в месяц для mixed-media production-сценария с единым лимитом на все типы файлов.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• mixed-media workflow\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — annual 50 downloads/month", "usd": 265.0, "priceText": "$265/month promo (was $333/month)", "description": "Расширенный annual-план iStock Premium + Video для активной mixed-media команды, где используются и изображения, и видео, и музыка.", "features": "• everything is one download\n• images + videos + music tracks / sound effects\n• unused downloads rollover\n• best value on video branch\n• standard license", "billingNote": "partially_verified\nannual screenshot promo price captured; monthly billing not finalized"}, {"label": "Premium + Video — 750+ / custom", "usd": null, "priceText": "Contact sales / custom", "description": "Кастомный сценарий iStock Premium + Video для больших потребностей сверх стандартных annual-лимитов.", "features": "• branch for larger needs\n• contact sales instead of fixed public price\n• images + videos + music tracks / sound effects\n• enterprise-like volume handling", "billingNote": "partially_verified\npublic screenshot shows contact flow instead of fixed price"}, {"label": "Credit Packs — 1 credit", "usd": 12.0, "priceText": "$12", "description": "Минимальный пакет кредитов iStock для точечной покупки отдельных файлов без подписки и без обязательств.", "features": "• pay as you go\n• no commitment\n• credits do not expire (per official credit-packs page)\n• access to full image library + videos\n• standard license\n• extended licenses can be added", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 3 credits", "usd": 33.0, "priceText": "$33 (save $3)", "description": "Малый пакет кредитов iStock для единичных дополнительных загрузок с небольшим дисконтом относительно покупки по одному кредиту.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 6 credits", "usd": 60.0, "priceText": "$60 (save $12)", "description": "Небольшой кредитный пакет iStock для эпизодических задач, когда нужен запас credits и гибкость без подписки.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 12 credits", "usd": 115.0, "priceText": "$115 (save $29)", "description": "Средний малый пакет кредитов iStock для нескольких premium-файлов без перехода на подписочную модель.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 18 credits", "usd": 170.0, "priceText": "$170 (save $46)", "description": "Расширенный пакет кредитов iStock для малого проекта с более выраженной экономией на bundle-покупке.", "features": "• pay as you go\n• no commitment\n• small-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 24 credits", "usd": 220.0, "priceText": "$220 (save $68)", "description": "Стартовый пакет кредитов iStock для более крупных проектов и для покупки файлов вне подписочного лимита.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 36 credits", "usd": 325.0, "priceText": "$325 (save $107)", "description": "Кредитный пакет iStock среднего объема для команд, которым нужен predictable запас credits для разнородных ассетов.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 60 credits", "usd": 520.0, "priceText": "$520 (save $200)", "description": "Крупный пакет кредитов iStock для регулярных покупок видео и изображений без привязки к monthly subscription limit.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 150 credits", "usd": 1.0, "priceText": "$1,250 (save $550)", "description": "Большой пакет кредитов iStock для production-команд, которым нужен высокий запас гибких кредитов на premium-assets.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}, {"label": "Credit Packs — 300 credits", "usd": 2.0, "priceText": "$2,400 (save $1,200)", "description": "Максимальный публичный пакет кредитов iStock в этой сетке для большого объема разовых покупок и смешанного использования изображений и видео.", "features": "• pay as you go\n• no commitment\n• large-project pack\n• access to full image library + videos\n• extended licenses available\n• screenshot example: up to 300 images or 50 videos or a mix", "billingNote": "partially_verified\ncredit packs captured from screenshot / official page"}]}]};                       // null — общая страница для товаров, добавленных в админке
   var RATE = MC.RATE;
   /* формула с сайта (payment-flow.v2.js → computeChargedUsd): до $45 — (цена + $5) × 1.2, выше — цена × 1.3; 0 и пусто → базовые $20 */
   function quote(u){ return { base: u, usd: MC.charged(u) }; }
+  /* итог в рублях: с сервера (актуальная цена, курс и комиссия из админки), иначе — по формуле прототипа */
+  function totalRub(p){ return p.kop != null ? p.kop / 100 : quote(p.usd).usd * RATE; }
+  function payable(p){ return p.kop != null || (typeof p.usd === 'number' && p.usd > 0 && !p.live); }
   /* форматы цен — те же функции, что на сайте (payment-flow.v2.js): короткая для карточек и расчёта, полная для деталей */
   var PF = window.MC_PRICE;
   function ru(t){ return String(t || '').replace(/^Free$/i,'Бесплатно').replace(/^Custom(?: pricing)?$/i,'По запросу').replace(/^Уточняется$/,'По запросу')
     .replace(/\bbilled monthly\b/gi,'ежемесячно').replace(/\bbilled yearly\b/gi,'при оплате за год').replace(/\bbilled\s+/gi,'').replace(/\btokens\b/gi,'токенов').replace(/\bcredits\b/gi,'кредитов').replace(/\s+at\s+/gi,' · ').replace(/\bper user\b/gi,'за пользователя').replace(/\bper seat\b/gi,'за место'); }
-  function priceShort(p){ return ru(PF.monthly(p.priceText, p.usd)); }
-  function priceFull(p){ return ru(PF.localize(p.priceText)); }
+  function priceShort(p){ return p.rubText ? p.rubText : ru(PF.monthly(p.priceText, p.usd)); }
+  function priceFull(p){ return p.rubText ? p.rubText : ru(PF.localize(p.priceText)); }
   var pay = $('pay'), status = $('status'), email = $('email'), emailHint = $('emailHint'), details = $('planDetails');
   var groups = $('planGroups'), current = null, buttons = [];
 
-  SVC.groups.forEach(function(g){
-    var wrap = document.createElement('div'); wrap.className = 'plan-group';
-    if (SVC.groups.length > 1) { var h = document.createElement('h4'); h.textContent = g.name; wrap.appendChild(h); }
-    var grid = document.createElement('div'); grid.className = 'plans'; grid.setAttribute('role','group'); grid.setAttribute('aria-label', g.name);
-    g.plans.forEach(function(p){
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'plan';
-      var custom = typeof p.usd !== 'number';
-      b.innerHTML = '<b>' + p.label + '</b><span class="price">' + priceShort(p) + '</span>' +
-        (p.free ? '<span class="rub ask">бесплатно</span>' : custom ? '<span class="rub ask">по запросу</span>' : '<span class="rub">' + rub(quote(p.usd).usd * RATE) + '</span>');
-      b.addEventListener('click', function(){ select(p, b); });
-      grid.appendChild(b); buttons.push(b);
+  function start(){
+    groups.innerHTML = ''; buttons = [];
+    SVC.groups.forEach(function(g){
+      if (!g.plans.length) return;
+      var wrap = document.createElement('div'); wrap.className = 'plan-group';
+      if (SVC.groups.filter(function(x){ return x.plans.length; }).length > 1) { var h = document.createElement('h4'); h.textContent = g.name; wrap.appendChild(h); }
+      var grid = document.createElement('div'); grid.className = 'plans'; grid.setAttribute('role','group'); grid.setAttribute('aria-label', g.name);
+      g.plans.forEach(function(p){
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'plan';
+        b.innerHTML = '<b>' + esc(p.label) + '</b><span class="price">' + esc(priceShort(p)) + '</span>' +
+          (p.free ? '<span class="rub ask">бесплатно</span>' : !payable(p) ? '<span class="rub ask">по запросу</span>' : '<span class="rub">' + rub(totalRub(p)) + '</span>');
+        b.addEventListener('click', function(){ select(p, b); });
+        grid.appendChild(b); buttons.push(b);
+      });
+      wrap.appendChild(grid); groups.appendChild(wrap);
     });
-    wrap.appendChild(grid); groups.appendChild(wrap);
-  });
+    // стартовый план — первый платный, чтобы расчёт сразу был содержательным
+    var all = [].concat.apply([], SVC.groups.map(function(g){ return g.plans; }));
+    if (!all.length) { unavailable('Тарифы скоро появятся — напишите в поддержку, посчитаем вручную.'); return; }
+    var first = all.filter(payable)[0] || all[0];
+    select(first, buttons[all.indexOf(first)]);
+  }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
 
   function select(p, b){
     current = p;
     buttons.forEach(function(o){ o.setAttribute('aria-pressed', o === b ? 'true':'false'); });
     var feats = String(p.features || '').split('\n').map(function(s){ return s.replace(/^•\s*/,'').trim(); }).filter(Boolean);
     var shortP = priceShort(p), fullP = priceFull(p);
-    details.innerHTML = '<h4>' + p.label + '</h4><span class="pd-price">' + shortP + '</span><p>' + (p.description || '') + '</p>' + (fullP && fullP !== shortP ? '<p class="pd-note">Условия: ' + fullP + '</p>' : '') +
-      (feats.length ? '<ul>' + feats.map(function(f){ return '<li>' + f + '</li>'; }).join('') + '</ul>' : '');
+    details.innerHTML = '<h4>' + esc(p.label) + '</h4><span class="pd-price">' + esc(shortP) + '</span><p>' + esc(p.description || '') + '</p>' + (fullP && fullP !== shortP ? '<p class="pd-note">Условия: ' + esc(fullP) + '</p>' : '') +
+      (feats.length ? '<ul>' + feats.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' : '');
     MC.bump(details);
     render();
   }
 
   function render(){
-    var custom = typeof current.usd !== 'number';
     $('calcSub').textContent = SVC.name + ' · ' + current.label;
     $('rowPlan').textContent = priceShort(current);
     if (current.free) {
@@ -1710,18 +1791,25 @@ window.MC = (function(){
       pay.textContent = 'Оплата не требуется'; pay.disabled = true; MC.bump($('rowTotal')); return;
     }
     pay.disabled = false;
-    if (custom) {
+    if (!payable(current)) {
       $('rowComm').textContent = '—'; $('rowTotal').textContent = 'по запросу';
       pay.textContent = 'Запросить расчёт'; MC.bump($('rowTotal')); return;
     }
-    var q = quote(current.usd), totalRub = q.usd * RATE, subRub = (current.usd || 0) * RATE;
-    $('rowComm').textContent = rub(totalRub - subRub);
-    $('rowTotal').textContent = rub(totalRub);
-    pay.textContent = 'Оплатить ' + rub(totalRub);
+    var tot = totalRub(current), sub = current.rubBase != null ? current.rubBase : (current.usd || 0) * RATE;
+    $('rowComm').textContent = rub(Math.max(0, tot - sub));
+    $('rowTotal').textContent = rub(tot);
+    pay.textContent = 'Оплатить ' + rub(tot);
     MC.bump($('rowTotal'));
   }
 
+  function unavailable(text){
+    groups.innerHTML = ''; details.innerHTML = '<p>' + esc(text) + '</p>';
+    $('rowPlan').textContent = '—'; $('rowComm').textContent = '—'; $('rowTotal').textContent = '—';
+    pay.textContent = 'Сейчас недоступно'; pay.disabled = true; current = null;
+  }
+
   pay.addEventListener('click', function(){
+    if (!current) return;
     var v = email.value.trim(), ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
     if (!ok) {
       email.setAttribute('aria-invalid','true'); emailHint.className = 'hint err';
@@ -1732,22 +1820,62 @@ window.MC = (function(){
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
     emailHint.textContent = 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
     status.className = 'calc-status ok';
-    var demoText = typeof current.usd !== 'number' ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(quote(current.usd).usd * RATE) + '.';
+    var demoText = !payable(current) ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(totalRub(current)) + '.';
     MC.isLive().then(function(on){
-      if (!on || typeof current.usd !== 'number') { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
+      if (!on || !payable(current)) { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;
-      var slug = (SVC.href || '').replace(/^.*service\//, '').replace(/\/.*$/, '');
-      MC.checkout({ slug: slug, plan: current.label, fields: { account_email: v }, title: SVC.name + ' · ' + current.label, back: location.pathname });
+      MC.checkout({ slug: SLUG, plan: current.label, fields: { account_email: v }, title: SVC.name + ' · ' + current.label, back: location.pathname });
     });
   });
 
-  // стартовый план — первый платный, чтобы расчёт сразу был содержательным
-  var first = null;
-  SVC.groups.some(function(g){ return g.plans.some(function(p, i){ if (typeof p.usd === 'number' && p.usd > 0) { first = p; return true; } return false; }); });
-  first = first || SVC.groups[0].plans[0];
-  var idx = 0; SVC.groups.forEach(function(g){ g.plans.forEach(function(p){ if (p === first) select(p, buttons[idx]); idx++; }); });
+  /* — живые данные из админки: цены, новые и выключенные тарифы, выключенный товар — */
+  var SLUG = SVC ? MC.slugOf(SVC.href) : MC.slugOf(location.pathname);
+  function fromApi(r){
+    var byLabel = {}, used = {};
+    r.plans.forEach(function(p){ byLabel[p.label] = p; });
+    function merge(p, a){
+      return { label: a.label, usd: a.currency === 'usd' && a.price_cents ? a.price_cents / 100 : (a.free ? 0 : null), free: a.free,
+        priceText: a.price_text || (p && p.priceText) || '', description: a.description || (p && p.description) || '', features: (p && p.features) || '',
+        kop: a.purchasable && a.charged_kop != null ? a.charged_kop : null, live: true,
+        rubText: a.currency === 'rub' ? (a.price_text || rub((a.price_kop || 0) / 100)) : null, rubBase: a.currency === 'rub' ? (a.price_kop || 0) / 100 : null };
+    }
+    var gs = (SVC ? SVC.groups : [{ name: r.product.name, plans: [] }]).map(function(g){
+      return { name: g.name, plans: g.plans.filter(function(p){ return byLabel[p.label]; }).map(function(p){ used[p.label] = 1; return merge(p, byLabel[p.label]); }) };
+    });
+    var extra = r.plans.filter(function(a){ return !used[a.label] && !a.custom; }).map(function(a){ return merge(null, a); });
+    if (extra.length) { if (!gs.length) gs.push({ name: r.product.name, plans: [] }); gs[gs.length - 1].plans = gs[gs.length - 1].plans.concat(extra); }
+    return gs;
+  }
+  function fillDynamic(p){
+    // общая страница: заполняем тексты из товара
+    var name = p.name;
+    document.title = name + ' — Marscap';
+    var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
+    var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
+    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
+  }
+  if (SVC) start();
+  else { SVC = { name: 'Сервис', short: 'сервису', href: 'service/' + SLUG + '/', groups: [] }; unavailable('Загружаем тарифы…'); }
+  MC.isLive().then(function(on){
+    if (!on) { if (!SVC.groups.length) unavailable('Страница доступна только на сайте.'); return; }
+    MC.api('GET', '/catalog/' + encodeURIComponent(SLUG)).then(function(r){
+      RATE = r.rate;
+      if (!SVC.groups.length) { SVC.name = r.product.name; SVC.short = r.product.name; SVC.cat = r.product.category; fillDynamic(r.product); }
+      SVC.groups = fromApi(r);
+      start();
+      var all = [].concat.apply([], SVC.groups.map(function(g){ return g.plans; })), paid = all.filter(payable);
+      var facts = document.querySelectorAll('.facts .fact');
+      if (facts[0] && paid.length) { var m = paid.reduce(function(a, b){ return totalRub(a) <= totalRub(b) ? a : b; }); facts[0].querySelector('b').textContent = m.rubText ? 'от ' + rub(totalRub(m)) : 'от $' + (m.usd % 1 ? m.usd.toFixed(2) : m.usd); }
+      if (facts[2]) facts[2].querySelector('b').textContent = all.length + ' ' + MC.plural(all.length, ['вариант', 'варианта', 'вариантов']);
+    }, function(e){
+      if (e.status === 404) unavailable('Этот сервис сейчас недоступен для оплаты. Посмотрите другие в каталоге или напишите в поддержку.');
+    });
+  });
 
-  MC.initShowcase({ cat: SVC.cat, current: SVC.href });
+  MC.initShowcase({ cat: SVC.cat || 'all', current: SVC.href });
   MC.initReveal();
 })();
 
