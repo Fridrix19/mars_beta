@@ -12,7 +12,7 @@ export async function onPaymentSucceeded(paymentId: string) {
       order = await one(`select * from place_order($1, $2, $3, $4, $5)`,
         [p.user_id, p.for_order.plan_id, p.for_order.fields ?? {}, 'topup:' + p.id, p.for_order.amount_cents ?? null])
     } catch (e: any) { order_error = e?.message ?? 'order_failed' }
-    if (order?.id) await fulfillCardOrder(order.id)
+    if (order?.id) await fulfillOrder(order.id)
   }
   return { status: 'succeeded', order_id: order?.id ?? null, order_error }
 }

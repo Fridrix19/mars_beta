@@ -2749,9 +2749,10 @@ window.MC = (function(){
     tb.innerHTML = PAYMENTS.map(function(p){ var o = order(p.order); return '<tr><td class="mono">' + fmtD(p.at, true) + '</td><td><b>' + (o ? esc(o.title) : esc(p.title || '')) + '</b>' + (p.order ? '<br><button type="button" class="act-link mono" data-go="order:' + p.order + '">' + p.order + '</button>' : '') + '</td><td>' + p.method + '</td><td class="num">' + rub(p.rubv) + '</td><td class="st">' + badge(PST[p.status]) + '</td><td>' + (p.status === 'ok' || p.status === 'refunded' ? '<button type="button" class="act-link" data-rc="' + p.id + '">' + ico('doc') + 'Квитанция</button>' : '') + '</td></tr>'; }).join('');
     tb.querySelectorAll('[data-rc]').forEach(function(b){ b.addEventListener('click', function(){ receipt(pay(b.getAttribute('data-rc'))); }); });
     $('refN').textContent = REFUNDS.length;
-    $('refList').innerHTML = REFUNDS.length ? REFUNDS.map(function(r){ return '<div class="refc"><b>' + r.id + ' · ' + esc(r.why) + '</b><span class="sum">' + rub(r.rubv) + '</span><span>Платёж ' + r.pay + ' · заказ ' + r.order + ' · ' + fmtD(r.at) + (r.doneAt ? ' → возвращён ' + fmtD(r.doneAt) : '') + '</span>' + badge(r.status === 'done' ? ['Выполнен', 'badge-ok'] : ['На рассмотрении', 'badge-warn']) + '</div>'; }).join('') : '<div class="empty"><b>Запросов нет</b></div>';
+    $('refList').innerHTML = REFUNDS.length ? REFUNDS.map(function(r){ return '<div class="refc"><b>' + r.id + ' · ' + esc(r.why) + '</b><span class="sum">' + rub(r.rubv) + '</span><span>Платёж ' + r.pay + ' · заказ ' + r.order + ' · ' + fmtD(r.at) + (r.doneAt ? ' → возвращён ' + fmtD(r.doneAt) : '') + '</span>' + badge(r.status === 'done' ? ['Выполнен', 'badge-ok'] : r.status === 'rejected' ? ['Отклонён', 'badge-err'] : ['На рассмотрении', 'badge-warn']) + '</div>'; }).join('') : '<div class="empty"><b>Запросов нет</b></div>';
     var sel = $('refPay'), opts = PAYMENTS.filter(function(p){ return p.status === 'ok'; });
-    sel.innerHTML = opts.map(function(p){ var o = order(p.order); return '<option value="' + p.id + '">' + p.id + ' · ' + (o ? o.title : '') + ' · ' + rub(p.rubv) + '</option>'; }).join('');
+    if (LIVE) { sel.previousElementSibling.textContent = 'Заказ'; sel.innerHTML = ORDERS.filter(function(o){ return o.status !== 'refund' && o.status !== 'cancel'; }).map(function(o){ return '<option value="' + o.id + '">' + o.id + ' · ' + esc(o.title) + ' · ' + money(o) + '</option>'; }).join('') || '<option value="">Заказов для возврата нет</option>'; }
+    else sel.innerHTML = opts.map(function(p){ var o = order(p.order); return '<option value="' + p.id + '">' + p.id + ' · ' + (o ? o.title : '') + ' · ' + rub(p.rubv) + '</option>'; }).join('');
     payTab(param === 'refunds' ? 'refunds' : 'pays');
     $('payTopup').hidden = !LIVE; $('balLine').hidden = !LIVE;
     if (LIVE) $('balLine').innerHTML = '<span class="k">Баланс</span><b>' + MC.kop(BAL) + '</b><span class="d">возвраты по заказам приходят сюда</span>';
@@ -2760,7 +2761,7 @@ window.MC = (function(){
   function payTab(t){ $('payTabs').querySelectorAll('[role="tab"]').forEach(function(x){ x.setAttribute('aria-selected', x.getAttribute('data-pt') === t); }); $('payPane').hidden = t !== 'pays'; $('refPane').hidden = t !== 'refunds'; }
   $('payTabs').addEventListener('click', function(e){ var t = e.target.closest('[role="tab"]'); if (t) payTab(t.getAttribute('data-pt')); });
   $('refForm').addEventListener('submit', function(e){
-    e.preventDefault(); if (LIVE) { toast('Напишите в поддержку', 'Возврат оформит оператор: деньги по заказу вернутся на баланс, по заявке — на карту.'); return; } var p = pay($('refPay').value); if (!p) return;
+    e.preventDefault(); if (LIVE) { var oid = $('refPay').value; if (!oid) return; MC.api('POST', '/refunds', { order_id: oid, reason: $('refWhy').value + ($('refTxt').value.trim() ? ': ' + $('refTxt').value.trim() : ''), destination: 'balance' }).then(function(){ $('refTxt').value = ''; return load(); }).then(function(){ R.payments('refunds'); toast('Заявка отправлена', 'Оператор рассмотрит её — деньги вернутся на баланс.', 'ok'); }, fail); return; } var p = pay($('refPay').value); if (!p) return;
     REFUNDS.unshift({ id: 'R-' + (rseq++), pay: p.id, order: p.order, why: $('refWhy').value, rubv: p.rubv, status: 'review', at: new Date() });
     $('refTxt').value = ''; R.payments('refunds'); toast('Запрос отправлен', 'Ответим в течение 3 рабочих дней.', 'ok');
   });
@@ -2913,14 +2914,16 @@ window.MC = (function(){
     return MC.api('GET', '/auth/me').then(function(r){
       if (!r.user) { location.replace(BASE + 'login.html'); return false; }
       applyUser(r.user);
-      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards')]).then(function(x){
+      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards'), MC.api('GET', '/refunds')]).then(function(x){
         setArr(ORDERS, x[0].orders.map(function(o){ return mapOrder(o); }));
         setArr(PAYMENTS, x[1].payments.map(function(p){ return { id: p.id.slice(0, 8).toUpperCase(), full: p.id, order: null, title: 'Пополнение баланса', method: p.provider === 'test' ? 'Тестовая оплата' : 'СБП', rubv: p.amount_kop / 100, status: PSTAT[p.status] || 'pending', at: p.paid_at || p.created_at }; }));
         setArr(NOTIFS, x[2].notifications.map(function(n){ var h = (n.link || '').split('#')[1] || 'overview'; return { t: n.title, s: n.body || '', at: n.created_at, go: h, unread: !n.read_at, nid: n.id }; }));
         SESSIONS = x[3].sessions.map(function(s){ return { id: s.id, cur: s.current ? 1 : 0, dev: s.device, place: '', ip: (s.ip || '').replace(/\.\d+\.\d+$/, '.·.·'), at: s.current ? 'сейчас' : fmtD(s.last_seen_at, true), icon: /iPhone|Android/.test(s.device) ? 'phone' : 'laptop' }; });
         setArr(CARDS, x[4].cards.map(function(c){ var old = card(c.id); return { id: c.id, last4: c.last4, brand: c.brand, status: c.status === 'frozen' ? 'frozen' : 'active', balance: c.balance_cents / 100, exp: c.exp, issued: c.created_at, test: c.test, pan: old && old.pan, cvv: old && old.cvv }; }));
         CARDS.forEach(function(c){ var src = x[4].cards.filter(function(k){ return k.id === c.id; })[0]; var o = src && src.order_id && order(src.order_id); if (o) o.card = c.id; });
-        setArr(TICKETS, []); setArr(REFUNDS, []);
+        setArr(TICKETS, []);
+        var RST = { new: 'review', approved: 'review', rejected: 'rejected', done: 'done' };
+        setArr(REFUNDS, x[5].refunds.map(function(r){ return { id: 'R-' + r.id.slice(0, 6).toUpperCase(), pay: r.payment_id ? r.payment_id.slice(0, 8).toUpperCase() : '—', order: r.order_id || '—', why: r.reason + (r.admin_note ? ' · ' + r.admin_note : ''), rubv: r.amount_kop / 100, status: RST[r.status], at: r.created_at, doneAt: r.status === 'done' ? r.decided_at : null, dest: r.destination }; }));
         DOCS.length = 1; DOCS[0] = { name: 'Оферта', ver: '2.3', at: USER.since, href: BASE + 'legal-files/offer.pdf', hist: [] };
         counters(); return true;
       });

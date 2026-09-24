@@ -1,6 +1,7 @@
 // Применяет server/db/migrations/*.sql по порядку; каждая — в своей транзакции.
 // База, где схема уже есть, но нет записей в schema_migrations (ручной накат 001–003), размечается без повторного применения.
 import pg from 'pg'
+import { scryptSync, randomBytes } from 'node:crypto'
 import { readdir, readFile } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -43,4 +44,15 @@ try {
     }
   }
   console.log('миграции применены')
+
+  // первый админ: admin / admin (или ADMIN_BOOTSTRAP_PASSWORD), только если админов нет. Пароль нужно сменить после входа.
+  const n = (await client.query('select count(*)::int n from admins')).rows[0].n
+  if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off') {
+    const pw = process.env.ADMIN_BOOTSTRAP_PASSWORD || 'admin'
+    const salt = randomBytes(16)
+    const key = scryptSync(pw.normalize('NFKC'), salt, 32, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 })
+    const hash = `scrypt$16384$8$1$${salt.toString('base64url')}$${key.toString('base64url')}`
+    await client.query(`insert into admins (login, password_hash, name, role, must_change) values ('admin', $1, 'Владелец', 'owner', true)`, [hash])
+    console.log('создан админ: admin (смените пароль после входа)')
+  }
 } finally { await client.end() }

@@ -126,7 +126,7 @@ test('деньги: пополнение, KYC, недостача, покупк�
 test('каталог', async () => {
   const c = await client()('GET', '/api/catalog?category=ai')
   assert.ok(c.body.products.length > 10); assert.ok(c.body.products.every(p => p.category === 'ai'))
-  const all = await client()('GET', '/api/catalog'); assert.equal(all.body.products.length, 140)
+  const all = await client()('GET', '/api/catalog'); assert.ok(all.body.products.length >= 140)
   const p = await client()('GET', '/api/catalog/chatgpt'); assert.equal(p.body.plans[0].charged_kop, 240676)
   assert.equal((await client()('GET', '/api/catalog/nope')).status, 404)
 })

@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url'
+import Marscap from './app/theme/marscap'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 
@@ -6,6 +7,22 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-09-01',
   devtools: { enabled: false },
   ssr: true,
+  modules: ['@primevue/nuxt-module'],
+  primevue: {
+    options: { theme: { preset: Marscap, options: { darkModeSelector: '.mc-dark', cssLayer: false } }, ripple: false },
+    components: { include: '*' },
+    directives: { include: ['Tooltip'] },
+  },
+  css: ['primeicons/primeicons.css', '~/assets/admin.css'],
+  app: {
+    head: {
+      htmlAttrs: { lang: 'ru', class: 'mc-dark' },
+      meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+      link: [{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+             { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Onest:wght@600;700&family=JetBrains+Mono:wght@500&display=swap' }],
+    },
+  },
+  routeRules: { '/admin/**': { ssr: false }, '/admin': { ssr: false } },
   runtimeConfig: {
     databaseUrl: '',            // NUXT_DATABASE_URL (или DATABASE_URL)
     secret: '',                 // NUXT_SECRET — HMAC кодов и ключ шифрования выдач
@@ -20,7 +37,7 @@ export default defineNuxtConfig({
     public: { siteUrl: '' },
   },
   nitro: {
-    // прототип отдаётся как статика; API — /api/*
+    // прототип отдаётся как статика; API — /api/*; админка — /admin (Nuxt + PrimeVue)
     publicAssets: [
       { dir: root + '_proto', baseURL: '/', maxAge: 0 },
       { dir: root + 'source-site/assets', baseURL: '/assets', maxAge: 60 * 60 * 24 },

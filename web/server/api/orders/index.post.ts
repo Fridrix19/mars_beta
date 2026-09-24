@@ -17,10 +17,8 @@ export default defineEventHandler(async (e) => {
   const amount = b?.amount_cents != null ? Math.round(Number(b.amount_cents)) : null
   try {
     let o = await one(`select * from place_order($1, $2, $3, $4, $5)`, [u.id, plan.id, fields, 'u:' + u.id + ':' + idem, amount])
-    if (plan.slug === 'virtual-card') {
-      await fulfillCardOrder(o.id)
-      o = await one(`select * from orders where id = $1`, [o.id])
-    }
+    await fulfillOrder(o.id)
+    o = await one(`select * from orders where id = $1`, [o.id])
     return { order: orderView(o) }
   } catch (err) { pgFail(err) }
 })

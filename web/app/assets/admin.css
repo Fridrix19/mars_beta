@@ -1,0 +1,53 @@
+/* Админка Marscap — поверх пресета PrimeVue; токены из дизайн-системы */
+:root { --ink-950:#090D18; --ink-900:#0E1420; --ink-850:#171E2C; --ink-800:#222A3A; --line:#262E3D; --line-strong:#303848;
+  --text:#EEF0F4; --text-2:#C0C4CD; --text-3:#9FA5B0; --accent:#3D7EFC; --ok:#63D18F; --warn:#EEB154; --err:#F97770;
+  --mono:'JetBrains Mono', ui-monospace, monospace; }
+html, body { margin:0; background:var(--ink-950); color:var(--text-2); font:15px/1.5 'Golos Text', system-ui, sans-serif; }
+h1, h2, h3 { font-family:'Onest', 'Golos Text', sans-serif; color:var(--text); margin:0; letter-spacing:-.01em }
+h1 { font-size:26px } h2 { font-size:19px } h3 { font-size:16px }
+a { color:#699FFF; text-decoration:none } a:hover { text-decoration:underline }
+.mono { font-family:var(--mono); font-size:.92em }
+.muted { color:var(--text-3) } .ok { color:var(--ok) } .err { color:var(--err) } .warn { color:var(--warn) }
+.adm { display:grid; grid-template-columns:240px 1fr; min-height:100vh }
+.adm-side { background:var(--ink-900); border-right:1px solid var(--line); padding:18px 12px; display:flex; flex-direction:column; gap:4px; position:sticky; top:0; height:100vh; box-sizing:border-box }
+.adm-brand { display:flex; align-items:center; gap:10px; padding:4px 10px 16px; font:700 17px 'Onest', sans-serif; color:var(--text) }
+.adm-brand small { font:500 11px var(--mono); color:var(--warn); border:1px solid color-mix(in oklab, var(--warn) 40%, transparent); border-radius:6px; padding:1px 6px }
+.adm-nav a { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; color:var(--text-2); text-decoration:none; font-weight:500 }
+.adm-nav a:hover { background:var(--ink-850); color:var(--text) }
+.adm-nav a.is-on { background:linear-gradient(180deg,#0B1A3F,#0A1633); color:var(--text); box-shadow:inset 0 -1px 0 #3D7EFC }
+.adm-nav a .n { margin-left:auto; font:600 11px var(--mono); background:#3D7EFC; color:#fff; border-radius:99px; padding:1px 7px }
+.adm-nav a .n.warn { background:var(--warn); color:#1b1300 }
+.adm-me { margin-top:auto; padding:12px; border-top:1px solid var(--line); display:grid; gap:8px }
+.adm-me b { color:var(--text) }
+.adm-main { padding:26px 30px 60px; min-width:0 }
+.adm-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px }
+.adm-head .eyebrow { display:block; font:600 11px Inter, 'Golos Text', sans-serif; letter-spacing:.12em; text-transform:uppercase; color:#699FFF; margin-bottom:6px }
+.panel { background:var(--ink-900); border:1px solid var(--line); border-radius:16px; padding:18px 20px }
+.grid { display:grid; gap:14px } .g2 { grid-template-columns:repeat(2, minmax(0,1fr)) } .g3 { grid-template-columns:repeat(3, minmax(0,1fr)) } .g4 { grid-template-columns:repeat(4, minmax(0,1fr)) }
+.kpi { background:var(--ink-900); border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:grid; gap:4px; text-decoration:none; color:inherit }
+.kpi .k { font:600 11px Inter, sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--text-3) }
+.kpi .v { font:600 24px var(--mono); color:var(--text) }
+.kpi.hot { border-color:color-mix(in oklab, var(--warn) 55%, var(--line)) }
+.kv { display:grid; grid-template-columns:160px 1fr; gap:8px 14px; margin:0 } .kv dt { color:var(--text-3) } .kv dd { margin:0; color:var(--text); min-width:0; overflow-wrap:anywhere }
+.toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px }
+.toolbar .grow { flex:1; min-width:220px }
+.tl { list-style:none; margin:0; padding:0; display:grid; gap:10px } .tl li { border-left:2px solid var(--line-strong); padding:0 0 0 12px } .tl time { display:block; font-size:12px; color:var(--text-3) }
+.chart { display:flex; align-items:flex-end; gap:6px; height:140px; padding-top:10px }
+.chart .col { flex:1; display:flex; flex-direction:column; justify-content:flex-end; gap:2px; align-items:stretch; min-width:0 }
+.chart .bar { background:#3D7EFC; border-radius:4px 4px 0 0; min-height:2px } .chart .bar.t { background:#52CFF3; opacity:.55 }
+.chart .lbl { font:500 10px var(--mono); color:var(--text-3); text-align:center; margin-top:4px }
+.legend { display:flex; gap:14px; font-size:12px; color:var(--text-3) } .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px }
+.kyc-img { display:block; max-width:100%; max-height:70vh; border-radius:12px; border:1px solid var(--line); background:#000 }
+.secret { font-family:var(--mono); white-space:pre-wrap; background:var(--ink-850); border:1px solid var(--line-strong); border-radius:10px; padding:10px 12px; color:var(--text) }
+.login-wrap { min-height:100vh; display:grid; place-items:center; padding:16px }
+.login { width:min(380px, 100%); display:grid; gap:14px }
+.field { display:grid; gap:6px } .field label { font-size:13px; color:var(--text-3) }
+.banner { background:color-mix(in oklab, var(--warn) 14%, var(--ink-900)); border:1px solid color-mix(in oklab, var(--warn) 45%, transparent); color:var(--text); border-radius:12px; padding:10px 14px; margin-bottom:16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.p-datatable .p-datatable-tbody > tr { cursor:default } .p-datatable .p-datatable-tbody > tr.clickable { cursor:pointer }
+.p-datatable-table-container { border:1px solid var(--line); border-radius:14px }
+.row-actions { display:flex; gap:8px; flex-wrap:wrap }
+@media (max-width: 900px) {
+  .adm { grid-template-columns:1fr } .adm-side { position:static; height:auto; flex-direction:row; flex-wrap:wrap; padding:10px }
+  .adm-brand { padding:6px 10px; width:100% } .adm-nav { display:flex; flex-wrap:wrap; gap:4px } .adm-me { display:none }
+  .adm-main { padding:18px 14px 40px } .g2, .g3, .g4 { grid-template-columns:1fr 1fr } .kv { grid-template-columns:1fr }
+}
