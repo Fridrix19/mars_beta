@@ -70,7 +70,13 @@
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
     emailHint.textContent = 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
     status.className = 'calc-status ok';
-    status.textContent = typeof current.usd !== 'number' ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(quote(current.usd).usd * RATE) + '.';
+    var demoText = typeof current.usd !== 'number' ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(quote(current.usd).usd * RATE) + '.';
+    MC.isLive().then(function(on){
+      if (!on || typeof current.usd !== 'number') { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
+      status.textContent = 'Переходим к оплате…'; pay.disabled = true;
+      var slug = (SVC.href || '').replace(/^.*service\//, '').replace(/\/.*$/, '');
+      MC.checkout({ slug: slug, plan: current.label, fields: { account_email: v }, title: SVC.name + ' · ' + current.label, back: location.pathname });
+    });
   });
 
   // стартовый план — первый платный, чтобы расчёт сразу был содержательным

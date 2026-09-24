@@ -342,3 +342,5 @@
 .bal-line .d{margin-left:auto;color:var(--text-3);font-size:13px}
 .testpay{display:grid;gap:10px;padding:14px;border:1px dashed var(--line-strong);border-radius:12px}
 .testpay b{font-family:'JetBrains Mono',monospace;font-size:22px}
+.cab-head-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
+@media (max-width:760px){.cab-head-btns{width:100%}.cab-head-btns .btn{flex:1}}

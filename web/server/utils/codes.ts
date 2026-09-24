@@ -1,6 +1,6 @@
 import type { H3Event } from 'h3'
 
-export type CodePurpose = 'register' | 'login' | 'reset' | 'change_email'
+export type CodePurpose = 'register' | 'login' | 'reset' | 'change_email' | 'reveal'
 const TTL_MIN = 10, MAX_ATTEMPTS = 5, RESEND_SEC = 59, PER_EMAIL_HOUR = 6, PER_IP_HOUR = 30
 
 const codeHash = (email: string, purpose: string, code: string) => hmac(`${email}:${purpose}:${code}`)

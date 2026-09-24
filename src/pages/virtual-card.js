@@ -42,7 +42,11 @@
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
     emailHint.textContent = 'Сюда придут реквизиты и инструкция.';
     status.className = 'calc-status ok';
-    status.textContent = 'Прототип: здесь откроется окно СБП на ' + rub(total(den)) + '.';
+    MC.isLive().then(function(on){
+      if (!on) { status.textContent = 'Прототип: здесь откроется окно СБП на ' + rub(total(den)) + '.'; return; }
+      status.textContent = 'Переходим к оплате…'; pay.disabled = true;
+      MC.checkout({ slug: 'virtual-card', usd: den, fields: {}, title: 'Виртуальная карта · $' + den, back: location.pathname });
+    });
   });
 
   /* — карта: наклон за курсором, автовращение на паузе — */

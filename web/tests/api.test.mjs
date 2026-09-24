@@ -155,4 +155,47 @@ test('кабинет: профиль, сессии, смена пароля, KYC
   assert.equal(f.rows[0].purpose, 'kyc'); assert.equal(f.rows[0].size_bytes, 16)
 })
 
+test('карты: выпуск по заказу, реквизиты по коду, заморозка, пополнение', async () => {
+  const call = client(), email = uniq(); const u = await register(call, email)
+  await db.query(`update users set kyc_status = 'approved' where id = $1`, [u.id])
+  await call('POST', `/api/topups/${(await call('POST', '/api/topups', { amount_kop: 30000_00 })).body.payment.id}/test`, {})
+  const p50 = await plan('virtual-card', '$50')
+  const o = await call('POST', '/api/orders', { plan_id: p50, idem: 'card-issue-1' })
+  assert.equal(o.body.order.status, 'done')
+  let cards = (await call('GET', '/api/cards')).body.cards
+  assert.equal(cards.length, 1); assert.equal(cards[0].balance_cents, 5000); assert.match(cards[0].last4, /^\d{4}$/); assert.match(cards[0].exp, /^\d\d\/\d\d$/)
+  const id = cards[0].id
+  assert.equal((await call('POST', `/api/cards/${id}/reveal`, { code: '123456' })).code, 'code_missing')
+  const rc = await call('POST', `/api/cards/${id}/reveal-code`, {})
+  const rv = await call('POST', `/api/cards/${id}/reveal`, { code: rc.body.dev_code })
+  assert.match(rv.body.pan, /^4000 00\d\d \d{4} \d{4}$/); assert.ok(rv.body.pan.endsWith(cards[0].last4)); assert.match(rv.body.cvv, /^\d{3}$/)
+  const digits = rv.body.pan.replace(/\D/g, '').split('').map(Number)
+  const luhn = digits.reverse().reduce((s, d, i) => s + (i % 2 ? (d * 2 > 9 ? d * 2 - 9 : d * 2) : d), 0)
+  assert.equal(luhn % 10, 0)
+  assert.equal((await client()('GET', '/api/cards')).status, 401)
+  const other = client(); await register(other, uniq())
+  assert.equal((await other('POST', `/api/cards/${id}/reveal-code`, {})).status, 404)
+  // пополнение карты
+  const p75 = await plan('virtual-card', '$75')
+  const t = await call('POST', '/api/orders', { plan_id: p75, card_id: id, idem: 'card-topup-1' })
+  assert.equal(t.body.order.status, 'done')
+  assert.equal((await call('GET', '/api/cards')).body.cards[0].balance_cents, 12500)
+  assert.equal((await other('POST', '/api/orders', { plan_id: p75, card_id: id, idem: 'steal-card-1' })).code, 'card_unavailable')
+  // заморозка
+  assert.equal((await call('POST', `/api/cards/${id}/freeze`, { frozen: true })).body.card.status, 'frozen')
+  assert.equal((await call('POST', `/api/cards/${id}/reveal-code`, {})).code, 'card_frozen')
+  assert.equal((await call('POST', '/api/orders', { plan_id: p75, card_id: id, idem: 'card-topup-2' })).code, 'card_unavailable')
+  await call('POST', `/api/cards/${id}/freeze`, { frozen: false })
+  // пополнение карты «под заказ» при нехватке баланса
+  const cu = await plan('virtual-card', 'Своя сумма')
+  const bal = (await call('GET', '/api/balance')).body.balance_kop
+  const tp = await call('POST', '/api/topups', { amount_kop: 50000_00, for_order: { plan_id: cu, amount_cents: 20000, fields: { card_id: id } } })
+  const done = await call('POST', `/api/topups/${tp.body.payment.id}/test`, {})
+  assert.match(done.body.order_id, /^MC-/)
+  assert.equal((await call('GET', '/api/cards')).body.cards[0].balance_cents, 32500)
+  const ord = await call('GET', `/api/orders/${done.body.order_id}`)
+  assert.equal(ord.body.order.status, 'done'); assert.match(ord.body.order.delivery, /пополнена/)
+  assert.ok(bal > 0)
+})
+
 test.after(() => db.end())

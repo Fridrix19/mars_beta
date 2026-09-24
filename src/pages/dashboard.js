@@ -196,7 +196,7 @@
       '<button type="button" class="kpi k-btn" data-go="support"><span class="k">Обращения</span><span class="v">' + openT + '</span><span class="d">' + (openT ? 'есть ответ оператора' : 'открытых нет') + '</span></button>';
     var act = ORDERS.filter(isActive).slice(0, 4);
     $('ovOrders').innerHTML = act.length ? act.map(ordRow).join('') : '<div class="empty"><span class="ico">' + ico('orders') + '</span><b>Активных заказов нет</b><p>Пополните карту или выберите сервис в каталоге.</p></div>';
-    $('ovCards').innerHTML = !CARDS.length ? '<div class="empty"><b>Карт пока нет</b><p>Выпуск карт подключим вместе с банком-партнёром.</p></div>' : CARDS.map(function(c){ return '<button type="button" class="ov-card" data-go="cards">' + cbHtml(c, true) + '<span class="ov-card-t"><b>' + c.brand + ' •• ' + c.last4 + '</b><span>' + (c.status === 'active' ? 'Активна · баланс ' + usdf(c.balance) : 'Заморожена') + '</span><span class="mono">до ' + c.exp + '</span></span></button>'; }).join('');
+    $('ovCards').innerHTML = !CARDS.length ? '<div class="empty"><b>Карт пока нет</b><p>Выпустите первую: «Новый заказ» → виртуальная карта.</p></div>' : CARDS.map(function(c){ return '<button type="button" class="ov-card" data-go="cards">' + cbHtml(c, true) + '<span class="ov-card-t"><b>' + c.brand + ' •• ' + c.last4 + '</b><span>' + (c.status === 'active' ? 'Активна · баланс ' + usdf(c.balance) : 'Заморожена') + '</span><span class="mono">до ' + c.exp + '</span></span></button>'; }).join('');
     renderNotifs();
     renderQuick();
   };
@@ -295,7 +295,7 @@
   });
   $('wPayLater').addEventListener('click', function(){ var o = createOrder(false); $('wDoneT').textContent = 'Заказ создан'; $('wDoneP').innerHTML = 'Заказ <b>' + o.id + '</b> ждёт оплаты — расчёт зафиксирован на 15 минут. Оплатить можно из карточки заказа.'; wizShow(6); });
   $('wOpen').addEventListener('click', function(){ if (newOrder) go('order', newOrder.id); });
-  R['new'] = function(){ if (LIVE) { if (W.prod === 'topup') W.prod = 'issue'; var tp = document.querySelector('.pick-grid [data-prod="topup"]'); if (tp) tp.hidden = true; $('wPayLater').hidden = true; } document.querySelectorAll('.pick-grid .pick').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-prod') === W.prod); }); wizShow(W.step || 1); };
+  R['new'] = function(){ if (LIVE) { var act = CARDS.filter(function(c){ return c.status === 'active'; }); if (W.prod === 'topup' && !act.length) W.prod = 'issue'; if (W.prod === 'topup' && !card(W.card)) W.card = act[0].id; var tp = document.querySelector('.pick-grid [data-prod="topup"]'); if (tp) tp.hidden = !act.length; $('wPayLater').hidden = true; } document.querySelectorAll('.pick-grid .pick').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-prod') === W.prod); }); wizShow(W.step || 1); };
 
   /* ===== Мои заказы ===== */
   var ordF = 'all';
@@ -361,7 +361,7 @@
     $('cardsGrid').innerHTML = CARDS.map(function(c){
       var linked = ORDERS.filter(function(o){ return o.card === c.id; }), r = revealed[c.id];
       return '<div class="cardp" data-c="' + c.id + '">' + cbHtml(c) +
-        '<div class="cardp-meta"><span>Выпущена ' + fmtD(c.issued) + '</span>' + badge(c.status === 'active' ? ['Активна', 'badge-ok'] : ['Заморожена', 'badge-plain']) + '</div>' +
+        '<div class="cardp-meta"><span>Выпущена ' + fmtD(c.issued) + '</span>' + (c.test ? badge(['Тестовая', 'badge-warn']) : '') + badge(c.status === 'active' ? ['Активна', 'badge-ok'] : ['Заморожена', 'badge-plain']) + '</div>' +
         (r ? '<div class="secure"><div class="t"><span>Реквизиты видны</span><b><span data-sec="' + c.id + '">60</span> с</b></div><div class="cred"><span class="k">Номер</span><span class="v">' + c.pan + '</span><button type="button" class="icon-btn plain" data-copy="' + c.pan.replace(/ /g, '') + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">Срок</span><span class="v">' + c.exp + '</span><button type="button" class="icon-btn plain" data-copy="' + c.exp + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">CVV</span><span class="v">' + c.cvv + '</span><button type="button" class="icon-btn plain" data-copy="' + c.cvv + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">Имя</span><span class="v">MARSCAP CARDHOLDER</span><button type="button" class="icon-btn plain" data-copy="MARSCAP CARDHOLDER" aria-label="Копировать">' + ico('copy') + '</button></div></div>' : '') +
         '<div class="cardp-btns">' + (r ? '<button type="button" class="btn btn-ghost wide" data-ca="hide">' + ico('lock') + 'Скрыть реквизиты</button>' : '<button type="button" class="btn btn-primary wide" data-ca="reveal" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('eye') + 'Показать реквизиты</button>') +
         '<button type="button" class="btn btn-ghost" data-ca="topup" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('plus') + 'Пополнить</button><button type="button" class="btn btn-ghost" data-ca="freeze">' + ico('snow') + (c.status === 'active' ? 'Заморозить' : 'Разморозить') + '</button></div>' +
@@ -371,6 +371,7 @@
     $('cardsGrid').querySelectorAll('[data-copy]').forEach(function(b){ b.addEventListener('click', function(){ var v = b.getAttribute('data-copy'); (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function(){ toast('Скопировано', '', 'ok'); }, function(){ toast('Скопируйте вручную', v); }); }); });
   };
   function cardAct(c, a){
+    if (LIVE) { liveCardAct(c, a); return; }
     if (a === 'reveal') stepUp('Показать реквизиты •• ' + c.last4, null, function(){ revealed[c.id] = 60; R.cards(); clearInterval(revealT[c.id]); revealT[c.id] = setInterval(function(){ revealed[c.id]--; var el = document.querySelector('[data-sec="' + c.id + '"]'); if (el) el.textContent = revealed[c.id]; if (revealed[c.id] <= 0){ clearInterval(revealT[c.id]); delete revealed[c.id]; if (cur === 'cards') R.cards(); } }, 1000); });
     else if (a === 'hide'){ clearInterval(revealT[c.id]); delete revealed[c.id]; R.cards(); }
     else if (a === 'topup'){ W = { prod: 'topup', card: c.id, usd: 50, step: 2 }; go('new'); }
@@ -538,6 +539,7 @@
     var r = { id: o.id, kind: slug === 'virtual-card' ? 'issue' : 'svc', svc: svcN, title: o.product_name, sub: o.plan_label || '', usd: o.price_cents / 100, rubv: o.amount_kop / 100, rate: o.rate,
       status: st, created: o.created_at, done: o.delivered_at, tl: tl, slug: slug };
     if (o.delivery) r.cred = o.delivery;
+    if (o.buyer_fields && o.buyer_fields.card_id) r.card = o.buyer_fields.card_id;
     if (st === 'action') r.action = { text: 'Оператору нужны данные по заказу', btn: 'Написать', go: 'support:new' };
     return r;
   }
@@ -546,12 +548,14 @@
     return MC.api('GET', '/auth/me').then(function(r){
       if (!r.user) { location.replace(BASE + 'login.html'); return false; }
       applyUser(r.user);
-      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions')]).then(function(x){
+      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards')]).then(function(x){
         setArr(ORDERS, x[0].orders.map(function(o){ return mapOrder(o); }));
         setArr(PAYMENTS, x[1].payments.map(function(p){ return { id: p.id.slice(0, 8).toUpperCase(), full: p.id, order: null, title: 'Пополнение баланса', method: p.provider === 'test' ? 'Тестовая оплата' : 'СБП', rubv: p.amount_kop / 100, status: PSTAT[p.status] || 'pending', at: p.paid_at || p.created_at }; }));
         setArr(NOTIFS, x[2].notifications.map(function(n){ var h = (n.link || '').split('#')[1] || 'overview'; return { t: n.title, s: n.body || '', at: n.created_at, go: h, unread: !n.read_at, nid: n.id }; }));
         SESSIONS = x[3].sessions.map(function(s){ return { id: s.id, cur: s.current ? 1 : 0, dev: s.device, place: '', ip: (s.ip || '').replace(/\.\d+\.\d+$/, '.·.·'), at: s.current ? 'сейчас' : fmtD(s.last_seen_at, true), icon: /iPhone|Android/.test(s.device) ? 'phone' : 'laptop' }; });
-        setArr(CARDS, []); setArr(TICKETS, []); setArr(REFUNDS, []);
+        setArr(CARDS, x[4].cards.map(function(c){ var old = card(c.id); return { id: c.id, last4: c.last4, brand: c.brand, status: c.status === 'frozen' ? 'frozen' : 'active', balance: c.balance_cents / 100, exp: c.exp, issued: c.created_at, test: c.test, pan: old && old.pan, cvv: old && old.cvv }; }));
+        CARDS.forEach(function(c){ var src = x[4].cards.filter(function(k){ return k.id === c.id; })[0]; var o = src && src.order_id && order(src.order_id); if (o) o.card = c.id; });
+        setArr(TICKETS, []); setArr(REFUNDS, []);
         DOCS.length = 1; DOCS[0] = { name: 'Оферта', ver: '2.3', at: USER.since, href: BASE + 'legal-files/offer.pdf', hist: [] };
         counters(); return true;
       });
@@ -564,7 +568,7 @@
     if (!order(id)) { MC.api('GET', '/orders/' + encodeURIComponent(id)).then(function(r){ ORDERS.unshift(mapOrder(r.order, r.events)); baseOrder(id); }, function(){ go('orders'); }); return; }
     baseOrder(id);
     MC.api('GET', '/orders/' + encodeURIComponent(id)).then(function(r){
-      var i = ORDERS.indexOf(order(id)); ORDERS[i] = mapOrder(r.order, r.events); if (cur === 'order') baseOrder(id);
+      var prev = order(id), i = ORDERS.indexOf(prev), m = mapOrder(r.order, r.events); if (prev && prev.card && !m.card) m.card = prev.card; ORDERS[i] = m; if (cur === 'order') baseOrder(id);
     }).catch(function(){});
   };
   // уведомления: прочитать на сервере
@@ -608,24 +612,29 @@
       return fixed ? { plan_id: fixed.id } : { plan_id: pl.filter(function(x){ return x.custom; })[0].id, amount_cents: usd * 100 };
     });
   }
+  // покупка с баланса: pp = {plan_id, amount_cents}; недостача → пополнение под заказ; нет KYC → верификация
+  function buy(pp, fields, cardId, btn, onOk){
+    if (btn) btn.classList.add('is-loading');
+    var body = { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: fields || {}, idem: MC.uid() };
+    if (cardId) body.card_id = cardId;
+    return MC.api('POST', '/orders', body).then(function(r){
+      if (btn) btn.classList.remove('is-loading'); onOk(r.order.id);
+    }, function(e){
+      if (btn) btn.classList.remove('is-loading');
+      if (e.code === 'insufficient_funds') { var f = {}; for (var k in (fields || {})) f[k] = fields[k]; if (cardId) f.card_id = cardId; topupModal(e.data.shortfall_kop, { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: f }, function(r){ if (r.order_id) onOk(r.order_id); }); return; }
+      if (e.code === 'kyc_required') { toast('Нужна верификация', 'Покупки открываются после проверки документов. Баланс можно пополнить уже сейчас.', 'err'); go('kyc'); return; }
+      fail(e);
+    });
+  }
   function livePay(btn){
-    btn.classList.add('is-loading');
-    var idem = MC.uid();
-    cardPlan(W.usd).then(function(pp){
-      return MC.api('POST', '/orders', { plan_id: pp.plan_id, amount_cents: pp.amount_cents, idem: idem }).then(function(r){
-        btn.classList.remove('is-loading'); orderDone(r.order.id);
-      }, function(e){
-        btn.classList.remove('is-loading');
-        if (e.code === 'insufficient_funds') { topupModal(e.data.shortfall_kop, pp, function(r){ if (r.order_id) orderDone(r.order_id); }); return; }
-        if (e.code === 'kyc_required') { toast('Нужна верификация', 'Покупки открываются после проверки документов.', 'err'); go('kyc'); return; }
-        fail(e);
-      });
-    }).catch(function(e){ btn.classList.remove('is-loading'); fail(e); });
+    cardPlan(W.usd).then(function(pp){ buy(pp, {}, W.prod === 'topup' ? W.card : null, btn, orderDone); }).catch(fail);
   }
   function orderDone(id){
     load().then(function(){
       newOrder = order(id);
-      $('wDoneT').textContent = 'Заказ оплачен'; $('wDoneP').innerHTML = 'Заказ <b>' + esc(id) + '</b> списан с баланса. Выпустим карту и пришлём уведомление — обычно до 30 минут.';
+      var o = order(id), c = o && o.card && card(o.card);
+      $('wDoneT').textContent = o && o.status === 'done' ? (W.prod === 'topup' ? 'Карта пополнена' : 'Карта выпущена') : 'Заказ оплачен';
+      $('wDoneP').innerHTML = 'Заказ <b>' + esc(id) + '</b> оплачен с баланса. ' + (c ? 'Карта ' + c.brand + ' •• ' + c.last4 + ' — баланс ' + usdf(c.balance) + '. Реквизиты — в «Мои карты».' : 'Пришлём уведомление, когда будет готово.');
       wizShow(6); toast('Оплачено с баланса', id, 'ok');
     });
   }
@@ -655,6 +664,54 @@
     profTab(param || 'contacts');
   }
 
+
+  // карты на сервере: показ реквизитов по коду из письма, заморозка, пополнение
+  function liveCardAct(c, a){
+    if (a === 'reveal') {
+      MC.api('POST', '/cards/' + c.id + '/reveal-code', {}).then(function(r){
+        modal({ title: 'Показать реквизиты •• ' + c.last4, sub: 'Код отправили на ' + USER.email + (r.dev_code ? ' · стенд: ' + r.dev_code : ''), body: otpHtml('suBoxes') + '<p class="hint auth-center">Код действует 10 минут</p>', foot: [{ label: 'Отмена' }],
+          onOpen: function(){ wireOtp($('suBoxes'), function(code, box){
+            MC.api('POST', '/cards/' + c.id + '/reveal', { code: code }).then(function(d){
+              box.classList.add('is-ok'); c.pan = d.pan; c.cvv = d.cvv;
+              setTimeout(function(){ closeModal(); revealed[c.id] = d.ttl_sec || 60; R.cards(); clearInterval(revealT[c.id]); revealT[c.id] = setInterval(function(){ revealed[c.id]--; var el = document.querySelector('[data-sec="' + c.id + '"]'); if (el) el.textContent = revealed[c.id]; if (revealed[c.id] <= 0){ clearInterval(revealT[c.id]); delete revealed[c.id]; delete c.pan; delete c.cvv; if (cur === 'cards') R.cards(); } }, 1000); }, 300);
+            }, function(e){ box.classList.add('is-err'); toast('Код не подошёл', e.message, 'err'); setTimeout(function(){ box.classList.remove('is-err'); box.querySelectorAll('input').forEach(function(x){ x.value = ''; x.classList.remove('is-filled'); }); box.querySelector('input').focus(); }, 600); });
+          }); } });
+      }, fail);
+    }
+    else if (a === 'hide') { clearInterval(revealT[c.id]); delete revealed[c.id]; delete c.pan; delete c.cvv; R.cards(); }
+    else if (a === 'topup') { W = { prod: 'topup', card: c.id, usd: 50, step: 2 }; go('new'); }
+    else if (a === 'freeze') {
+      var to = c.status === 'active';
+      var run = function(){ MC.api('POST', '/cards/' + c.id + '/freeze', { frozen: to }).then(function(){ delete revealed[c.id]; delete c.pan; delete c.cvv; return load(); }).then(function(){ R.cards(); toast(to ? 'Карта заморожена' : 'Карта активна', '', 'ok'); }, fail); };
+      if (to) modal({ title: 'Заморозить карту •• ' + c.last4 + '?', sub: 'Списания будут отклоняться, баланс сохранится. Разморозить можно в любой момент.', foot: [{ label: 'Отмена' }, { label: 'Заморозить', cls: 'btn-primary', onClick: run }] }); else run();
+    }
+  }
+
+  // покупка со страницы сервиса или карты (MC.checkout → #checkout)
+  function runCheckout(){
+    var o = null; try { o = JSON.parse(sessionStorage.getItem('mc-checkout') || 'null'); sessionStorage.removeItem('mc-checkout'); } catch (e) {}
+    if (!o || !o.slug) return;
+    MC.api('GET', '/catalog/' + encodeURIComponent(o.slug)).then(function(r){
+      var pl = r.plans, pp = null, sum = 0;
+      if (o.slug === 'virtual-card') {
+        var usd = Math.round(+o.usd || 0), fx = pl.filter(function(x){ return x.price_cents === usd * 100 && !x.custom; })[0], cu = pl.filter(function(x){ return x.custom; })[0];
+        pp = fx ? { plan_id: fx.id } : cu ? { plan_id: cu.id, amount_cents: usd * 100 } : null; sum = fx ? fx.charged_kop : Math.round(MC.charged(usd) * 100 * r.rate);
+      } else {
+        var p = pl.filter(function(x){ return x.label === o.plan && x.purchasable; })[0];
+        if (p) { pp = { plan_id: p.id }; sum = p.charged_kop; }
+      }
+      if (!pp) { toast('Тариф недоступен', 'Этот тариф сейчас нельзя купить онлайн — напишите в поддержку.', 'err'); return; }
+      var rows = [['Товар', esc(o.title || r.product.name)], ['К оплате', '<span class="mono">' + MC.kop(sum) + '</span>'], ['На балансе', '<span class="mono">' + MC.kop(BAL) + '</span>']];
+      if (o.fields && o.fields.account_email) rows.splice(1, 0, ['Аккаунт в сервисе', esc(o.fields.account_email)]);
+      modal({ title: 'Подтвердите покупку', sub: BAL >= sum ? 'Спишем с баланса, курс зафиксируем в заказе.' : 'На балансе не хватает ' + MC.kop(sum - BAL) + ' — пополним на недостающее, и заказ оформится сам.',
+        body: '<dl class="kv">' + rows.map(function(x){ return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('') + '</dl>',
+        foot: [{ label: 'Отмена' }, { label: BAL >= sum ? 'Оплатить с баланса' : 'Пополнить и оплатить', cls: 'btn-primary', keep: true, onClick: function(btn){
+          buy(pp, o.fields || {}, null, btn, function(id){ closeModal(); load().then(function(){ toast('Заказ оформлен', id, 'ok'); go('order', id); }); });
+          return false;
+        } }] });
+    }, fail);
+  }
+
   /* ——— выход ——— */
   function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} var to = function(){ location.href = BASE + 'login.html'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
   $('logout').addEventListener('click', logout); $('logoutM').addEventListener('click', logout);
@@ -665,8 +722,10 @@
   MC.isLive().then(function(on){
     if (!on) { counters(); route(); return; }
     LIVE = true; demo = false;
+    $('ovTopup').hidden = false;
     var qt = $('qTabs').querySelector('[data-q]:not([data-q="svc"])'); if (qt) qt.textContent = 'Виртуальная карта'; $('qGo').textContent = 'Оформить карту';
-    load().then(function(ok){ if (ok) route(); });
+    var wantCheckout = location.hash === '#checkout'; if (wantCheckout) history.replaceState(null, '', '#overview');
+    load().then(function(ok){ if (!ok) return; route(); if (wantCheckout) runCheckout(); });
   });
   MC.initReveal();
 })();

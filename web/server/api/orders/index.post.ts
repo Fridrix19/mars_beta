@@ -5,12 +5,22 @@ export default defineEventHandler(async (e) => {
   const idem = String(b?.idem ?? '')
   if (!/^[\w-]{8,80}$/.test(idem)) fail(422, 'bad_idem', 'Нужен ключ идемпотентности (idem).')
   const plan = await one(
-    `select pp.id, pr.buyer_fields from product_plans pp join products pr on pr.id = pp.product_id where pp.id::text = $1`, [String(b?.plan_id ?? '')])
+    `select pp.id, pr.buyer_fields, pr.slug from product_plans pp join products pr on pr.id = pp.product_id where pp.id::text = $1`, [String(b?.plan_id ?? '')])
   if (!plan) fail(404, 'plan_not_found', 'Тариф не найден.')
-  const fields = validateFields(plan.buyer_fields, b?.fields)
+  const fields: Record<string, string> = validateFields(plan.buyer_fields, b?.fields)
+  // пополнение существующей карты: карта должна быть своей и активной
+  if (plan.slug === 'virtual-card' && b?.card_id) {
+    const card = await one(`select id from cards where id::text = $1 and user_id = $2 and status = 'active'`, [String(b.card_id), u.id])
+    if (!card) fail(422, 'card_unavailable', 'Карта заморожена или не найдена.')
+    fields.card_id = card.id
+  }
   const amount = b?.amount_cents != null ? Math.round(Number(b.amount_cents)) : null
   try {
-    const o = await one(`select * from place_order($1, $2, $3, $4, $5)`, [u.id, plan.id, fields, 'u:' + u.id + ':' + idem, amount])
+    let o = await one(`select * from place_order($1, $2, $3, $4, $5)`, [u.id, plan.id, fields, 'u:' + u.id + ':' + idem, amount])
+    if (plan.slug === 'virtual-card') {
+      await fulfillCardOrder(o.id)
+      o = await one(`select * from orders where id = $1`, [o.id])
+    }
     return { order: orderView(o) }
   } catch (err) { pgFail(err) }
 })

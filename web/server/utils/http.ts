@@ -41,6 +41,7 @@ const PG_ERRORS: Record<string, [number, string]> = {
   plan_not_purchasable: [422, 'Этот тариф нельзя купить — только по запросу.'],
   amount_out_of_range: [422, 'Сумма вне допустимого диапазона.'],
   user_not_found: [404, 'Пользователь не найден.'],
+  card_unavailable: [422, 'Карта заморожена или не найдена.'],
 }
 export function pgFail(e: any): never {
   const known = PG_ERRORS[e?.message]

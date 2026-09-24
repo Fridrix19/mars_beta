@@ -34,6 +34,7 @@ const SUBJ: Record<string, string> = {
   login: 'Код для входа',
   reset: 'Код для восстановления пароля',
   change_email: 'Код для смены почты',
+  reveal: 'Код для показа реквизитов карты',
 }
 export function codeMail(to: string, purpose: string, code: string): Mail {
   const subject = `${code} — ${SUBJ[purpose] || 'код Marscap'}`
