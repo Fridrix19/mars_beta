@@ -531,8 +531,8 @@
   var EVT = { created: 'Заказ оплачен', status: 'Статус изменён', delivered: 'Выдано', note: 'Комментарий', refund: 'Возврат на баланс' };
   function fail(e){ toast('Не получилось', e.message, 'err'); if (e.code === 'unauthorized') setTimeout(function(){ location.href = BASE + 'login.html'; }, 900); }
   function applyUser(u){
-    USER.email = u.email; USER.id = u.email; USER.phone = u.phone || 'не указан'; USER.rawPhone = u.phone;
-    USER.name = u.name || u.email.split('@')[0]; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
+    USER.email = u.email; USER.id = u.username || u.email; USER.phone = u.phone || 'не указан'; USER.rawPhone = u.phone;
+    USER.name = u.name || u.username || u.email.split('@')[0]; USER.login = u.username; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
     BAL = u.balance_kop || 0;
     var hl = document.querySelector('.head-login'); if (hl && hl.lastChild) hl.lastChild.textContent = USER.name;
   }
@@ -656,7 +656,7 @@
 
   // профиль на сервере
   function liveProfile(param){
-    $('contactList').innerHTML = '<div><span class="k">Почта</span><span class="v mono">' + esc(USER.email) + '</span></div><div><span class="k">Телефон</span><span class="v mono">' + esc(USER.rawPhone || 'не указан') + ' <button type="button" class="auth-link" data-ch="phone">' + (USER.rawPhone ? 'Изменить' : 'Добавить') + '</button></span></div><div><span class="k">В Marscap с</span><span class="v">' + new Date(USER.since).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) + '</span></div>';
+    $('contactList').innerHTML = '<div><span class="k">Логин</span><span class="v mono">' + esc(USER.login || '—') + '</span></div><div><span class="k">Почта</span><span class="v mono">' + esc(USER.email) + '</span></div><div><span class="k">Телефон</span><span class="v mono">' + esc(USER.rawPhone || 'не указан') + ' <button type="button" class="auth-link" data-ch="phone">' + (USER.rawPhone ? 'Изменить' : 'Добавить') + '</button></span></div><div><span class="k">В Marscap с</span><span class="v">' + new Date(USER.since).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) + '</span></div>';
     $('contactList').querySelector('[data-ch]').addEventListener('click', function(){
       modal({ title: 'Телефон', sub: 'Необязательно: для связи по заказам.', body: '<div class="field"><label for="ncVal">Телефон</label><input id="ncVal" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" value="' + esc(USER.rawPhone || '') + '"></div>',
         foot: [{ label: 'Отмена' }, { label: 'Сохранить', cls: 'btn-primary', keep: true, onClick: function(){ MC.api('PATCH', '/profile', { phone: $('ncVal').value }).then(function(r){ closeModal(); applyUser(r.user); R.profile(); toast('Сохранено', '', 'ok'); }, fail); return false; } }] });

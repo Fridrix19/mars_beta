@@ -4,7 +4,7 @@
       <div class="hero-copy auth-copy">
         <span class="eyebrow">Личный кабинет</span>
         <h1>Войдите или создайте аккаунт</h1>
-        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по почте и паролю или по коду из письма.</p>
+        <p>Заказы, карты, квитанции и поддержка — в одном месте. Вход по логину или почте и паролю, либо по коду из письма.</p>
         <ul class="check-marks auth-perks">
           <li>Статусы заказов и реквизиты карт без писем</li>
           <li>Пополнение карты и история платежей</li>
@@ -24,9 +24,9 @@
         <!-- вход -->
         <form class="auth-screen tabpanel" id="scrLogin" role="tabpanel" novalidate>
           <div class="field">
-            <label for="loginId">Почта</label>
-            <input id="loginId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
-            <p class="hint" id="loginIdHint">Та, что указывали при регистрации.</p>
+            <label for="loginId">Логин или почта</label>
+            <input id="loginId" type="text" autocomplete="username" placeholder="login или mail@gmail.com" autocapitalize="off" spellcheck="false">
+            <p class="hint" id="loginIdHint">Можно войти по любому из них.</p>
           </div>
           <div class="field">
             <div class="auth-lbl"><label for="loginPass">Пароль</label><button type="button" class="auth-link" id="toRecover">Забыли пароль?</button></div>
@@ -43,9 +43,14 @@
         <!-- регистрация -->
         <form class="auth-screen tabpanel" id="scrReg" role="tabpanel" hidden novalidate>
           <div class="field">
+            <label for="regLogin">Логин</label>
+            <input id="regLogin" type="text" autocomplete="username" placeholder="например, ivan_petrov" autocapitalize="off" spellcheck="false" maxlength="32">
+            <p class="hint" id="regLoginHint">Латиница, цифры, точка, дефис или _, от 3 символов. По нему можно входить.</p>
+          </div>
+          <div class="field">
             <label for="regId">Почта</label>
-            <input id="regId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
-            <p class="hint" id="regIdHint">Сюда придёт код подтверждения и реквизиты карт.</p>
+            <input id="regId" type="email" inputmode="email" autocomplete="email" placeholder="mail@gmail.com" autocapitalize="off" spellcheck="false">
+            <p class="hint" id="regIdHint">Gmail, Яндекс, Mail.ru, Rambler, iCloud, Outlook и другие крупные сервисы. Сюда придёт код и реквизиты карт.</p>
           </div>
           <div class="field">
             <label for="regPass">Пароль</label>
@@ -115,15 +120,16 @@
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
             <h2>Восстановление доступа</h2>
-            <p>Укажите почту аккаунта — пришлём код, после него зададите новый пароль.</p>
+            <p>Укажите логин или почту аккаунта — пришлём на почту ссылку, по ней зададите новый пароль.</p>
           </div>
           <div class="field">
-            <label for="recId">Почта</label>
-            <input id="recId" type="email" inputmode="email" autocomplete="email" placeholder="mail@example.ru" autocapitalize="off" spellcheck="false">
+            <label for="recId">Логин или почта</label>
+            <input id="recId" type="text" autocomplete="username" placeholder="login или mail@gmail.com" autocapitalize="off" spellcheck="false">
             <p class="hint" id="recIdHint"></p>
           </div>
           <div class="alert alert-err" id="recErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="recErrText"></div></div>
-          <button type="submit" class="btn btn-primary auth-submit">Получить код</button>
+          <div class="alert alert-ok" id="recSent" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16v11H4z"/><path d="m4 8 8 6 8-6"/></svg><div id="recSentText"></div></div>
+          <button type="submit" class="btn btn-primary auth-submit" id="recBtn">Отправить ссылку</button>
         </form>
 
         <!-- новый пароль -->
@@ -131,7 +137,7 @@
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
             <h2>Новый пароль</h2>
-            <p>Код подтверждён. Придумайте новый пароль — старый перестанет работать, активные сессии завершатся.</p>
+            <p id="newPassText">Придумайте новый пароль — старый перестанет работать, активные сессии завершатся.</p>
           </div>
           <div class="field">
             <label for="newPass">Новый пароль</label>

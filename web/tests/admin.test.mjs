@@ -5,6 +5,8 @@ import pg from 'pg'
 
 const API = process.env.API_URL || 'http://localhost:3100'
 const db = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+const un = (e) => e.split('@')[0].toLowerCase()
+await db.query(`update settings set value = value || '["example.ru"]'::jsonb where key = 'email_domains' and not value ? 'example.ru'`)
 const uniq = () => `a${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}@example.ru`
 function client() {
   let cookies = {}
@@ -18,8 +20,8 @@ function client() {
 }
 async function user(call) {
   const email = uniq()
-  const s = await call('POST', '/api/auth/register/start', { email })
-  const c = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: true })
+  const s = await call('POST', '/api/auth/register/start', { email, username: un(email) })
+  const c = await call('POST', '/api/auth/register/complete', { email, username: un(email), password: 'Secret123', code: s.body.dev_code, agree: true })
   return c.body.user
 }
 const ADMIN_PW = 'AdminTest2026x'

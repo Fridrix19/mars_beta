@@ -53,3 +53,31 @@ export function pgFail(e: any): never {
   }
   throw e
 }
+
+// логин: 3–32 символа, латиница, цифры, точка, дефис, подчёркивание; начинается с буквы или цифры
+export function normUsername(v: unknown): string {
+  const s = String(v ?? '').trim().toLowerCase()
+  if (!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(s)) fail(422, 'bad_username', 'Логин: 3–32 символа — латиница, цифры, точка, дефис или _; начинается с буквы или цифры.')
+  if (/^(admin|support|marscap|root|system|help|info|noreply|mail)$/.test(s)) fail(422, 'username_reserved', 'Этот логин зарезервирован — выберите другой.')
+  return s
+}
+
+// почта только с разрешённых доменов (список — в админке, «Настройки»)
+export async function checkEmailDomain(email: string) {
+  const domain = email.split('@')[1]
+  const r = await one<{ v: string[] }>(`select value v from settings where key = 'email_domains'`)
+  const list = (r?.v || []).map((d: string) => String(d).toLowerCase())
+  if (list.length && !list.includes(domain))
+    fail(422, 'email_domain', 'Регистрация — только с почтой крупных сервисов: Gmail, Яндекс, Mail.ru, Rambler, iCloud, Outlook и других. Временные и неизвестные адреса не принимаем.', { allowed: list })
+}
+
+// аккаунт по логину или почте
+export async function findAccount(login: unknown) {
+  const s = String(login ?? '').trim().toLowerCase()
+  if (!s) fail(422, 'login_required', 'Укажите логин или почту.')
+  return one<{ id: string; email: string; username: string; password_hash: string; status: string; locked: boolean; wait: number }>(
+    `select id, email, username, password_hash, status, coalesce(locked_until > now(), false) as locked,
+            greatest(0, ceil(extract(epoch from locked_until - now()) / 60))::int as wait
+       from users where ${s.includes('@') ? 'email' : 'username'} = $1`, [s])
+}
+export const maskEmail = (e: string) => e.replace(/^(.{2})[^@]*(@.*)$/, '$1•••$2')

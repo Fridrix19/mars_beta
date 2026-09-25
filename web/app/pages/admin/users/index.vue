@@ -13,12 +13,12 @@ watch(() => f.kyc, () => { f.first = 0; load() }); onMounted(load)
 <template>
   <div class="adm-head"><div><span class="eyebrow">Клиенты</span><h1>Пользователи</h1></div><span class="muted">{{ total }}</span></div>
   <div class="toolbar">
-    <IconField class="grow"><InputIcon class="pi pi-search" /><InputText v-model="f.q" placeholder="Почта, имя, телефон или id" fluid /></IconField>
+    <IconField class="grow"><InputIcon class="pi pi-search" /><InputText v-model="f.q" placeholder="Логин, почта, имя, телефон или id" fluid /></IconField>
     <Select v-model="f.kyc" :options="[{ v: null, l: 'Любой KYC' }, { v: 'none', l: 'Без KYC' }, { v: 'pending', l: 'На проверке' }, { v: 'approved', l: 'Пройден' }, { v: 'rejected', l: 'Отклонён' }]" option-label="l" option-value="v" style="min-width:180px" />
   </div>
   <DataTable :value="rows" :loading="loading" lazy paginator :rows="50" :total-records="total" :first="f.first" @page="e => { f.first = e.first; load() }"
     row-hover :row-class="() => 'clickable'" @row-click="e => navigateTo('/admin/users/' + e.data.id)" size="small">
-    <Column header="Почта"><template #body="{ data }"><b style="color:var(--text)">{{ data.email }}</b><div class="muted">{{ data.name || '' }} {{ data.phone || '' }}</div></template></Column>
+    <Column header="Пользователь"><template #body="{ data }"><b style="color:var(--text)">{{ data.username }}</b><div class="muted">{{ data.email }}{{ data.name ? ' · ' + data.name : '' }}{{ data.phone ? ' · ' + data.phone : '' }}</div></template></Column>
     <Column header="Баланс"><template #body="{ data }"><span class="mono">{{ kop(data.balance_kop) }}</span></template></Column>
     <Column header="KYC"><template #body="{ data }"><Tag :value="KYC_ST[data.kyc_status][0]" :severity="KYC_ST[data.kyc_status][1]" /></template></Column>
     <Column field="orders" header="Заказов" />

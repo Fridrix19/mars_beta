@@ -3,15 +3,21 @@
   var screens = ['scrLogin','scrReg','scrOtp','scrMfa','scrRecover','scrNewPass','scrDone'];
   var tabs = $('authTabs'), flow = null, target = '', history = [];
 
-  /* — контакт: только почта — */
-  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  /* — логин или почта — */
+  var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, ULOGIN = /^[a-z0-9][a-z0-9._-]{2,31}$/;
   function digits(v){ return String(v || '').replace(/\D/g, ''); }
-  function parseId(v){
+  function parseId(v){   // только почта (регистрация)
     v = String(v || '').trim().toLowerCase();
     if (!v) return { err: 'Укажите почту.' };
-    return EMAIL.test(v) ? { kind: 'email', value: v, pretty: v } : { err: 'Проверьте почту — например, mail@example.ru.' };
+    return EMAIL.test(v) ? { kind: 'email', value: v, pretty: v } : { err: 'Проверьте почту — например, mail@gmail.com.' };
   }
-  function maskId(id){ return id.value.replace(/^(.{2})[^@]*(@.*)$/, '$1•••$2'); }
+  function parseLogin(v){  // логин или почта (вход, восстановление)
+    v = String(v || '').trim().toLowerCase();
+    if (!v) return { err: 'Укажите логин или почту.' };
+    if (v.indexOf('@') >= 0) return parseId(v);
+    return ULOGIN.test(v) ? { kind: 'login', value: v, pretty: v } : { err: 'Логин — латиница, цифры, точка, дефис или _, от 3 символов.' };
+  }
+  function maskId(id){ return id.kind === 'email' ? id.value.replace(/^(.{2})[^@]*(@.*)$/, '$1•••$2') : 'почту аккаунта ' + id.value; }
 
   /* — «сервер»: настоящий API, если он есть, иначе демо-правила прототипа — */
   var LIVE = false, pending = null;   // pending — что подтверждаем кодом: {purpose, id, password, agree, news}
@@ -22,16 +28,19 @@
     codeStart: function(purpose, id){ return wait().then(function(){ if (purpose === 'register' && /taken/i.test(id.value)) throw err('email_taken', 'Аккаунт уже зарегистрирован. Войдите или восстановите пароль.'); return {}; }); },
     codeVerify: function(p, code){ return wait().then(function(){ if (code === '000000') throw err('code_wrong', 'Код не подошёл. Осталось попыток: 2.'); return p.purpose === 'reset' ? { ticket: 'demo' } : {}; }); },
     resetComplete: function(){ return wait({}); },
+    resetLink: function(){ return wait({ sent: true }); },
+    resetCheck: function(){ return wait({ username: 'demo' }); },
     mfa: function(code){ return wait().then(function(){ if (code === '000000') throw err('code_wrong', 'Код не подошёл. Проверьте время на устройстве или запросите код на почту.'); return {}; }); }
   };
   var live = {
-    login: function(id, pass){ return MC.api('POST', '/auth/login', { email: id.value, password: pass }); },
-    codeStart: function(purpose, id){ return MC.api('POST', purpose === 'register' ? '/auth/register/start' : purpose === 'login' ? '/auth/login/code-start' : '/auth/reset/start', { email: id.value }); },
+    login: function(id, pass){ return MC.api('POST', '/auth/login', { login: id.value, password: pass }); },
+    codeStart: function(purpose, id, p){ return purpose === 'register' ? MC.api('POST', '/auth/register/start', { email: id.value, username: p.username }) : MC.api('POST', '/auth/login/code-start', { login: id.value }); },
     codeVerify: function(p, code){
-      if (p.purpose === 'register') return MC.api('POST', '/auth/register/complete', { email: p.id.value, password: p.password, code: code, agree: p.agree, news: p.news });
-      if (p.purpose === 'login') return MC.api('POST', '/auth/login/code', { email: p.id.value, code: code });
-      return MC.api('POST', '/auth/reset/verify', { email: p.id.value, code: code });
+      if (p.purpose === 'register') return MC.api('POST', '/auth/register/complete', { email: p.id.value, username: p.username, password: p.password, code: code, agree: p.agree, news: p.news });
+      return MC.api('POST', '/auth/login/code', { login: p.id.value, code: code });
     },
+    resetLink: function(id){ return MC.api('POST', '/auth/reset/start', { login: id.value }); },
+    resetCheck: function(ticket){ return MC.api('POST', '/auth/reset/check', { ticket: ticket }); },
     resetComplete: function(ticket, pass){ return MC.api('POST', '/auth/reset/complete', { ticket: ticket, password: pass }); }
   };
   function srv(){ return LIVE ? live : demo; }
@@ -42,7 +51,7 @@
     LIVE = on;
     document.documentElement.classList.toggle('mc-live', on);
     $('otpDemo').hidden = on;
-    if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard.html') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
+    if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard.html') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.username || r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
   });
 
   /* — экраны — */
@@ -93,9 +102,9 @@
   /* — вход по паролю — */
   $('scrLogin').addEventListener('submit', function(e){
     e.preventDefault(); alertBox('loginErr', '');
-    var id = parseId($('loginId').value);
+    var id = parseLogin($('loginId').value);
     if (!fieldErr('loginId', 'loginIdHint', id.err)) return;
-    $('loginIdHint').textContent = 'Тот, что указывали при заказе.';
+    $('loginIdHint').textContent = 'Можно войти по любому из них.';
     if (!fieldErr('loginPass', 'loginPassHint', !$('loginPass').value ? 'Введите пароль.' : '')) return;
     var btn = $('loginBtn'); busy(btn, true);
     srv().login(id, $('loginPass').value).then(function(r){
@@ -108,7 +117,7 @@
   /* — вход по коду — */
   $('loginOtp').addEventListener('click', function(){
     alertBox('loginErr', '');
-    var id = parseId($('loginId').value);
+    var id = parseLogin($('loginId').value);
     if (!fieldErr('loginId', 'loginIdHint', id.err)) return;
     flow = 'login-otp'; target = id.pretty; requestCode({ purpose: 'login', id: id }, 'Код для входа', $('loginOtp'), 'loginErr');
   });
@@ -116,6 +125,8 @@
   /* — регистрация — */
   $('scrReg').addEventListener('submit', function(e){
     e.preventDefault(); alertBox('regErr', '');
+    var un = String($('regLogin').value || '').trim().toLowerCase();
+    if (!fieldErr('regLogin', 'regLoginHint', !ULOGIN.test(un) ? 'Логин: 3–32 символа — латиница, цифры, точка, дефис или _; начинается с буквы или цифры.' : loginTaken === un ? 'Этот логин занят — выберите другой.' : '')) return;
     var id = parseId($('regId').value);
     if (!fieldErr('regId', 'regIdHint', id.err)) return;
     $('regIdHint').textContent = 'Сюда придёт код подтверждения и реквизиты карт.';
@@ -123,16 +134,49 @@
     var agree = $('agreeOffer'); agree.closest('.check').classList.toggle('is-invalid', !agree.checked);
     if (!agree.checked) { alertBox('regErr', 'Без согласия с офертой создать аккаунт нельзя.'); return; }
     flow = 'register'; target = id.pretty;
-    requestCode({ purpose: 'register', id: id, password: $('regPass').value, agree: true, news: $('agreeNews').checked }, 'Подтвердите почту', e.submitter || $('scrReg').querySelector('[type=submit]'), 'regErr');
+    requestCode({ purpose: 'register', id: id, username: un, password: $('regPass').value, agree: true, news: $('agreeNews').checked }, 'Подтвердите почту', e.submitter || $('scrReg').querySelector('[type=submit]'), 'regErr');
   });
 
   /* — восстановление — */
   $('scrRecover').addEventListener('submit', function(e){
     e.preventDefault();
-    var id = parseId($('recId').value);
+    var id = parseLogin($('recId').value);
     if (!fieldErr('recId', 'recIdHint', id.err)) return;
-    flow = 'recover'; target = id.pretty; requestCode({ purpose: 'reset', id: id }, 'Код для восстановления', e.submitter || $('scrRecover').querySelector('[type=submit]'), 'recErr');
+    alertBox('recErr', ''); $('recSent').hidden = true;
+    var btn = $('recBtn'); busy(btn, true);
+    srv().resetLink(id).then(function(r){
+      busy(btn, false, 'Отправить ещё раз');
+      $('recSent').hidden = false;
+      $('recSentText').innerHTML = 'Если такой аккаунт есть, мы отправили ссылку для нового пароля на ' + (r.to ? '<b>' + r.to.replace(/[<>&"]/g, '') + '</b>' : 'его почту') + '. Ссылка действует 30 минут. Письма нет — проверьте «Спам».' +
+        (r.dev_link ? '<br><a href="' + r.dev_link.replace(/"/g, '') + '">Стенд без почты: открыть ссылку</a>' : '');
+    }, function(e){ busy(btn, false, 'Отправить ссылку'); alertBox('recErr', e.message); });
   });
+
+  /* — логин при регистрации: проверка, свободен ли — */
+  var loginTaken = null, lt = null;
+  $('regLogin').addEventListener('input', function(){
+    var v = this.value.trim().toLowerCase(); clearTimeout(lt); $('regLoginHint').className = 'hint';
+    if (!v) { $('regLoginHint').textContent = 'Латиница, цифры, точка, дефис или _, от 3 символов. По нему можно входить.'; return; }
+    if (!ULOGIN.test(v)) { $('regLoginHint').textContent = 'Только латиница, цифры, точка, дефис или _, от 3 до 32 символов.'; return; }
+    if (!LIVE) return;
+    lt = setTimeout(function(){ MC.api('GET', '/auth/username-check?u=' + encodeURIComponent(v)).then(function(r){
+      if ($('regLogin').value.trim().toLowerCase() !== v) return;
+      loginTaken = r.available ? null : v;
+      $('regLoginHint').className = r.available ? 'hint ok' : 'hint err';
+      $('regLoginHint').textContent = r.available ? 'Логин свободен.' : (r.reason || 'Этот логин занят — выберите другой.');
+    }).catch(function(){}); }, 350);
+  });
+
+  /* — ссылка из письма: login.html#reset:<токен> — */
+  function openReset(){
+    var m = location.hash.match(/^#reset:([\w-]{20,})$/); if (!m) return;
+    resetTicket = m[1]; history.length = 0;
+    window.history.replaceState(null, '', location.pathname + location.search);
+    srv().resetCheck(resetTicket).then(function(r){
+      $('newPassText').textContent = 'Аккаунт ' + (r.username || '') + '. Придумайте новый пароль — старый перестанет работать, все сессии завершатся.';
+      flow = 'recover'; target = r.username || ''; show('scrNewPass', false);
+    }, function(e){ show('scrRecover', false); alertBox('recErr', e.message); });
+  }
   $('scrNewPass').addEventListener('submit', function(e){
     e.preventDefault();
     if (!fieldErr('newPass', 'newPassHint', score($('newPass').value) < 2 ? 'Пароль слишком простой: от 8 символов, буквы и цифры.' : '')) return;
@@ -141,7 +185,7 @@
       busy(btn, false, label); done('Пароль обновлён', 'Все прежние сессии завершены. Вы вошли на этом устройстве.', r && r.user);
     }, function(e){
       busy(btn, false, label);
-      if (e.code === 'ticket_invalid') { toast('Код устарел', 'Запросите новый код.'); show('scrRecover'); return; }
+      if (e.code === 'ticket_invalid') { show('scrRecover'); alertBox('recErr', e.message); return; }
       fieldErr('newPass', 'newPassHint', e.message);
     });
   });
@@ -180,12 +224,14 @@
   function requestCode(p, title, btn, errBox){
     if (errBox && $(errBox)) alertBox(errBox, '');
     var label = btn ? btn.textContent : ''; if (btn) busy(btn, true);
-    srv().codeStart(p.purpose, p.id).then(function(r){
+    srv().codeStart(p.purpose, p.id, p).then(function(r){
       if (btn) busy(btn, false, label);
-      pending = p; startOtp(p.id, title, r || {});
+      pending = p; startOtp(p.id, title, r || {}); if (r && r.to) $('otpTarget').textContent = r.to;
     }, function(e){
       if (btn) busy(btn, false, label);
       if (e.code === 'email_taken') { $('loginId').value = p.id.value; show('scrLogin'); alertBox('loginErr', e.message); $('loginPass').focus(); return; }
+      if (e.code === 'username_taken' || e.code === 'bad_username' || e.code === 'username_reserved') { loginTaken = e.code === 'username_taken' ? p.username : null; fieldErr('regLogin', 'regLoginHint', e.message); return; }
+      if (e.code === 'email_domain') { fieldErr('regId', 'regIdHint', e.message); return; }
       if (e.code === 'not_registered') { $('regId').value = p.id.value; alertBox(errBox, e.message); return; }
       if (errBox && $(errBox)) alertBox(errBox, e.message); else toast('Не получилось', e.message);
     });
@@ -218,7 +264,7 @@
   });
   $('otpResend').addEventListener('click', function(){
     if (!pending) return; var b = $('otpResend'); b.disabled = true;
-    srv().codeStart(pending.purpose, pending.id).then(function(r){
+    srv().codeStart(pending.purpose, pending.id, pending).then(function(r){
       resetOtp('otpBoxes'); alertBox('otpErr', ''); startTimer(r && r.resend_after);
       toast(r && r.dev_code ? 'Новый код на стенде: ' + r.dev_code : 'Код отправлен повторно', 'Предыдущий код больше не действует.'); boxes('otpBoxes')[0].focus();
     }, function(e){
@@ -236,7 +282,7 @@
       busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-ok'); done('Вы вошли', 'Вход подтверждён вторым фактором. Устройство запомнено на 30 дней.');
     }, function(e){ busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-err'); alertBox('mfaErr', e.message); });
   });
-  $('mfaSms').addEventListener('click', function(){ var id = parseId($('loginId').value); flow = 'login-otp'; requestCode({ purpose: 'login', id: id }, 'Код для входа', null, 'mfaErr'); });
+  $('mfaSms').addEventListener('click', function(){ var id = parseLogin($('loginId').value); flow = 'login-otp'; requestCode({ purpose: 'login', id: id }, 'Код для входа', null, 'mfaErr'); });
   $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Прототип: введите любые 6 цифр в поля выше.'); boxes('mfaBoxes')[0].focus(); });
 
   /* — успех — */
@@ -260,5 +306,7 @@
   }
 
   if (location.hash === '#register') show('scrReg', false);
+  MC.isLive().then(function(){ openReset(); });   // после определения режима (сервер или демо)
+  window.addEventListener('hashchange', openReset);
   MC.initReveal();
 })();

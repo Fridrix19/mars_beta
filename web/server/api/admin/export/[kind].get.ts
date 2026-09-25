@@ -1,7 +1,7 @@
 // CSV: users, orders, payments, ledger; ?from=YYYY-MM-DD&to=YYYY-MM-DD
 const SQL: Record<string, [string, string[]]> = {
-  users: [`select id, email, name, phone, status, kyc_status, created_at, last_login_at, user_balance(id) balance_kop from users where created_at between $1 and $2 order by created_at`,
-          ['id','email','name','phone','status','kyc_status','created_at','last_login_at','balance_kop']],
+  users: [`select id, username, email, name, phone, status, kyc_status, created_at, last_login_at, user_balance(id) balance_kop from users where created_at between $1 and $2 order by created_at`,
+          ['id','username','email','name','phone','status','kyc_status','created_at','last_login_at','balance_kop']],
   orders: [`select o.id, u.email, o.product_name, o.plan_label, o.currency, o.price_cents, o.charged_cents, o.rate, o.amount_kop, o.status, o.created_at, o.delivered_at
               from orders o join users u on u.id = o.user_id where o.created_at between $1 and $2 order by o.created_at`,
            ['id','email','product_name','plan_label','currency','price_cents','charged_cents','rate','amount_kop','status','created_at','delivered_at']],

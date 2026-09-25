@@ -26,7 +26,7 @@ export async function issueCode(e: H3Event, email: string, purpose: CodePurpose)
     await q(`update email_codes set consumed_at = now() where email = $1 and purpose = $2 and consumed_at is null`, [email, purpose])
     fail(502, 'mail_failed', 'Не удалось отправить письмо. Проверьте адрес или попробуйте через минуту.')
   }
-  const dev = useRuntimeConfig().devCodes === true || String(useRuntimeConfig().devCodes) === 'true'
+  const dev = devCodesVisible()
   return { sent: true, resend_after: RESEND_SEC, ttl_min: TTL_MIN, ...(dev ? { dev_code: code } : {}) }
 }
 
@@ -46,4 +46,12 @@ export async function consumeCode(email: string, purpose: CodePurpose, code: str
   const ok = await one(`update email_codes set consumed_at = now() where id = $1 and consumed_at is null returning id`, [row.id])
   if (!ok) fail(400, 'code_missing', 'Код уже использован. Запросите новый.')
   return true
+}
+
+// код показывается на экране только на стенде и только пока письма реально не уходят (провайдер log).
+// Как только включена настоящая почта — код приходит только письмом.
+export function devCodesVisible() {
+  const cfg = useRuntimeConfig()
+  const dev = cfg.devCodes === true || String(cfg.devCodes) === 'true'
+  return dev && !(cfg.mailProvider === 'unisender' && cfg.unisenderKey)
 }

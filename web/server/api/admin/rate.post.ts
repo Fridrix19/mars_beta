@@ -13,8 +13,11 @@ export default defineEventHandler(async (e) => {
   } else {
     const r = Number(b?.rate)
     if (!Number.isFinite(r) || r < 10 || r > 1000) fail(422, 'bad_rate', 'Курс — число от 10 до 1000.')
-    await q(`insert into settings (key, value) values ('rate_auto', $1) on conflict (key) do update set value = excluded.value`, [JSON.stringify({ ...s, on: false })])
-    await q(`insert into settings (key, value) values ('rate_rub_per_usd', $1::text::jsonb) on conflict (key) do update set value = excluded.value`, [String(Math.round(r * 10000) / 10000)])
+    await tx(async (db) => {
+      await db.query(`select 1 from settings where key = 'rate_auto' for update`)
+      await db.query(`insert into settings (key, value) values ('rate_auto', $1) on conflict (key) do update set value = excluded.value`, [JSON.stringify({ ...s, on: false })])
+      await db.query(`insert into settings (key, value) values ('rate_rub_per_usd', $1::text::jsonb) on conflict (key) do update set value = excluded.value`, [String(Math.round(r * 10000) / 10000)])
+    })
   }
   const after = await rate()
   await audit(e, a, 'rate.update', null, { before, after, auto: b?.auto ?? false, markup_pct: b?.markup_pct })

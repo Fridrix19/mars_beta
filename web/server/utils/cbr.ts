@@ -23,9 +23,13 @@ export async function refreshRate(force = false) {
   if (!force && s.updated_at && Date.now() - new Date(s.updated_at).getTime() < 3 * 3600_000) return null
   const c = await fetchCbrUsd()
   if (!c) return null
-  const value = Math.round(c.value * (1 + (Number(s.markup_pct) || 0) / 100) * 10000) / 10000
-  await q(`insert into settings (key, value) values ('rate_rub_per_usd', $1::text::jsonb) on conflict (key) do update set value = excluded.value`, [String(value)])
-  await q(`insert into settings (key, value) values ('rate_auto', $1) on conflict (key) do update set value = excluded.value`,
-    [JSON.stringify({ ...s, cbr: c.value, cbr_date: c.date, updated_at: new Date().toISOString() })])
-  return value
+  // пока ходили в ЦБ, автокурс могли выключить или задать курс вручную — проверяем под блокировкой
+  return tx(async (db) => {
+    const cur = (await db.query(`select value from settings where key = 'rate_auto' for update`)).rows[0]?.value || {}
+    if (!cur.on) return null
+    const value = Math.round(c.value * (1 + (Number(cur.markup_pct) || 0) / 100) * 10000) / 10000
+    await db.query(`insert into settings (key, value) values ('rate_rub_per_usd', $1::text::jsonb) on conflict (key) do update set value = excluded.value`, [String(value)])
+    await db.query(`update settings set value = $1 where key = 'rate_auto'`, [JSON.stringify({ ...cur, cbr: c.value, cbr_date: c.date, updated_at: new Date().toISOString() })])
+    return value
+  })
 }

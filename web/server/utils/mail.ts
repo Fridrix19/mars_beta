@@ -5,7 +5,7 @@ export async function sendMail(m: Mail) {
   const cfg = useRuntimeConfig()
   if (cfg.mailProvider !== 'unisender' || !cfg.unisenderKey) {
     console.log(`[mail] → ${m.to} · ${m.subject}\n${m.text}`)
-    return { ok: true, provider: 'log' }
+    return { ok: true, provider: 'log' as string, error: undefined as string | undefined }
   }
   const res = await fetch(cfg.unisenderUrl + '/email/send.json', {
     method: 'POST',
@@ -43,4 +43,12 @@ export function codeMail(to: string, purpose: string, code: string): Mail {
 <p style="font:600 28px/1 'Courier New',monospace;letter-spacing:6px;color:#0244BE">${code}</p>
 <p style="color:#596070">Код действует 10 минут. Если вы ничего не запрашивали — просто удалите письмо.</p><p>Marscap</p></div>`
   return { to, subject, text, html }
+}
+
+export function resetMail(to: string, username: string, link: string): Mail {
+  const text = `Восстановление пароля Marscap\n\nЛогин: ${username}\n\nЧтобы задать новый пароль, откройте ссылку (действует 30 минут, один раз):\n${link}\n\nЕсли вы не запрашивали восстановление — просто удалите письмо, пароль останется прежним.\n\nMarscap`
+  const html = `<div style="font:15px/1.5 Arial,sans-serif;color:#0E1420"><p><b>Восстановление пароля Marscap</b></p><p>Логин: <b>${username}</b></p>
+<p><a href="${link}" style="display:inline-block;background:#0244BE;color:#fff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600">Задать новый пароль</a></p>
+<p style="color:#596070">Ссылка действует 30 минут и срабатывает один раз. Если вы не запрашивали восстановление — просто удалите письмо, пароль останется прежним.</p><p>Marscap</p></div>`
+  return { to, subject: 'Восстановление пароля Marscap', text, html }
 }

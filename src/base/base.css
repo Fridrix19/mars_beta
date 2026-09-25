@@ -225,7 +225,7 @@ a:hover{color:var(--accent-hover)}
 .field input:hover{border-color:var(--ink-600)}
 .field input:focus-visible{outline:none; border-color:var(--blue-500); box-shadow:0 0 0 3px color-mix(in oklab,var(--blue-500) 30%,transparent)}
 .field .hint{font-size:12.5px; color:var(--text-4)}
-.field .hint.err{color:var(--status-err)}
+.field .hint.err{color:var(--status-err)} .field .hint.ok{color:var(--status-ok)}
 .field input[aria-invalid="true"]{border-color:var(--status-err)}
 .custom-row{display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap}
 .custom-row .field{max-width:200px}

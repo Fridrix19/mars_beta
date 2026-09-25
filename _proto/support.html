@@ -230,7 +230,7 @@ a:hover{color:var(--accent-hover)}
 .field input:hover{border-color:var(--ink-600)}
 .field input:focus-visible{outline:none; border-color:var(--blue-500); box-shadow:0 0 0 3px color-mix(in oklab,var(--blue-500) 30%,transparent)}
 .field .hint{font-size:12.5px; color:var(--text-4)}
-.field .hint.err{color:var(--status-err)}
+.field .hint.err{color:var(--status-err)} .field .hint.ok{color:var(--status-ok)}
 .field input[aria-invalid="true"]{border-color:var(--status-err)}
 .custom-row{display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap}
 .custom-row .field{max-width:200px}
@@ -1704,7 +1704,7 @@ window.MC = (function(){
   function initSession(){
     me().then(function(u){
       if (!u) return;
-      var base = window.MC_BASE || '', name = u.name || u.email.split('@')[0];
+      var base = window.MC_BASE || '', name = u.name || u.username || u.email.split('@')[0];
       document.querySelectorAll('.head-login').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'dashboard.html'; a.lastChild.textContent = name; a.title = u.email; a.classList.add('is-auth'); });
       document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard.html'; a.lastChild.textContent = 'Личный кабинет'; });
     });

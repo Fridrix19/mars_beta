@@ -17,14 +17,14 @@ onMounted(load)
 <template>
   <div class="adm-head"><div><span class="eyebrow">Заказы</span><h1>Заказы</h1></div></div>
   <div class="toolbar">
-    <IconField class="grow"><InputIcon class="pi pi-search" /><InputText v-model="f.q" placeholder="Номер MC-…, почта, товар" fluid /></IconField>
+    <IconField class="grow"><InputIcon class="pi pi-search" /><InputText v-model="f.q" placeholder="Номер MC-…, логин, почта, товар" fluid /></IconField>
     <SelectButton v-model="f.status" :options="STATUS" option-label="l" option-value="v" :allow-empty="false" />
   </div>
   <DataTable :value="rows" :loading="loading" lazy paginator :rows="50" :total-records="total" :first="f.first" @page="e => { f.first = e.first; load() }"
     row-hover :row-class="() => 'clickable'" @row-click="e => navigateTo('/admin/orders/' + e.data.id)" size="small">
     <Column header="Заказ"><template #body="{ data }"><span class="mono">{{ data.id }}</span></template></Column>
     <Column header="Товар"><template #body="{ data }"><b style="color:var(--text)">{{ data.product_name }}</b><div class="muted">{{ data.plan_label }} · {{ DELIVERY[data.delivery] || '—' }}</div></template></Column>
-    <Column field="email" header="Клиент" />
+    <Column header="Клиент"><template #body="{ data }">{{ data.username }}<div class="muted">{{ data.email }}</div></template></Column>
     <Column header="Сумма"><template #body="{ data }"><span class="mono">{{ kop(data.amount_kop) }}</span></template></Column>
     <Column header="Статус"><template #body="{ data }"><Tag :value="ORDER_ST[data.status]?.[0]" :severity="ORDER_ST[data.status]?.[1]" /></template></Column>
     <Column header="Создан"><template #body="{ data }">{{ dt(data.created_at) }}</template></Column>

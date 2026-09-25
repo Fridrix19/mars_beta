@@ -26,6 +26,7 @@ const nav = computed(() => [
   { to: '/admin/products', label: 'Товары и цены', icon: 'pi-box', perm: 'products' },
   { to: '/admin/export', label: 'Выгрузки CSV', icon: 'pi-download', perm: 'export' },
   { to: '/admin/admins', label: 'Админы', icon: 'pi-shield', perm: 'admins' },
+  { to: '/admin/settings', label: 'Настройки', icon: 'pi-cog', perm: 'admins' },
   { to: '/admin/audit', label: 'Журнал действий', icon: 'pi-history', perm: 'audit' },
 ].filter(i => can(i.perm)))
 

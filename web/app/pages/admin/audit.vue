@@ -6,7 +6,7 @@ let t: any; watch(q, () => { clearTimeout(t); t = setTimeout(() => { first.value
 const A: Record<string, string> = { 'admin.login': 'Вход', 'admin.login_failed': 'Неудачный вход', 'admin.password': 'Смена пароля', 'admin.create': 'Новый админ', 'admin.update': 'Изменён админ',
   'balance.adjust': 'Корректировка баланса', 'user.block': 'Блокировка', 'user.unblock': 'Разблокировка', 'order.status': 'Статус заказа', 'order.deliver': 'Выдача вручную', 'order.deliver_key': 'Выдача ключа',
   'order.refund': 'Возврат заказа', 'refund.approve': 'Возврат одобрен', 'refund.reject': 'Возврат отклонён', 'refund.done': 'Возврат на карту выполнен', 'kyc.view': 'Просмотр KYC', 'kyc.approve': 'KYC одобрен', 'kyc.reject': 'KYC отклонён',
-  'product.create': 'Новый товар', 'product.update': 'Изменён товар', 'plan.create': 'Новый тариф', 'plan.update': 'Изменён тариф', 'keys.add': 'Ключи добавлены', 'keys.revoke': 'Ключ отозван', 'rate.update': 'Курс изменён' }
+  'product.create': 'Новый товар', 'product.update': 'Изменён товар', 'plan.create': 'Новый тариф', 'plan.update': 'Изменён тариф', 'keys.add': 'Ключи добавлены', 'keys.revoke': 'Ключ отозван', 'rate.update': 'Курс изменён', 'settings.domains': 'Домены почты', 'settings.mail_test': 'Тестовое письмо' }
 </script>
 <template>
   <div class="adm-head"><div><span class="eyebrow">Безопасность</span><h1>Журнал действий</h1></div></div>

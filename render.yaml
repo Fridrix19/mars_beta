@@ -20,14 +20,14 @@ services:
         value: "true"
       - key: NUXT_PAYMENT_PROVIDER
         value: test
-      - key: NUXT_MAIL_PROVIDER         # log → коды в логах; unisender — после DNS marscap.ru
-        value: log
+      - key: NUXT_MAIL_PROVIDER         # unisender — письма уходят; log — только в журнал сервера (коды тогда видны на экране стенда)
+        value: unisender
       - key: NUXT_UNISENDER_KEY
         sync: false
       - key: NUXT_UNISENDER_URL         # goapi…; если ключ из go1/go2 — адрес из кабинета
         value: https://goapi.unisender.ru/ru/transactional/api/v1
-      - key: NUXT_MAIL_FROM
-        value: noreply@marscap.ru
+      - key: NUXT_MAIL_FROM             # адрес на домене, подтверждённом в Unisender Go
+        value: noreply@fridrixdev.ru
       - key: NUXT_DEV_CODES             # только стенд: код приходит в ответе и показывается на экране
         value: "true"
       - key: NUXT_PUBLIC_SITE_URL       # для ссылок в письмах

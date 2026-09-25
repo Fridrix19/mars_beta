@@ -5,6 +5,8 @@ import pg from 'pg'
 
 const API = process.env.API_URL || 'http://localhost:3100'
 const db = new pg.Pool({ connectionString: process.env.DATABASE_URL })
+const un = (e) => e.split('@')[0].toLowerCase()
+await db.query(`update settings set value = value || '["example.ru"]'::jsonb where key = 'email_domains' and not value ? 'example.ru'`)
 const uniq = () => `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}@example.ru`
 
 function client() {
@@ -20,26 +22,27 @@ function client() {
   }
 }
 async function register(call, email, password = 'Secret123') {
-  const s = await call('POST', '/api/auth/register/start', { email })
+  const s = await call('POST', '/api/auth/register/start', { email, username: un(email) })
   assert.equal(s.status, 200); assert.match(s.body.dev_code, /^\d{6}$/)
-  const c = await call('POST', '/api/auth/register/complete', { email, password, code: s.body.dev_code, agree: true })
+  const c = await call('POST', '/api/auth/register/complete', { email, username: un(email), password, code: s.body.dev_code, agree: true })
   assert.equal(c.status, 200, JSON.stringify(c.body)); return c.body.user
 }
 const plan = async (slug, label) => (await db.query(`select pp.id from product_plans pp join products p on p.id = pp.product_id where p.slug = $1 and pp.label = $2`, [slug, label])).rows[0].id
 
 test('регистрация: код → аккаунт, занятая почта, неверный код', async () => {
   const call = client(), email = uniq()
-  const s = await call('POST', '/api/auth/register/start', { email })
-  assert.equal((await call('POST', '/api/auth/register/start', { email })).code, 'resend_too_soon')
+  const s = await call('POST', '/api/auth/register/start', { email, username: un(email) })
+  assert.equal((await call('POST', '/api/auth/register/start', { email, username: un(email) })).code, 'resend_too_soon')
   const wrong = s.body.dev_code === '111111' ? '222222' : '111111'
-  const w = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: wrong, agree: true })
+  const w = await call('POST', '/api/auth/register/complete', { email, username: un(email), password: 'Secret123', code: wrong, agree: true })
   assert.equal(w.code, 'code_wrong'); assert.equal(w.body.data.attempts_left, 4)
-  assert.equal((await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: false })).code, 'offer_required')
-  assert.equal((await call('POST', '/api/auth/register/complete', { email, password: 'short', code: s.body.dev_code, agree: true })).code, 'weak_password')
-  const ok = await call('POST', '/api/auth/register/complete', { email, password: 'Secret123', code: s.body.dev_code, agree: true })
+  assert.equal((await call('POST', '/api/auth/register/complete', { email, username: un(email), password: 'Secret123', code: s.body.dev_code, agree: false })).code, 'offer_required')
+  assert.equal((await call('POST', '/api/auth/register/complete', { email, username: un(email), password: 'short', code: s.body.dev_code, agree: true })).code, 'weak_password')
+  const ok = await call('POST', '/api/auth/register/complete', { email, username: un(email), password: 'Secret123', code: s.body.dev_code, agree: true })
   assert.equal(ok.status, 200); assert.equal(ok.body.user.email, email); assert.equal(ok.body.user.balance_kop, 0)
   assert.equal((await call('GET', '/api/auth/me')).body.user.email, email)
-  assert.equal((await client()('POST', '/api/auth/register/start', { email: email.toUpperCase() })).code, 'email_taken')
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: email.toUpperCase(), username: 'x' + un(email) })).code, 'email_taken')
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: uniq(), username: un(email).toUpperCase() })).code, 'username_taken')
   const h = (await db.query(`select password_hash from users where email = $1`, [email])).rows[0].password_hash
   assert.match(h, /^scrypt\$16384\$8\$1\$/)
 })
@@ -71,15 +74,17 @@ test('вход по коду и восстановление пароля', asyn
   assert.equal((await call('POST', '/api/auth/login/code', { email, code: s.body.dev_code })).code, 'code_missing')
 
   const other = client()
-  const r = await other('POST', '/api/auth/reset/start', { email })
-  const v = await other('POST', '/api/auth/reset/verify', { email, code: r.body.dev_code })
-  assert.ok(v.body.ticket)
-  const c = await other('POST', '/api/auth/reset/complete', { ticket: v.body.ticket, password: 'NewSecret99' })
+  const r = await other('POST', '/api/auth/reset/start', { login: un(email) })
+  assert.equal(r.status, 200); const token = r.body.dev_link.split('#reset:')[1]; assert.ok(token)
+  assert.equal((await other('POST', '/api/auth/reset/check', { ticket: token })).body.username, un(email))
+  assert.equal((await other('POST', '/api/auth/reset/complete', { ticket: token, password: 'short' })).code, 'weak_password')
+  const c = await other('POST', '/api/auth/reset/complete', { ticket: token, password: 'NewSecret99' })
   assert.equal(c.status, 200)
-  assert.equal((await other('POST', '/api/auth/reset/complete', { ticket: v.body.ticket, password: 'NewSecret99' })).code, 'ticket_invalid')
+  assert.equal((await other('POST', '/api/auth/reset/complete', { ticket: token, password: 'NewSecret99' })).code, 'ticket_invalid')
   assert.equal((await call('GET', '/api/auth/me')).body.user, null, 'старые сессии завершены')
+  assert.equal((await client()('POST', '/api/auth/login', { login: un(email), password: 'NewSecret99' })).status, 200)
   assert.equal((await client()('POST', '/api/auth/login', { email, password: 'NewSecret99' })).status, 200)
-  assert.equal((await client()('POST', '/api/auth/reset/start', { email: uniq() })).status, 200, 'не выдаёт, есть ли аккаунт')
+  const nobody = await client()('POST', '/api/auth/reset/start', { login: uniq() }); assert.equal(nobody.status, 200, 'не выдаёт, есть ли аккаунт'); assert.equal(nobody.body.dev_link, undefined)
 })
 
 test('деньги: пополнение, KYC, недостача, покупка, идемпотентность, пополнение под заказ', async () => {
@@ -196,6 +201,20 @@ test('карты: выпуск по заказу, реквизиты по код
   const ord = await call('GET', `/api/orders/${done.body.order_id}`)
   assert.equal(ord.body.order.status, 'done'); assert.match(ord.body.order.delivery, /пополнена/)
   assert.ok(bal > 0)
+})
+
+test('логин и почта: вход по логину, домены, занятые логины', async () => {
+  const email = uniq(); await register(client(), email)
+  const c = client()
+  const s = await c('POST', '/api/auth/login/code-start', { login: un(email) }); assert.match(s.body.to, /•••@example\.ru$/)
+  assert.equal((await c('POST', '/api/auth/login/code', { login: un(email), code: s.body.dev_code })).status, 200)
+  assert.equal((await c('GET', '/api/auth/me')).body.user.username, un(email))
+  // временная почта не проходит
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: 'x' + Date.now() + '@mailinator.com', username: 'tmp' + Date.now().toString(36) })).code, 'email_domain')
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: 'x' + Date.now() + '@gmail.com', username: 'admin' })).code, 'username_reserved')
+  assert.equal((await client()('POST', '/api/auth/register/start', { email: 'x' + Date.now() + '@gmail.com', username: 'a b' })).code, 'bad_username')
+  assert.equal((await client()('GET', '/api/auth/username-check?u=' + un(email))).body.available, false)
+  assert.equal((await client()('GET', '/api/auth/username-check?u=free' + Date.now().toString(36))).body.available, true)
 })
 
 test.after(() => db.end())

@@ -25,7 +25,7 @@ npm run build && npm start   # или npm run dev
 | `NUXT_MAIL_FROM` | `noreply@marscap.ru` | отправитель (домен с SPF/DKIM) |
 | `NUXT_PAYMENT_PROVIDER` | `test` | пока только тестовый провайдер |
 | `NUXT_COOKIE_SECURE` | `false` | `true` за HTTPS |
-| `NUXT_DEV_CODES` | `false` | `true` только на стенде: код из письма приходит в ответе API и показывается на экране |
+| `NUXT_DEV_CODES` | `false` | `true` только на стенде: код показывается на экране, **но только пока почта в режиме log** — с Unisender коды приходят только письмом |
 | `NUXT_PUBLIC_SITE_URL` | — | адрес сайта для ссылок в письмах |
 | `NUXT_ADMIN_NOTIFY_EMAIL` | — | куда слать о новых заказах, KYC и возвратах |
 
@@ -46,11 +46,12 @@ DATABASE_URL=… API_URL=http://localhost:3100 npm test
 
 | метод | путь | что делает |
 |---|---|---|
-| POST | `/api/auth/register/start` | `{email}` → код на почту; `409 email_taken` |
-| POST | `/api/auth/register/complete` | `{email, code, password, agree, news}` → аккаунт + сессия |
-| POST | `/api/auth/login` | `{email, password}`; 5 ошибок — `429 locked` на 15 минут |
+| POST | `/api/auth/register/start` | `{email, username}` → код на почту; почта только с разрешённых доменов (`email_domain`), `409 email_taken` / `username_taken` |
+| GET | `/api/auth/username-check?u=` | свободен ли логин |
+| POST | `/api/auth/register/complete` | `{email, username, code, password, agree, news}` → аккаунт + сессия |
+| POST | `/api/auth/login` | `{login, password}` — логин или почта; 5 ошибок — `429 locked` на 15 минут |
 | POST | `/api/auth/login/code-start`, `/api/auth/login/code` | вход по коду из письма |
-| POST | `/api/auth/reset/start` → `/reset/verify` → `/reset/complete` | код → тикет → новый пароль, все сессии завершаются |
+| POST | `/api/auth/reset/start` → `/reset/check` → `/reset/complete` | `{login}` (логин или почта) → письмо со ссылкой `login.html#reset:<токен>` (30 минут, один раз) → новый пароль, все сессии завершаются |
 | POST | `/api/auth/logout` · GET `/api/auth/me` | выход · профиль с балансом |
 | GET/DELETE | `/api/auth/sessions`, `/api/auth/sessions/:id` (`others`) | устройства |
 | POST | `/api/auth/password` | `{old, new}`, остальные сессии завершаются |

@@ -175,7 +175,7 @@ window.MC = (function(){
   function initSession(){
     me().then(function(u){
       if (!u) return;
-      var base = window.MC_BASE || '', name = u.name || u.email.split('@')[0];
+      var base = window.MC_BASE || '', name = u.name || u.username || u.email.split('@')[0];
       document.querySelectorAll('.head-login').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'dashboard.html'; a.lastChild.textContent = name; a.title = u.email; a.classList.add('is-auth'); });
       document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard.html'; a.lastChild.textContent = 'Личный кабинет'; });
     });
