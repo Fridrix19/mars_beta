@@ -15,6 +15,8 @@
   function priceFull(p){ return p.rubText ? p.rubText : ru(PF.localize(p.priceText)); }
   var pay = $('pay'), status = $('status'), email = $('email'), emailHint = $('emailHint'), details = $('planDetails');
   var groups = $('planGroups'), current = null, buttons = [];
+  var RCP = MC.recipient(email);
+  email.addEventListener('mc:recipient', function(e){ emailHint.className = 'hint'; emailHint.textContent = e.detail === 'gift' ? 'Подписку оформим на аккаунт друга с этой почтой — пришлём ему письмо.' : 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.'; });
 
   function start(){
     groups.innerHTML = ''; buttons = [];
@@ -86,13 +88,13 @@
       email.focus(); return;
     }
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
-    emailHint.textContent = 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
+    emailHint.textContent = RCP.mode() === 'gift' ? 'Подписку оформим на аккаунт друга с этой почтой — пришлём ему письмо.' : 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
     status.className = 'calc-status ok';
     var demoText = !payable(current) ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(totalRub(current)) + '.';
     MC.isLive().then(function(on){
       if (!on || !payable(current)) { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;
-      MC.checkout({ slug: SLUG, plan: current.label, fields: { account_email: v }, title: SVC.name + ' · ' + current.label, back: location.pathname });
+      MC.checkout({ slug: SLUG, plan: current.label, fields: { account_email: v }, gift_to: RCP.gift() || undefined, title: SVC.name + ' · ' + current.label, back: location.pathname });
     });
   });
 

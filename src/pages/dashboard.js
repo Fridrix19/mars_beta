@@ -61,7 +61,7 @@
   var DOCS = [
     { name: 'Оферта', ver: '2.3', at: ago(12, 14), href: BASE + 'legal-files/offer.pdf', hist: ['2.2 — принята ' + fmtD(ago(190)), '2.0 — принята ' + fmtD(ago(310))] },
     { name: 'Политика обработки персональных данных', ver: '1.4', at: ago(12, 14), href: BASE + 'legal-files/privacy.pdf', hist: ['1.3 — принята ' + fmtD(ago(310))] },
-    { name: 'Согласие на уведомления о заказах', ver: '1.0', at: ago(310), hist: [] }
+    { name: 'Тарифы и комиссии', ver: '1.0', at: ago(12, 14), href: BASE + 'tariffs.html', hist: [] }
   ];
   var SESSIONS = [
     { id: 's1', cur: 1, dev: 'Windows · Chrome', place: 'Москва', ip: '93.81.·.·', at: 'сейчас', icon: 'laptop' },
@@ -75,7 +75,7 @@
     { t: 'Заказ MC-1040 ждёт оплаты', s: 'Midjourney Standard · расчёт зафиксирован', at: ago(1, 18), go: 'order:MC-1040' },
     { t: 'Cursor Pro оформлен', s: 'Доступ выдан, акт доступен в документах', at: ago(6, 13), go: 'order:MC-1039' }
   ];
-  var ST = { new: ['Ожидает оплаты', 'badge-plain'], paid: ['Оплачен', 'badge-info'], work: ['В работе', 'badge-info'], action: ['Нужно действие', 'badge-warn'], done: ['Выполнен', 'badge-ok'], cancel: ['Отменён', 'badge-plain'], refund: ['Возврат', 'badge-plain'] };
+  var ST = { new: ['Ожидает оплаты', 'badge-plain'], paid: ['Оплачен', 'badge-info'], work: ['В работе', 'badge-info'], action: ['Нужно действие', 'badge-warn'], done: ['Исполнен', 'badge-ok'], cancel: ['Отменён', 'badge-plain'], refund: ['Возврат', 'badge-plain'] };
   var PST = { ok: ['Проведён', 'badge-ok'], pending: ['Ожидает', 'badge-warn'], refunded: ['Возвращён', 'badge-plain'], failed: ['Отклонён', 'badge-err'] };
   var seq = 1043, pseq = 5582, tseq = 208, rseq = 119;
 
@@ -173,10 +173,21 @@
     var map = { action: act, orders: ORDERS.filter(isActive).length, cards: CARDS.filter(function(c){ return c.status === 'active'; }).length, tickets: TICKETS.filter(function(t){ return t.status !== 'closed'; }).length };
     document.querySelectorAll('[data-cnt]').forEach(function(el){ var k = el.getAttribute('data-cnt'), v = map[k]; el.textContent = v || ''; el.classList.toggle('hot', k === 'action' && v > 0); });
     $('navKyc').textContent = { none: '!', basic: '', pending: '…', full: '✓', more: '!' }[USER.kyc] || '';
-    $('bellDot').hidden = !NOTIFS.some(function(n){ return n.unread; });
+    $('bellDot').hidden = !NOTIFS.some(function(n){ return n.unread && orderNotif(n); });
+    $('bell').title = $('bellDot').hidden ? 'Мои заказы' : 'Есть изменения в заказах';
+    var hl = document.querySelector('.head-login'); if (hl && hl.lastChild) hl.lastChild.textContent = USER.name;
     $('uName').textContent = USER.name; $('uAvatar').textContent = USER.name.charAt(0).toUpperCase(); $('uId').textContent = USER.id; $('uId').title = demo ? 'Демо-режим: войдите, чтобы увидеть свои данные' : '';
     var hr = new Date().getHours(); $('hello').textContent = (hr < 5 ? 'Доброй ночи' : hr < 12 ? 'Доброе утро' : hr < 18 ? 'Добрый день' : 'Добрый вечер') + ', ' + USER.name;
   }
+
+  function orderNotif(n){ return /^(order|orders|cards)\b/.test(n.go || ''); }
+  var FRESH = {};
+  $('bell').addEventListener('click', function(){
+    var ids = [];
+    NOTIFS.forEach(function(n){ if (n.unread && orderNotif(n)) { var m = /^order:(.+)$/.exec(n.go); if (m) FRESH[m[1]] = 1; n.unread = 0; if (n.nid) ids.push(n.nid); } });
+    if (ids.length && LIVE) MC.api('POST', '/notifications/read', { ids: ids }).catch(function(){});
+    go('orders'); counters();
+  });
 
   var R = {};
   /* ===== Обзор ===== */
@@ -185,6 +196,7 @@
     var acts = [];
     ORDERS.forEach(function(o){ if (o.status === 'action') acts.push({ cls: '', ico: 'warn', b: o.title + ' · ' + o.id, s: o.action.text, btn: o.action.btn, go: o.action.go }); if (o.status === 'new') acts.push({ cls: 'info', ico: 'pay', b: 'Оплатите ' + o.title + ' · ' + o.id, s: 'К оплате ' + money(o) + ' — расчёт зафиксирован', btn: 'Оплатить', go: 'order:' + o.id }); });
     if (LIVE && USER.kyc !== 'full') acts.unshift(USER.kyc === 'pending' ? { cls: 'info', ico: 'shield', b: 'Документы на проверке', s: 'Обычно до рабочего дня. Покупки откроются сразу после одобрения', btn: 'Статус', go: 'kyc' } : { cls: '', ico: 'shield', b: USER.kyc === 'more' ? 'Верификация отклонена' : 'Пройдите верификацию', s: USER.kyc === 'more' ? (USER.kycReason || 'Загрузите документы ещё раз') : 'Без неё можно пополнить баланс, но не покупать', btn: 'Пройти', go: 'kyc' });
+    if (LIVE && docsPending().length) acts.unshift({ cls: 'info', ico: 'doc', b: 'Обновились условия сервиса', s: docsPending().map(function(d){ return d.name + ', редакция ' + d.ver; }).join(' · ') + '. Примите их перед следующей покупкой', btn: 'Посмотреть', go: 'docs' });
     if (SESSIONS.some(function(s){ return s.sus; })) acts.push({ cls: 'err', ico: 'shield', b: 'Вход с нового устройства', s: 'Android · Chrome, Алматы. Если это не вы — завершите сессию и смените пароль', btn: 'Проверить', go: 'profile:sessions' });
     $('ovActions').innerHTML = acts.map(function(a){ return '<div class="act ' + a.cls + '">' + ico(a.ico) + '<div><b>' + esc(a.b) + '</b><span>' + esc(a.s) + '</span></div><button type="button" class="btn btn-ghost" data-go="' + a.go + '">' + a.btn + '</button></div>'; }).join('');
     var m = new Date().getMonth(), spent = 0; PAYMENTS.forEach(function(p){ if (p.status === 'ok' && new Date(p.at).getMonth() === m) spent += p.rubv; });
@@ -204,7 +216,7 @@
   };
   function ordRow(o){
     var p = progress(o);
-    return '<button type="button" class="ord ' + o.status + '" data-go="order:' + o.id + '">' + ordIcon(o) + '<span class="ord-t"><b>' + esc(o.title) + '</b><span class="mono">' + o.id + '</span></span><span class="ord-s"><span>' + esc(o.sub) + '</span><span>' + fmtD(o.created, true) + '</span></span><span class="ord-r"><span class="sum">' + money(o) + '</span>' + badge(ST[o.status]) + '</span>' + (isActive(o) || o.status === 'done' ? '<span class="ord-prog"><i style="--v:' + p + '%"></i></span>' : '') + '</button>';
+    return '<button type="button" class="ord ' + o.status + (FRESH[o.id] ? ' fresh' : '') + '" data-go="order:' + o.id + '">' + ordIcon(o) + '<span class="ord-t"><b>' + esc(o.title) + '</b><span class="mono">' + o.id + '</span>' + (FRESH[o.id] ? '<span class="badge badge-info">Обновлён</span>' : '') + (o.giftTo ? '<span class="badge badge-plain">Подарок</span>' : '') + '</span><span class="ord-s"><span>' + esc(o.sub) + '</span><span>' + fmtD(o.created, true) + '</span></span><span class="ord-r"><span class="sum">' + money(o) + '</span>' + badge(ST[o.status]) + '</span>' + (isActive(o) || o.status === 'done' ? '<span class="ord-prog"><i style="--v:' + p + '%"></i></span>' : '') + '</button>';
   }
   function renderNotifs(){
     $('ovNotif').innerHTML = NOTIFS.map(function(n, i){ return '<li class="' + (n.unread ? 'unread' : '') + '" data-n="' + i + '">' + ico(n.unread ? 'bell' : 'check') + '<b>' + esc(n.t) + '</b><span>' + esc(n.s) + '</span><time>' + fmtD(n.at, true) + '</time></li>'; }).join('');
@@ -242,7 +254,7 @@
   function wizStep2(){
     var s = W.prod === 'svc'; $('wp2svc').hidden = !s; $('wp2card').hidden = s; $('wNext2').hidden = s;
     $('wpCardPick').hidden = W.prod !== 'topup';
-    var act = CARDS.filter(function(c){ return c.status === 'active'; });
+    var act = CARDS.filter(function(c){ return c.status === 'active' && !c.giftTo; });
     $('wCards').innerHTML = act.map(function(c){ return '<button type="button" class="pick" data-c="' + c.id + '" aria-pressed="' + (c.id === W.card) + '">' + ico('card') + '<b>' + c.brand + ' •• ' + c.last4 + '</b><span>' + usdf(c.balance) + '</span></button>'; }).join('');
     $('wCards').querySelectorAll('.pick').forEach(function(b){ b.addEventListener('click', function(){ W.card = b.getAttribute('data-c'); wizStep2(); }); });
     var isD = DENOMS.indexOf(W.usd) >= 0;
@@ -256,18 +268,18 @@
     $('wqProd').textContent = W.prod === 'issue' ? 'Новая виртуальная карта' : 'Пополнение ' + (c ? c.brand + ' •• ' + c.last4 : 'карты');
     $('wqNom').textContent = usdf(u); $('wqFee').textContent = rub(total(u) - u * rate()) + ' (' + Math.round((total(u) / (u * rate()) - 1) * 100) + '%)'; $('wqRate').textContent = rate().toFixed(2) + ' ₽/$'; $('wqTot').textContent = rub(total(u));
     var reqs = [
-      ['ok', 'Оферта 2.3 принята', 'Действующая редакция, акцепт ' + fmtD(DOCS[0].at)],
+      ['ok', 'Оферта 2.3 принята', 'Действующая редакция, вы приняли её ' + fmtD(DOCS[0].at)],
       [USER.kyc === 'none' ? 'no' : 'ok', 'Базовая верификация', USER.kyc === 'none' ? 'Подтвердите телефон и почту' : 'Телефон и почта подтверждены'],
       [needKyc() ? 'todo' : 'ok', 'Расширенная верификация', u >= 150 ? (needKyc() ? 'Нужна для сумм от $150 — паспорт, 3–5 минут' : USER.kyc === 'pending' ? 'На проверке — оплатить можно, зачислим после подтверждения' : 'Пройдена') : 'Не требуется для сумм до $150']
     ];
-    if (LIVE) reqs = [['ok', 'Оферта принята', 'Редакция ' + DOCS[0].ver], [USER.kyc === 'full' ? 'ok' : 'todo', 'Верификация личности', USER.kyc === 'full' ? 'Пройдена' : USER.kyc === 'pending' ? 'Документы на проверке — оплатить можно после одобрения' : 'Нужна для любых покупок'], [BAL >= Math.round(total(u) * 100) / 100 ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL < total(u) ? ' — пополним на недостающее при оплате' : '')]];
+    if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [USER.kyc === 'full' ? 'ok' : 'todo', 'Верификация личности', USER.kyc === 'full' ? 'Пройдена' : USER.kyc === 'pending' ? 'Документы на проверке — оплатить можно после одобрения' : 'Нужна для любых покупок'], [BAL >= Math.round(total(u) * 100) / 100 ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL < total(u) ? ' — пополним на недостающее при оплате' : '')]];
     else if (W.prod === 'issue') reqs.push(['ok', 'Лимит карт', 'У вас ' + CARDS.length + ' из 5 возможных']);
     $('wqReq').innerHTML = reqs.map(function(r){ return '<div class="req ' + r[0] + '">' + ico(r[0] === 'ok' ? 'check' : r[0] === 'todo' ? 'warn' : 'x') + '<div><b>' + r[1] + '</b><span>' + r[2] + '</span></div></div>'; }).join('');
   }
   function wizStep4(){
     var k = needKyc();
     $('wDocs').innerHTML =
-      '<label class="check"><input type="checkbox" id="wAgree" checked><span class="box"></span><span>Подтверждаю параметры заказа и сумму ' + rub(total(W.usd)) + '<span class="sub">Оферта 2.3 уже принята ' + fmtD(DOCS[0].at) + ' — повторно подписывать не нужно</span></span></label>' +
+      '<label class="check"><input type="checkbox" id="wAgree" checked><span class="box"></span><span>Подтверждаю параметры заказа и сумму ' + rub(total(W.usd)) + '<span class="sub">Оферта, редакция ' + DOCS[0].ver + ', уже принята' + (DOCS[0].at ? ' ' + fmtD(DOCS[0].at) : '') + ' — повторно соглашаться не нужно</span></span></label>' +
       '<label class="check"><input type="checkbox" id="wMail" checked><span class="box"></span><span>Отправить квитанцию на ' + esc(USER.email) + '</span></label>' +
       (k && LIVE ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Нужна верификация</b>Покупки открываются после проверки документов. Баланс пополнить можно уже сейчас.<div class="alert-actions"><button type="button" class="auth-link" data-go="kyc">Пройти сейчас</button></div></div></div>' : '') +
       (k && !LIVE ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Нужна расширенная верификация</b>Для сумм от $150 требуется подтверждение личности. Оплатить можно сейчас — заказ подождёт результата проверки, обычно 3–5 минут.<div class="alert-actions"><button type="button" class="auth-link" data-go="kyc">Пройти сейчас</button><button type="button" class="auth-link" id="wLess">Уменьшить до $100</button></div></div></div>' : '');
@@ -297,11 +309,11 @@
   });
   $('wPayLater').addEventListener('click', function(){ var o = createOrder(false); $('wDoneT').textContent = 'Заказ создан'; $('wDoneP').innerHTML = 'Заказ <b>' + o.id + '</b> ждёт оплаты — расчёт зафиксирован на 15 минут. Оплатить можно из карточки заказа.'; wizShow(6); });
   $('wOpen').addEventListener('click', function(){ if (newOrder) go('order', newOrder.id); });
-  R['new'] = function(){ if (LIVE) { var act = CARDS.filter(function(c){ return c.status === 'active'; }); if (W.prod === 'topup' && !act.length) W.prod = 'issue'; if (W.prod === 'topup' && !card(W.card)) W.card = act[0].id; var tp = document.querySelector('.pick-grid [data-prod="topup"]'); if (tp) tp.hidden = !act.length; $('wPayLater').hidden = true; } document.querySelectorAll('.pick-grid .pick').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-prod') === W.prod); }); wizShow(W.step || 1); };
+  R['new'] = function(){ if (LIVE) { var act = CARDS.filter(function(c){ return c.status === 'active' && !c.giftTo; }); if (W.prod === 'topup' && !act.length) W.prod = 'issue'; if (W.prod === 'topup' && !card(W.card)) W.card = act[0].id; var tp = document.querySelector('.pick-grid [data-prod="topup"]'); if (tp) tp.hidden = !act.length; $('wPayLater').hidden = true; } document.querySelectorAll('.pick-grid .pick').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-prod') === W.prod); }); wizShow(W.step || 1); };
 
   /* ===== Мои заказы ===== */
   var ordF = 'all';
-  var FILT = { all: function(){ return true; }, active: isActive, action: function(o){ return o.status === 'action' || o.status === 'new'; }, done: function(o){ return o.status === 'done'; }, closed: function(o){ return o.status === 'cancel' || o.status === 'refund'; } };
+  var FILT = { all: function(){ return true; }, active: isActive, action: function(o){ return o.status === 'action' || o.status === 'new'; }, done: function(o){ return o.status === 'done'; } };
   R.orders = function(param){
     if (param && FILT[param]) ordF = param;
     var q = $('ordSearch').value.trim().toLowerCase();
@@ -315,6 +327,7 @@
   /* карточка заказа */
   R.order = function(id){
     var o = order(id); if (!o){ go('orders'); return; }
+    delete FRESH[id];
     var p = pay(o.pay), c = o.card ? card(o.card) : null;
     var kv = [['Продукт', esc(o.title) + (o.kind === 'svc' ? ' <a class="auth-link" href="' + svcHref(o.svc) + '">страница сервиса</a>' : '')], ['Параметры', esc(o.sub)]];
     if (c) kv.push(['Карта', '<button type="button" class="auth-link" data-go="cards">' + c.brand + ' •• ' + c.last4 + '</button>']);
@@ -322,7 +335,7 @@
     if (p) kv.push(['Платёж', '<button type="button" class="auth-link mono" data-pay="' + p.id + '">' + p.id + '</button> · ' + PST[p.status][0]]);
     kv.push(['Создан', fmtD(o.created, true)]); if (o.done) kv.push(['Выполнен', fmtD(o.done, true)]);
     if (LIVE) kv.push(['Курс', '<span class="mono">' + o.rate + ' ₽/$ · зафиксирован</span>']);
-    kv.push(['Оферта', 'ред. ' + DOCS[0].ver + ' · <button type="button" class="auth-link" data-go="docs">принята</button>']);
+    kv.push(['Оферта', 'редакция ' + (o.offer || DOCS[0].ver) + ' · <button type="button" class="auth-link" data-go="docs">документы</button>']);
     var actions = '';
     if (o.status === 'new') actions = '<button type="button" class="btn btn-primary" data-act="pay">Оплатить ' + money(o) + '</button><button type="button" class="btn btn-ghost" data-act="cancel">Отменить</button>';
     else if (o.status === 'action') actions = '<button type="button" class="btn btn-primary" data-go="' + o.action.go + '">' + o.action.btn + '</button>';
@@ -363,12 +376,16 @@
     $('cardsGrid').innerHTML = CARDS.map(function(c){
       var linked = ORDERS.filter(function(o){ return o.card === c.id; }), r = revealed[c.id];
       return '<div class="cardp" data-c="' + c.id + '">' + cbHtml(c) +
-        '<div class="cardp-meta"><span>Выпущена ' + fmtD(c.issued) + '</span>' + (c.test ? badge(['Тестовая', 'badge-warn']) : '') + badge(c.status === 'active' ? ['Активна', 'badge-ok'] : ['Заморожена', 'badge-plain']) + '</div>' +
+        '<div class="cardp-meta"><span>Выпущена ' + fmtD(c.issued) + '</span>' + (c.test ? badge(['Тестовая', 'badge-warn']) : '') + (c.gift ? badge(['Подарок', 'badge-info']) : '') + (c.giftTo ? badge(['Ждёт получения', 'badge-warn']) : badge(c.status === 'active' ? ['Активна', 'badge-ok'] : ['Заморожена', 'badge-plain'])) + '</div>' +
+        (c.giftTo ? '<div class="alert alert-info">' + ico('gift') + '<div><b>Подарок для ' + esc(c.giftTo) + '</b>Карта перейдёт в кабинет друга, когда он войдёт или зарегистрируется с этой почтой. Реквизиты увидит только он.</div></div>' : '') +
         (r ? '<div class="secure"><div class="t"><span>Реквизиты видны</span><b><span data-sec="' + c.id + '">60</span> с</b></div><div class="cred"><span class="k">Номер</span><span class="v">' + c.pan + '</span><button type="button" class="icon-btn plain" data-copy="' + c.pan.replace(/ /g, '') + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">Срок</span><span class="v">' + c.exp + '</span><button type="button" class="icon-btn plain" data-copy="' + c.exp + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">CVV</span><span class="v">' + c.cvv + '</span><button type="button" class="icon-btn plain" data-copy="' + c.cvv + '" aria-label="Копировать">' + ico('copy') + '</button></div><div class="cred"><span class="k">Имя</span><span class="v">MARSCAP CARDHOLDER</span><button type="button" class="icon-btn plain" data-copy="MARSCAP CARDHOLDER" aria-label="Копировать">' + ico('copy') + '</button></div></div>' : '') +
-        '<div class="cardp-btns">' + (r ? '<button type="button" class="btn btn-ghost wide" data-ca="hide">' + ico('lock') + 'Скрыть реквизиты</button>' : '<button type="button" class="btn btn-primary wide" data-ca="reveal" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('eye') + 'Показать реквизиты</button>') +
-        '<button type="button" class="btn btn-ghost" data-ca="topup" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('plus') + 'Пополнить</button><button type="button" class="btn btn-ghost" data-ca="freeze">' + ico('snow') + (c.status === 'active' ? 'Заморозить' : 'Разморозить') + '</button></div>' +
+        (c.giftTo ? '' : '<div class="cardp-btns">' + (r ? '<button type="button" class="btn btn-ghost wide" data-ca="hide">' + ico('lock') + 'Скрыть реквизиты</button>' : '<button type="button" class="btn btn-primary wide" data-ca="reveal" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('eye') + 'Показать реквизиты</button>') +
+        '<button type="button" class="btn btn-ghost" data-ca="topup" ' + (c.status !== 'active' ? 'disabled' : '') + '>' + ico('plus') + 'Пополнить</button><button type="button" class="btn btn-ghost" data-ca="freeze">' + ico('snow') + (c.status === 'active' ? 'Заморозить' : 'Разморозить') + '</button></div>') +
         '<div class="cardp-links">Заказы: ' + (linked.length ? linked.map(function(o){ return '<button type="button" class="auth-link mono" data-go="order:' + o.id + '">' + o.id + '</button>'; }).join('') : '—') + '</div></div>';
-    }).join('') + '<button type="button" class="cardp issue" data-go="new" data-prod="issue">' + ico('plus') + '<b>Выпустить ещё одну</b><p>Отдельная карта под сервис или покупку — удобно для лимитов.</p></button>';
+    }).join('') + '<button type="button" class="cardp issue" data-go="new" data-prod="issue">' + ico('plus') + '<b>Выпустить ещё одну</b><p>Отдельная карта под сервис или покупку — удобно для лимитов.</p></button>' +
+      (LIVE ? '<button type="button" class="cardp issue" data-gift="1">' + ico('gift') + '<b>Подарить другу</b><p>Карта с балансом — на почту друга. Появится у него в кабинете.</p></button>' : '');
+    var gb = $('cardsGrid').querySelector('[data-gift]'); if (gb) gb.addEventListener('click', giftModal);
+    $('giftBtn').hidden = !LIVE;
     $('cardsGrid').querySelectorAll('[data-ca]').forEach(function(b){ b.addEventListener('click', function(){ cardAct(card(b.closest('.cardp').getAttribute('data-c')), b.getAttribute('data-ca')); }); });
     $('cardsGrid').querySelectorAll('[data-copy]').forEach(function(b){ b.addEventListener('click', function(){ var v = b.getAttribute('data-copy'); (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(function(){ toast('Скопировано', '', 'ok'); }, function(){ toast('Скопируйте вручную', v); }); }); });
   };
@@ -444,7 +461,7 @@
     $('sesN').textContent = SESSIONS.length;
     $('sesList').innerHTML = SESSIONS.map(function(s){ return '<div class="ses ' + (s.sus ? 'sus' : '') + '">' + ico(s.icon) + '<b>' + s.dev + (s.cur ? badge(['Это устройство', 'badge-ok']) : '') + (s.sus ? badge(['Подозрительный', 'badge-err']) : '') + '</b><span>' + s.place + ' · ' + s.ip + ' · ' + s.at + '</span>' + (s.cur ? '' : '<button type="button" class="btn btn-ghost" data-kill="' + s.id + '">Завершить</button>') + '</div>'; }).join('');
     $('sesList').querySelectorAll('[data-kill]').forEach(function(b){ b.addEventListener('click', function(){ var id = b.getAttribute('data-kill'); SESSIONS = SESSIONS.filter(function(s){ return s.id !== id; }); R.profile('sessions'); toast('Сессия завершена', 'Если это были не вы — смените пароль.', 'ok'); }); });
-    $('consentList').innerHTML = DOCS.map(function(d){ return '<div><span class="k">' + esc(d.name) + '</span><span class="v">ред. ' + d.ver + ' · ' + fmtD(d.at) + '</span></div>'; }).join('');
+    $('consentList').innerHTML = DOCS.map(function(d){ return '<div><span class="k">' + (d.href ? '<a href="' + esc(d.href) + '" target="_blank" rel="noopener">' + esc(d.name) + '</a>' : esc(d.name)) + '</span><span class="v">ред. ' + esc(d.ver) + ' · ' + (d.pending ? '<button type="button" class="auth-link" data-go="docs">нужно принять</button>' : 'приняли ' + fmtD(d.at)) + '</span></div>'; }).join('');
     profTab(param || 'contacts');
   };
   function profTab(t){ $('profTabs').querySelectorAll('[role="tab"]').forEach(function(x){ x.setAttribute('aria-selected', x.getAttribute('data-pp') === t); }); document.querySelectorAll('.prof-pane').forEach(function(p){ p.hidden = p.getAttribute('data-pp') !== t; }); }
@@ -512,7 +529,10 @@
 
   /* ===== Документы ===== */
   R.docs = function(){
-    $('docAccepted').innerHTML = DOCS.map(function(d, i){ return '<div class="docr">' + ico('doc') + '<b>' + esc(d.name) + '<span class="ver">v' + d.ver + '</span>' + badge(['Принята', 'badge-ok']) + '</b><span>Акцепт ' + fmtD(d.at, true) + ' · ' + esc(USER.id) + (d.hist.length ? ' · <button type="button" class="auth-link" data-h="' + i + '">история</button>' : '') + '</span><div class="r">' + (d.href ? '<a class="icon-btn" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Открыть">' + ico('dl') + '</a>' : '') + '</div><div class="hist" hidden id="dh' + i + '">' + d.hist.map(function(h){ return '<div>' + h + '</div>'; }).join('') + '</div></div>'; }).join('');
+    var pend = DOCS.filter(function(d){ return d.pending; });
+    $('docPending').innerHTML = pend.length ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Обновились условия</b>' + pend.map(function(d){ return esc(d.name) + ' — редакция ' + esc(d.ver) + ' от ' + fmtD(d.published) + (d.note ? ': ' + esc(d.note) : ''); }).join('<br>') + '<br>Прочитайте и примите — без этого новые покупки недоступны.<div class="alert-actions"><button type="button" class="btn btn-primary" id="docAccept">Принимаю</button></div></div></div>' : '';
+    var da = $('docAccept'); if (da) da.addEventListener('click', function(){ acceptDocs(da, function(){ R.docs(); }); });
+    $('docAccepted').innerHTML = DOCS.map(function(d, i){ return '<div class="docr">' + ico('doc') + '<b>' + esc(d.name) + '<span class="ver">ред. ' + esc(d.ver) + '</span>' + badge(d.pending ? ['Нужно принять', 'badge-warn'] : ['Принята', 'badge-ok']) + '</b><span>' + (d.pending ? 'Опубликована ' + fmtD(d.published) + ' · вы её ещё не приняли' : 'Вы приняли ' + fmtD(d.at, true) + (d.published ? ' · опубликована ' + fmtD(d.published) : '')) + (d.hist.length ? ' · <button type="button" class="auth-link" data-h="' + i + '">прошлые редакции</button>' : '') + '</span><div class="r">' + (d.href ? '<a class="icon-btn" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Открыть">' + ico('dl') + '</a>' : '') + '</div><div class="hist" hidden id="dh' + i + '">' + d.hist.map(function(h){ return '<div>' + h + '</div>'; }).join('') + '</div></div>'; }).join('');
     $('docAccepted').querySelectorAll('[data-h]').forEach(function(b){ b.addEventListener('click', function(){ var el = $('dh' + b.getAttribute('data-h')); el.hidden = !el.hidden; }); });
     var files = [];
     PAYMENTS.forEach(function(p){ if (p.status === 'ok' || p.status === 'refunded'){ var o = order(p.order); files.push({ t: 'Квитанция ' + p.id, s: (o ? o.title + ' · ' : '') + rub(p.rubv) + ' · ' + fmtD(p.at), pay: p.id, at: p.at }); } });
@@ -532,7 +552,7 @@
   function fail(e){ toast('Не получилось', e.message, 'err'); if (e.code === 'unauthorized') setTimeout(function(){ location.href = BASE + 'login.html'; }, 900); }
   function applyUser(u){
     USER.email = u.email; USER.id = u.username || u.email; USER.phone = u.phone || 'не указан'; USER.rawPhone = u.phone;
-    USER.name = u.name || u.username || u.email.split('@')[0]; USER.login = u.username; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
+    USER.name = u.name || u.username || u.email.split('@')[0]; USER.login = u.username; USER.tg = u.telegram || ''; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
     BAL = u.balance_kop || 0;
     var hl = document.querySelector('.head-login'); if (hl && hl.lastChild) hl.lastChild.textContent = USER.name;
   }
@@ -544,6 +564,7 @@
       status: st, created: o.created_at, done: o.delivered_at, tl: tl, slug: slug };
     if (o.delivery) r.cred = o.delivery;
     if (o.buyer_fields && o.buyer_fields.card_id) r.card = o.buyer_fields.card_id;
+    if (o.gift_to) { r.giftTo = o.gift_to; r.sub = (r.sub ? r.sub + ' · ' : '') + 'подарок для ' + o.gift_to; }
     if (st === 'action') r.action = { text: 'Оператору нужны данные по заказу', btn: 'Написать', go: 'support:new' };
     return r;
   }
@@ -552,17 +573,20 @@
     return MC.api('GET', '/auth/me').then(function(r){
       if (!r.user) { location.replace(BASE + 'login.html'); return false; }
       applyUser(r.user);
-      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards'), MC.api('GET', '/refunds')]).then(function(x){
+      return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards'), MC.api('GET', '/refunds'), MC.api('GET', '/me/documents').catch(function(){ return null; })]).then(function(x){
         setArr(ORDERS, x[0].orders.map(function(o){ return mapOrder(o); }));
         setArr(PAYMENTS, x[1].payments.map(function(p){ return { id: p.id.slice(0, 8).toUpperCase(), full: p.id, order: null, title: 'Пополнение баланса', method: p.provider === 'test' ? 'Тестовая оплата' : 'СБП', rubv: p.amount_kop / 100, status: PSTAT[p.status] || 'pending', at: p.paid_at || p.created_at }; }));
         setArr(NOTIFS, x[2].notifications.map(function(n){ var h = (n.link || '').split('#')[1] || 'overview'; return { t: n.title, s: n.body || '', at: n.created_at, go: h, unread: !n.read_at, nid: n.id }; }));
         SESSIONS = x[3].sessions.map(function(s){ return { id: s.id, cur: s.current ? 1 : 0, dev: s.device, place: '', ip: (s.ip || '').replace(/\.\d+\.\d+$/, '.·.·'), at: s.current ? 'сейчас' : fmtD(s.last_seen_at, true), icon: /iPhone|Android/.test(s.device) ? 'phone' : 'laptop' }; });
-        setArr(CARDS, x[4].cards.map(function(c){ var old = card(c.id); return { id: c.id, last4: c.last4, brand: c.brand, status: c.status === 'frozen' ? 'frozen' : 'active', balance: c.balance_cents / 100, exp: c.exp, issued: c.created_at, test: c.test, pan: old && old.pan, cvv: old && old.cvv }; }));
+        setArr(CARDS, x[4].cards.map(function(c){ var old = card(c.id); return { id: c.id, last4: c.last4, brand: c.brand, status: c.status === 'frozen' ? 'frozen' : 'active', balance: c.balance_cents / 100, exp: c.exp, issued: c.created_at, test: c.test, giftTo: c.gift_to, gift: c.gift, pan: old && old.pan, cvv: old && old.cvv }; }));
         CARDS.forEach(function(c){ var src = x[4].cards.filter(function(k){ return k.id === c.id; })[0]; var o = src && src.order_id && order(src.order_id); if (o) o.card = c.id; });
         setArr(TICKETS, []);
         var RST = { new: 'review', approved: 'review', rejected: 'rejected', done: 'done' };
         setArr(REFUNDS, x[5].refunds.map(function(r){ return { id: 'R-' + r.id.slice(0, 6).toUpperCase(), pay: r.payment_id ? r.payment_id.slice(0, 8).toUpperCase() : '—', order: r.order_id || '—', why: r.reason + (r.admin_note ? ' · ' + r.admin_note : ''), rubv: r.amount_kop / 100, status: RST[r.status], at: r.created_at, doneAt: r.status === 'done' ? r.decided_at : null, dest: r.destination }; }));
-        DOCS.length = 1; DOCS[0] = { name: 'Оферта', ver: '2.3', at: USER.since, href: BASE + 'legal-files/offer.pdf', hist: [] };
+        if (x[6]) setArr(DOCS, x[6].current.map(function(d){
+          return { id: d.id, kind: d.kind, name: d.title, ver: d.version, at: d.accepted_at, pending: !d.accepted_at, published: d.published_at, note: d.note, href: d.url,
+            hist: x[6].history.filter(function(h){ return h.kind === d.kind && h.id !== d.id; }).map(function(h){ return 'редакция ' + esc(h.version) + ' — вы приняли ' + fmtD(h.accepted_at, true) + (h.url ? ' · <a class="auth-link" href="' + esc(h.url) + '" target="_blank" rel="noopener">открыть</a>' : ''); }) };
+        }));
         counters(); return true;
       });
     }).catch(function(e){ fail(e); return false; });
@@ -619,15 +643,17 @@
     });
   }
   // покупка с баланса: pp = {plan_id, amount_cents}; недостача → пополнение под заказ; нет KYC → верификация
-  function buy(pp, fields, cardId, btn, onOk){
+  function buy(pp, fields, cardId, btn, onOk, giftTo){
     if (btn) btn.classList.add('is-loading');
     var body = { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: fields || {}, idem: MC.uid() };
     if (cardId) body.card_id = cardId;
+    if (giftTo) body.gift_to = giftTo;
     return MC.api('POST', '/orders', body).then(function(r){
       if (btn) btn.classList.remove('is-loading'); onOk(r.order.id);
     }, function(e){
       if (btn) btn.classList.remove('is-loading');
-      if (e.code === 'insufficient_funds') { var f = {}; for (var k in (fields || {})) f[k] = fields[k]; if (cardId) f.card_id = cardId; topupModal(e.data.shortfall_kop, { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: f }, function(r){ if (r.order_id) onOk(r.order_id); }); return; }
+      if (e.code === 'insufficient_funds') { var f = {}; for (var k in (fields || {})) f[k] = fields[k]; if (cardId) f.card_id = cardId; topupModal(e.data.shortfall_kop, { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: f, gift_to: giftTo || undefined }, function(r){ if (r.order_id) onOk(r.order_id); }); return; }
+      if (e.code === 'docs_update_required') { load().then(function(){ docsModal(function(){ buy(pp, fields, cardId, btn, onOk, giftTo); }); }); return; }
       if (e.code === 'kyc_required') { toast('Нужна верификация', 'Покупки открываются после проверки документов. Баланс можно пополнить уже сейчас.', 'err'); go('kyc'); return; }
       fail(e);
     });
@@ -645,6 +671,37 @@
     });
   }
 
+  // обновлённые документы: принять
+  function docsPending(){ return DOCS.filter(function(d){ return d.pending; }); }
+  function acceptDocs(btn, onOk){
+    if (btn) btn.classList.add('is-loading');
+    MC.api('POST', '/me/documents', { ids: docsPending().map(function(d){ return d.id; }) }).then(function(){ return load(); }).then(function(){ if (btn) btn.classList.remove('is-loading'); toast('Спасибо, условия приняты', '', 'ok'); if (onOk) onOk(); }, function(e){ if (btn) btn.classList.remove('is-loading'); fail(e); });
+  }
+  function docsModal(onOk){
+    var p = docsPending(); if (!p.length) { if (onOk) onOk(); return; }
+    modal({ title: 'Обновились условия', sub: 'Перед покупкой примите новую редакцию.', body: '<ul class="check-marks">' + p.map(function(d){ return '<li><a href="' + esc(d.href) + '" target="_blank" rel="noopener">' + esc(d.name) + '</a>, редакция ' + esc(d.ver) + ' от ' + fmtD(d.published) + (d.note ? '<br><span class="hint">' + esc(d.note) + '</span>' : '') + '</li>'; }).join('') + '</ul>',
+      foot: [{ label: 'Позже' }, { label: 'Принимаю и продолжаю', cls: 'btn-primary', keep: true, onClick: function(btn){ acceptDocs(btn, function(){ closeModal(); if (onOk) onOk(); }); return false; } }] });
+  }
+  // подарок: виртуальная карта на почту друга
+  var gUsd = 50;
+  function giftModal(){
+    if (DENOMS.indexOf(gUsd) < 0) gUsd = DENOMS[0];
+    modal({ title: 'Подарить карту другу', sub: 'Карта появится в кабинете друга, когда он войдёт или зарегистрируется с этой почтой. Письмо отправим сразу после оплаты.',
+      body: '<div class="field"><label for="gEmail">Почта друга</label><input id="gEmail" type="email" inputmode="email" autocomplete="off" placeholder="friend@gmail.com"></div><div class="field"><label>Номинал</label><div class="q-denoms" id="gDen"></div></div><dl class="kv"><div><dt>К оплате</dt><dd class="mono" id="gSum"></dd></div><div><dt>На балансе</dt><dd class="mono">' + MC.kop(BAL) + '</dd></div></dl>',
+      onOpen: function(){
+        function draw(){ $('gDen').innerHTML = DENOMS.map(function(d){ return '<button type="button" aria-pressed="' + (d === gUsd) + '" data-d="' + d + '">$' + d + '</button>'; }).join(''); $('gSum').textContent = rub(total(gUsd)); $('gDen').querySelectorAll('button').forEach(function(b){ b.addEventListener('click', function(){ gUsd = +b.getAttribute('data-d'); draw(); }); }); }
+        draw();
+      },
+      foot: [{ label: 'Отмена' }, { label: 'Подарить', cls: 'btn-primary', keep: true, onClick: function(btn){
+        var em = $('gEmail').value.trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) { $('gEmail').setAttribute('aria-invalid', 'true'); $('gEmail').focus(); toast('Почта', 'Укажите почту друга, например friend@gmail.com.', 'err'); return false; }
+        if (em === String(USER.email).toLowerCase()) { $('gEmail').focus(); toast('Это ваша почта', 'Чтобы купить себе, используйте «Выпустить карту».', 'err'); return false; }
+        cardPlan(gUsd).then(function(pp){ buy(pp, {}, null, btn, function(id){ closeModal(); load().then(function(){ toast('Подарок оформлен', 'Письмо ушло на ' + em, 'ok'); go('order', id); }); }, em); }).catch(fail);
+        return false;
+      } }] });
+  }
+  $('giftBtn').addEventListener('click', giftModal);
+
   // верификация: загрузка файлов на ручную проверку
   function kycUpload(list){
     var fd = new FormData(), n = 0; [].forEach.call(list, function(f){ fd.append('files', f); n++; }); if (!n) return;
@@ -656,8 +713,12 @@
 
   // профиль на сервере
   function liveProfile(param){
-    $('contactList').innerHTML = '<div><span class="k">Логин</span><span class="v mono">' + esc(USER.login || '—') + '</span></div><div><span class="k">Почта</span><span class="v mono">' + esc(USER.email) + '</span></div><div><span class="k">Телефон</span><span class="v mono">' + esc(USER.rawPhone || 'не указан') + ' <button type="button" class="auth-link" data-ch="phone">' + (USER.rawPhone ? 'Изменить' : 'Добавить') + '</button></span></div><div><span class="k">В Marscap с</span><span class="v">' + new Date(USER.since).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) + '</span></div>';
-    $('contactList').querySelector('[data-ch]').addEventListener('click', function(){
+    $('contactList').innerHTML = '<div><span class="k">Логин</span><span class="v mono">' + esc(USER.login || '—') + '</span></div><div><span class="k">Почта</span><span class="v mono">' + esc(USER.email) + '</span></div><div><span class="k">Телефон</span><span class="v mono">' + esc(USER.rawPhone || 'не указан') + ' <button type="button" class="auth-link" data-ch="phone">' + (USER.rawPhone ? 'Изменить' : 'Добавить') + '</button></span></div><div><span class="k">Telegram</span><span class="v">' + (USER.tg ? '<a class="mono" href="https://t.me/' + esc(USER.tg) + '" target="_blank" rel="noopener">@' + esc(USER.tg) + '</a>' : 'не указан') + ' <button type="button" class="auth-link" data-ch="tg">' + (USER.tg ? 'Изменить' : 'Добавить') + '</button></span></div><div><span class="k">В Marscap с</span><span class="v">' + new Date(USER.since).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) + '</span></div>';
+    $('contactList').querySelector('[data-ch="tg"]').addEventListener('click', function(){
+      modal({ title: 'Telegram', sub: 'Для связи по заказам: оператор сможет написать вам в Telegram.', body: '<div class="field"><label for="ncVal">Имя пользователя</label><input id="ncVal" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="@ivan_petrov" value="' + esc(USER.tg ? '@' + USER.tg : '') + '"><span class="hint">Можно вставить ссылку t.me/… Пустое поле — убрать.</span></div>',
+        foot: [{ label: 'Отмена' }, { label: 'Сохранить', cls: 'btn-primary', keep: true, onClick: function(){ MC.api('PATCH', '/profile', { telegram: $('ncVal').value }).then(function(r){ closeModal(); applyUser(r.user); R.profile(); toast('Сохранено', '', 'ok'); }, fail); return false; } }] });
+    });
+    $('contactList').querySelector('[data-ch="phone"]').addEventListener('click', function(){
       modal({ title: 'Телефон', sub: 'Необязательно: для связи по заказам.', body: '<div class="field"><label for="ncVal">Телефон</label><input id="ncVal" type="tel" inputmode="tel" placeholder="+7 900 000-00-00" value="' + esc(USER.rawPhone || '') + '"></div>',
         foot: [{ label: 'Отмена' }, { label: 'Сохранить', cls: 'btn-primary', keep: true, onClick: function(){ MC.api('PATCH', '/profile', { phone: $('ncVal').value }).then(function(r){ closeModal(); applyUser(r.user); R.profile(); toast('Сохранено', '', 'ok'); }, fail); return false; } }] });
     });
@@ -666,7 +727,7 @@
     $('sesN').textContent = SESSIONS.length;
     $('sesList').innerHTML = SESSIONS.map(function(x){ return '<div class="ses">' + ico(x.icon) + '<b>' + esc(x.dev) + (x.cur ? badge(['Это устройство', 'badge-ok']) : '') + '</b><span>' + esc(x.ip) + ' · ' + x.at + '</span>' + (x.cur ? '' : '<button type="button" class="btn btn-ghost" data-kill="' + x.id + '">Завершить</button>') + '</div>'; }).join('');
     $('sesList').querySelectorAll('[data-kill]').forEach(function(b){ b.addEventListener('click', function(){ MC.api('DELETE', '/auth/sessions/' + b.getAttribute('data-kill')).then(function(){ return load(); }).then(function(){ R.profile('sessions'); toast('Сессия завершена', 'Если это были не вы — смените пароль.', 'ok'); }, fail); }); });
-    $('consentList').innerHTML = DOCS.map(function(d){ return '<div><span class="k">' + esc(d.name) + '</span><span class="v">ред. ' + d.ver + ' · ' + fmtD(d.at) + '</span></div>'; }).join('');
+    $('consentList').innerHTML = DOCS.map(function(d){ return '<div><span class="k">' + (d.href ? '<a href="' + esc(d.href) + '" target="_blank" rel="noopener">' + esc(d.name) + '</a>' : esc(d.name)) + '</span><span class="v">ред. ' + esc(d.ver) + ' · ' + (d.pending ? '<button type="button" class="auth-link" data-go="docs">нужно принять</button>' : 'приняли ' + fmtD(d.at)) + '</span></div>'; }).join('');
     profTab(param || 'contacts');
   }
 
@@ -708,11 +769,12 @@
       }
       if (!pp) { toast('Тариф недоступен', 'Этот тариф сейчас нельзя купить онлайн — напишите в поддержку.', 'err'); return; }
       var rows = [['Товар', esc(o.title || r.product.name)], ['К оплате', '<span class="mono">' + MC.kop(sum) + '</span>'], ['На балансе', '<span class="mono">' + MC.kop(BAL) + '</span>']];
-      if (o.fields && o.fields.account_email) rows.splice(1, 0, ['Аккаунт в сервисе', esc(o.fields.account_email)]);
+      if (o.fields && o.fields.account_email && !o.gift_to) rows.splice(1, 0, ['Аккаунт в сервисе', esc(o.fields.account_email)]);
+      if (o.gift_to) rows.splice(1, 0, ['Подарок для', esc(o.gift_to) + '<br><span class="hint">Отправим письмо на эту почту' + (o.slug === 'virtual-card' ? ', карта появится в кабинете получателя' : '') + '</span>']);
       modal({ title: 'Подтвердите покупку', sub: BAL >= sum ? 'Спишем с баланса, курс зафиксируем в заказе.' : 'На балансе не хватает ' + MC.kop(sum - BAL) + ' — пополним на недостающее, и заказ оформится сам.',
         body: '<dl class="kv">' + rows.map(function(x){ return '<div><dt>' + x[0] + '</dt><dd>' + x[1] + '</dd></div>'; }).join('') + '</dl>',
         foot: [{ label: 'Отмена' }, { label: BAL >= sum ? 'Оплатить с баланса' : 'Пополнить и оплатить', cls: 'btn-primary', keep: true, onClick: function(btn){
-          buy(pp, o.fields || {}, null, btn, function(id){ closeModal(); load().then(function(){ toast('Заказ оформлен', id, 'ok'); go('order', id); }); });
+          buy(pp, o.fields || {}, null, btn, function(id){ closeModal(); load().then(function(){ toast(o.gift_to ? 'Подарок оформлен' : 'Заказ оформлен', o.gift_to ? 'Письмо ушло на ' + o.gift_to : id, 'ok'); go('order', id); }); }, o.gift_to);
           return false;
         } }] });
     }, fail);
@@ -746,7 +808,7 @@
   $('logout').addEventListener('click', logout); $('logoutM').addEventListener('click', logout);
 
   /* ——— шапка сайта: «Войти» → имя ——— */
-  var hl = document.querySelector('.head-login'); if (hl){ hl.href = '#profile'; hl.lastChild.textContent = USER.name; hl.setAttribute('data-go', 'profile'); }
+  var hl = document.querySelector('.head-login'); if (hl){ hl.href = '#profile'; hl.setAttribute('data-go', 'profile'); }
 
   MC.isLive().then(function(on){
     if (!on) { counters(); route(); return; }
@@ -757,6 +819,14 @@
     Promise.all([load(), MC.vcPricing().catch(function(){ return null; })]).then(function(x){
       var v = x[1]; if (v && !v.unavailable) { VCP = v; VMIN = v.min; VMAX = v.max; if (v.denoms.length) { DENOMS.length = 0; [].push.apply(DENOMS, v.denoms); if (DENOMS.indexOf(qUsd) < 0) qUsd = DENOMS[0]; } }
       if (!x[0]) return; route(); if (wantCheckout) runCheckout();
+      // свежие статусы: раз в минуту и при возврате на вкладку — колокольчик загорится, если заказ изменился
+      var busy = false;
+      function refresh(){
+        if (busy || document.visibilityState !== 'visible') return; busy = true;
+        load().then(function(){ busy = false; if ($('modal').hidden && (cur === 'overview' || cur === 'orders' || cur === 'cards' || cur === 'docs')) R[cur](null, { keepScroll: true }); }, function(){ busy = false; });
+      }
+      setInterval(refresh, 60000);
+      document.addEventListener('visibilitychange', refresh);
     });
   });
   MC.initReveal();

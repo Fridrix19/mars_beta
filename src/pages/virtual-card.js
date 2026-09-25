@@ -4,6 +4,8 @@
   var den = 50, mode = 'fixed';
   var total = function(d){ return MC.charged(d) * RATE; };  // как на сайте: номинал × 1.3 (≥ $50); на сервере — цены из админки (ниже)
   var pay = $('pay'), status = $('status'), email = $('email'), emailHint = $('emailHint');
+  var RCP = MC.recipient(email);
+  email.addEventListener('mc:recipient', function(e){ emailHint.className = 'hint'; emailHint.textContent = e.detail === 'gift' ? 'Карта появится в кабинете друга, когда он войдёт с этой почтой. Письмо отправим сразу.' : 'Сюда придут реквизиты и инструкция.'; });
 
   function render(){
     $('rowDen').textContent = '$' + den;
@@ -48,12 +50,12 @@
       email.focus(); return;
     }
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
-    emailHint.textContent = 'Сюда придут реквизиты и инструкция.';
+    emailHint.textContent = RCP.mode() === 'gift' ? 'Карта появится в кабинете друга, когда он войдёт с этой почтой.' : 'Сюда придут реквизиты и инструкция.';
     status.className = 'calc-status ok';
     MC.isLive().then(function(on){
       if (!on) { status.textContent = 'Прототип: здесь откроется окно СБП на ' + rub(total(den)) + '.'; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;
-      MC.checkout({ slug: 'virtual-card', usd: den, fields: {}, title: 'Виртуальная карта · $' + den, back: location.pathname });
+      MC.checkout({ slug: 'virtual-card', usd: den, fields: {}, gift_to: RCP.gift() || undefined, title: (RCP.gift() ? 'Подарок: виртуальная карта' : 'Виртуальная карта') + ' · $' + den, back: location.pathname });
     });
   });
 

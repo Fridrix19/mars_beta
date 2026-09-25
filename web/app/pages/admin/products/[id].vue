@@ -40,7 +40,7 @@ const planName = (id: string) => r.value.plans.find((x: any) => x.id === id)?.la
 <template>
   <div v-if="p">
     <div class="adm-head"><div><span class="eyebrow"><NuxtLink to="/admin/products">Товары</NuxtLink></span><h1>{{ p.name }}</h1></div>
-      <a :href="'/service/' + p.slug + '/'" target="_blank" rel="noopener">страница на сайте</a></div>
+      <div style="text-align:right"><a :href="'/service/' + p.slug + '/'" target="_blank" rel="noopener">страница на сайте</a><div class="muted" style="font-size:13px">изменён {{ dt(r.product.updated_at) }}{{ r.product.updated_by_name ? ' · ' + r.product.updated_by_name : '' }}</div></div></div>
     <div class="grid g2" style="align-items:start">
       <div class="panel grid">
         <h2>Товар</h2>

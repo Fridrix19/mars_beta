@@ -14,6 +14,7 @@ export async function startSession(e: H3Event, userId: string) {
   await q(`insert into sessions (user_id, token_hash, ip, user_agent, expires_at) values ($1, $2, $3, $4, now() + interval '${DAYS} days')`,
     [userId, sha256(token), clientIp(e), ua])
   await q(`update users set last_login_at = now(), failed_logins = 0, locked_until = null where id = $1`, [userId])
+  await claimGiftCards(userId).catch(() => 0)
   const cfg = useRuntimeConfig()
   setCookie(e, COOKIE, token, {
     httpOnly: true, sameSite: 'lax', path: '/', maxAge: DAYS * 86400,

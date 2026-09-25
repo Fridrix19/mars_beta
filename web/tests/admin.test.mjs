@@ -42,7 +42,8 @@ test('вход в админку, права ролей, аудит', async () =
   const a = await admin()
   assert.equal((await client()('POST', '/api/admin/auth/login', { login: 'admin', password: 'nope' })).code, 'bad_credentials')
   const me = await a('GET', '/api/admin/auth/me'); assert.equal(me.body.admin.role, 'owner'); assert.ok(me.body.perms.includes('balance.adjust'))
-  const s = await a('GET', '/api/admin/summary'); assert.equal(s.status, 200); assert.equal(s.body.days.length, 14)
+  const s = await a('GET', '/api/admin/summary'); assert.equal(s.status, 200); assert.equal(s.body.days.length, 30)
+  const sp = await a('GET', '/api/admin/summary?from=2026-09-01&to=2026-09-10'); assert.equal(sp.body.days.length, 10); assert.equal(sp.body.period.from, '2026-09-01')
   // модератор KYC не видит пользователей
   const login = 'kyc' + Date.now().toString(36)
   assert.equal((await a('POST', '/api/admin/admins', { login, name: 'Модератор', role: 'kyc', password: 'TempPass12345' })).status, 200)

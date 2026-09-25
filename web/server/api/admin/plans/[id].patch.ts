@@ -21,6 +21,6 @@ export default defineEventHandler(async (e) => {
   const changed: Record<string, any> = {}
   for (const k of ['label','currency','price_cents','price_kop','price_text','free','active','custom_min_cents','custom_max_cents']) if (String(before[k]) !== String(pl[k])) changed[k] = [before[k], pl[k]]
   await audit(e, a, 'plan.update', pl.id, { product: before.slug, label: pl.label, changed })
-  await q(`update products set updated_at = now() where id = $1`, [pl.product_id])
+  await q(`update products set updated_at = now(), updated_by = $2 where id = $1`, [pl.product_id, a.id])
   return { plan: pl }
 })

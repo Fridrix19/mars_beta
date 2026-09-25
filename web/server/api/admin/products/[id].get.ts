@@ -1,6 +1,6 @@
 export default defineEventHandler(async (e) => {
   await requireAdmin(e, 'products')
-  const p = await one(`select * from products where id::text = $1 or slug = $1`, [getRouterParam(e, 'id')])
+  const p = await one(`select p.*, (select name from admins where id = p.updated_by) updated_by_name from products p where p.id::text = $1 or p.slug = $1`, [getRouterParam(e, 'id')])
   if (!p) fail(404, 'not_found', 'Товар не найден.')
   const r = await rate()
   const plans = await q(`select pp.*, (select count(*)::int from product_keys k where k.plan_id = pp.id and k.status = 'free') keys_free

@@ -26,6 +26,7 @@ export default defineEventHandler(async (e) => {
     await c.query(`update users set kyc_status = 'pending', kyc_reason = null where id = $1`, [u.id])
     return s.rows[0].id
   })
+  trackAction(u.id, 'kyc_submit', { label: files.length + ' файл(ов)' })
   notifyAdmins('Новая заявка на верификацию', `${u.email} отправил документы (${files.length} шт.).`, '/admin/kyc/' + id)
   return { ok: true, submission: id, status: 'pending' }
 })

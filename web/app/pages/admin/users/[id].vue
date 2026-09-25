@@ -23,6 +23,7 @@ async function block(blocked: boolean) {
       <div><span class="eyebrow"><NuxtLink to="/admin/users">Пользователи</NuxtLink></span><h1>{{ u.username }}</h1><span class="muted">{{ u.email }}</span></div>
       <div class="row-actions">
         <template v-if="can('balance.adjust')"><Button label="Начислить" icon="pi pi-plus" severity="secondary" outlined @click="openAdj(1)" /><Button label="Списать" icon="pi pi-minus" severity="secondary" outlined @click="openAdj(-1)" /></template>
+        <NuxtLink v-if="can('analytics')" :to="'/admin/analytics?login=' + u.username"><Button label="История действий" icon="pi pi-history" severity="secondary" outlined /></NuxtLink>
         <template v-if="can('users.write')"><Button v-if="u.status === 'active'" label="Заблокировать" severity="danger" outlined @click="blk.open = true; blk.reason = ''" /><Button v-else label="Разблокировать" severity="success" outlined :loading="blk.busy" @click="block(false)" /></template>
       </div>
     </div>
@@ -57,7 +58,7 @@ async function block(blocked: boolean) {
           <Column header="Выпущена"><template #body="{ data }">{{ d(data.created_at) }}</template></Column><template #empty><span class="muted">Карт нет</span></template></DataTable></TabPanel>
         <TabPanel value="profile"><div class="grid g2">
           <div class="panel"><dl class="kv">
-            <dt>Логин</dt><dd class="mono">{{ u.username }}</dd><dt>Почта</dt><dd>{{ u.email }}</dd><dt>Имя</dt><dd>{{ u.name || '—' }}</dd><dt>Телефон</dt><dd>{{ u.phone || '—' }}</dd><dt>Регистрация</dt><dd>{{ dt(u.created_at) }}</dd><dt>Последний вход</dt><dd>{{ dt(u.last_login_at) }}</dd>
+            <dt>Логин</dt><dd class="mono">{{ u.username }}</dd><dt>Telegram</dt><dd>{{ u.telegram ? '@' + u.telegram : '—' }}</dd><dt>Почта</dt><dd>{{ u.email }}</dd><dt>Имя</dt><dd>{{ u.name || '—' }}</dd><dt>Телефон</dt><dd>{{ u.phone || '—' }}</dd><dt>Регистрация</dt><dd>{{ dt(u.created_at) }}</dd><dt>Последний вход</dt><dd>{{ dt(u.last_login_at) }}</dd>
             <dt>Оферта</dt><dd>ред. {{ u.consent_offer || '—' }}</dd><dt>Рассылка</dt><dd>{{ u.consent_news ? 'да' : 'нет' }}</dd>
             <dt>KYC-заявки</dt><dd><template v-for="k in r.kyc" :key="k.id"><NuxtLink :to="'/admin/kyc/' + k.id">{{ KYC_ST[k.status][0] }} · {{ d(k.created_at) }}</NuxtLink><br></template><span v-if="!r.kyc.length">—</span></dd>
           </dl></div>

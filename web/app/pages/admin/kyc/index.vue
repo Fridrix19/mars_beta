@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const { api } = useAdm()
-const rows = ref<any[]>([]), status = ref('pending'), loading = ref(false)
-async function load() { loading.value = true; rows.value = (await api('GET', '/kyc?status=' + status.value).finally(() => loading.value = false) as any).submissions }
-watch(status, load); onMounted(load)
+const rows = ref<any[]>([]), status = ref('pending'), loading = ref(false), period = ref({ from: '', to: '' })
+async function load() { loading.value = true; rows.value = (await api('GET', '/kyc?status=' + status.value + periodQS(period.value)).finally(() => loading.value = false) as any).submissions }
+watch(status, load); watch(period, load, { deep: true }); onMounted(load)
 </script>
 <template>
   <div class="adm-head"><div><span class="eyebrow">Верификация пользователей</span><h1>Проверка документов</h1></div>
-    <SelectButton v-model="status" :options="[{ v: 'pending', l: 'На проверке' }, { v: 'approved', l: 'Одобренные' }, { v: 'rejected', l: 'Отклонённые' }]" option-label="l" option-value="v" :allow-empty="false" /></div>
+    <SelectButton v-model="status" :options="[{ v: 'pending', l: 'На проверке' }, { v: 'approved', l: 'Одобренные' }, { v: 'rejected', l: 'Отклонённые' }, { v: 'all', l: 'Все' }]" option-label="l" option-value="v" :allow-empty="false" /></div>
+  <div class="toolbar"><AdmPeriod v-model="period" allow-all /><span class="muted">{{ rows.length }} заявок</span></div>
   <DataTable :value="rows" :loading="loading" row-hover :row-class="() => 'clickable'" @row-click="e => navigateTo('/admin/kyc/' + e.data.id)" size="small">
     <Column field="email" header="Пользователь" />
     <Column header="Файлов"><template #body="{ data }">{{ data.files }}</template></Column>

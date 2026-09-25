@@ -1,0 +1,50 @@
+<main>
+  <section class="hero wrap svc-hero faq-hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow">Документы</span>
+        <h1>Тарифы и комиссии</h1>
+        <p>Сколько стоит оплата сервиса и выпуск виртуальной карты. Итог в рублях вы видите до оплаты — в нём уже всё учтено.</p>
+        <div class="facts">
+          <div class="fact"><b id="tfRate">80,23 ₽</b><span>курс за $1 сейчас</span></div>
+          <div class="fact"><b>от 100 ₽</b><span>пополнение баланса</span></div>
+          <div class="fact"><b id="tfCard">$50–200</b><span>номинал карты</span></div>
+        </div>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="{{BASE}}catalog.html">Каталог</a>
+          <a class="btn btn-ghost" data-doc="offer" href="{{BASE}}legal-files/offer.pdf" target="_blank" rel="noopener">Оферта</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <div class="wrap stack">
+    <section class="panel reveal" id="commission">
+      <div class="section-head"><span class="eyebrow">Комиссия сервиса</span><h2>Как считается цена</h2></div>
+      <div class="card-grid">
+        <article class="card info-card"><span class="eyebrow">Тариф до $45</span><h3>(цена + $5) × 1,2</h3><p>Для недорогих подписок: фиксированная надбавка $5 и 20%.</p></article>
+        <article class="card info-card"><span class="eyebrow">Тариф от $45</span><h3>цена × 1,3</h3><p>Для дорогих тарифов — только 30%, без фиксированной части.</p></article>
+        <article class="card info-card"><span class="eyebrow">Курс</span><h3>ЦБ РФ + наценка</h3><p>Рубли считаем по курсу на момент оплаты. Цена в заказе фиксируется и дальше не меняется.</p></article>
+      </div>
+      <p class="tf-note" id="tfCustom">У отдельных товаров может быть своя комиссия — она уже учтена в цене на странице товара.</p>
+    </section>
+
+    <section class="panel reveal" id="examples">
+      <div class="section-head"><span class="eyebrow">Примеры</span><h2>Сколько вы заплатите</h2></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Цена тарифа</th><th class="num">С комиссией</th><th class="num">В рублях</th></tr></thead><tbody id="tfRows"></tbody></table></div>
+    </section>
+
+    <section class="panel reveal" id="other">
+      <div class="section-head"><span class="eyebrow">Баланс и возвраты</span><h2>Остальное — бесплатно</h2></div>
+      <div class="table-wrap"><table class="table"><tbody>
+        <tr><td>Пополнение баланса через СБП</td><td class="num">0 ₽, от 100 до 300 000 ₽</td></tr>
+        <tr><td>Выпуск виртуальной карты</td><td class="num" id="tfCardRow">номинал $50–200 + комиссия</td></tr>
+        <tr><td>Хранение баланса</td><td class="num">0 ₽, без срока</td></tr>
+        <tr><td>Возврат, если заказ не выполнен</td><td class="num">100% на баланс</td></tr>
+        <tr><td>Подарок другу</td><td class="num">как обычная покупка</td></tr>
+      </tbody></table></div>
+      <p class="tf-note">Действующая редакция: <span id="tfVer">1.0</span>. Об изменениях сообщаем в кабинете и по почте заранее.</p>
+    </section>
+  </div>
+</main>

@@ -320,6 +320,11 @@ def build_catalog():
         extra_css=read('pages/index.css')+'\n'+read('pages/catalog.css'))
     emit('catalog.html',out)
 
+def build_tariffs():
+    out=assemble('Тарифы и комиссии — Marscap', read('pages/tariffs.html'), read('pages/tariffs.js'), nav='none', m_cy='0.21', m_size='0.9', galaxy={'cx':'0.66','cy':'0.42','dx':'0','dy':'0','size':'2.4'},
+        extra_css=read('pages/index.css')+'\n'+read('pages/faq.css')+'\n.tf-note{margin-block-start:14px; color:var(--text-4); font-size:14px}')
+    emit('tariffs.html',out)
+
 def build_login():
     out=assemble('Вход и регистрация — Marscap', read('pages/login.html'), read('pages/login.js'), nav='none', m_cy='0.17', m_size='0.8', galaxy={'cx':'0.33','cy':'0.9','dx':'0','dy':'0','size':'2'},
         extra_css=read('pages/login.css'))
@@ -353,6 +358,7 @@ if __name__=='__main__':
     build_support()
     build_faq()
     build_contacts()
+    build_tariffs()
     build_login()
     build_dashboard()
     if sys.argv[1:]==['all']:

@@ -13,7 +13,14 @@ export default defineEventHandler(async (e) => {
       phone = '+' + n
     }
   }
-  await q(`update users set name = coalesce($2, name), phone = case when $4 then $3 else phone end where id = $1`,
-    [u.id, name === undefined ? null : name, phone ?? null, phone !== undefined])
+  let tg: string | null | undefined
+  if (b?.telegram !== undefined) {
+    const t = String(b.telegram ?? '').trim().replace(/^https?:\/\/t\.me\//i, '').replace(/^@/, '')
+    if (!t) tg = null
+    else if (!/^[a-zA-Z][a-zA-Z0-9_]{4,31}$/.test(t)) fail(422, 'bad_telegram', 'Telegram: имя пользователя из 5–32 символов — латиница, цифры и _, например @ivan_petrov.')
+    else tg = t
+  }
+  await q(`update users set name = coalesce($2, name), phone = case when $4 then $3 else phone end, telegram = case when $6 then $5 else telegram end where id = $1`,
+    [u.id, name === undefined ? null : name, phone ?? null, phone !== undefined, tg ?? null, tg !== undefined])
   return { user: await me(e, u.id) }
 })

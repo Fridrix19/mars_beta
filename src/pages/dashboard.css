@@ -344,3 +344,7 @@
 .testpay b{font-family:'JetBrains Mono',monospace;font-size:22px}
 .cab-head-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
 @media (max-width:760px){.cab-head-btns{width:100%}.cab-head-btns .btn{flex:1}}
+.ord.fresh{border-color:color-mix(in oklab,var(--accent) 55%,var(--line)); box-shadow:inset 3px 0 0 var(--accent)}
+.ord-t .badge{font-size:11px}
+.cardp .alert{margin:0}
+.cab-bell{position:relative}

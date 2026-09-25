@@ -34,6 +34,8 @@ export const ORDER_ST: Record<string, [string, string]> = {
 }
 export const KYC_ST: Record<string, [string, string]> = { none: ['Нет', 'secondary'], pending: ['На проверке', 'warn'], approved: ['Пройдена', 'success'], rejected: ['Отклонена', 'danger'] }
 export const REF_ST: Record<string, [string, string]> = { new: ['Новая', 'warn'], approved: ['Одобрена', 'info'], rejected: ['Отклонена', 'danger'], done: ['Выполнена', 'success'] }
-export const ROLE: Record<string, string> = { owner: 'Владелец', operator: 'Оператор', kyc: 'Модератор KYC' }
+export const ROLE: Record<string, string> = { owner: 'Владелец', senior: 'Старший админ', operator: 'Оператор', kyc: 'Модератор KYC' }
+export const PERM_LABEL: Record<string, string> = { summary: 'сводка', users: 'пользователи', 'users.write': 'блокировка', 'balance.adjust': 'корректировка баланса', orders: 'заказы и выдача', refunds: 'возвраты', kyc: 'верификация', products: 'товары (просмотр)', 'products.write': 'товары и цены (правка)', admins: 'админы', settings: 'настройки', audit: 'журнал админов', analytics: 'аналитика и история пользователей', export: 'выгрузки CSV' }
+export const periodQS = (p: { from: string; to: string }) => (p.from ? '&from=' + p.from : '') + (p.to ? '&to=' + p.to : '')
 export const LEDGER: Record<string, string> = { topup: 'Пополнение', purchase: 'Покупка', refund: 'Возврат', adjust: 'Корректировка', payout: 'Вывод на карту' }
 export const DELIVERY: Record<string, string> = { manual: 'Ручная', auto: 'Автоматическая (пул ключей)', card_topup: 'Виртуальная карта' }

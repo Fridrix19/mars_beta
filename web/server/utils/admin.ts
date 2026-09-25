@@ -2,24 +2,27 @@ import type { H3Event } from 'h3'
 
 export const ADM_COOKIE = 'mc_adm'
 const HOURS = 12
-export type AdminRole = 'owner' | 'operator' | 'kyc'
+export type AdminRole = 'owner' | 'senior' | 'operator' | 'kyc'
 export type Admin = { id: string; login: string; name: string; role: AdminRole; must_change: boolean; session_id: string }
 
-// что может каждая роль
+// что может каждая роль. Владелец — всё; старший — работа + журнал младших и аналитика; оператор и модератор KYC — без журналов
 const CAN: Record<string, AdminRole[]> = {
-  summary: ['owner', 'operator', 'kyc'],
-  users: ['owner', 'operator'],
-  'users.write': ['owner', 'operator'],
+  summary: ['owner', 'senior', 'operator', 'kyc'],
+  users: ['owner', 'senior', 'operator'],
+  'users.write': ['owner', 'senior', 'operator'],
   'balance.adjust': ['owner'],
-  orders: ['owner', 'operator'],
-  refunds: ['owner', 'operator'],
-  kyc: ['owner', 'operator', 'kyc'],
-  products: ['owner', 'operator'],
+  orders: ['owner', 'senior', 'operator'],
+  refunds: ['owner', 'senior', 'operator'],
+  kyc: ['owner', 'senior', 'operator', 'kyc'],
+  products: ['owner', 'senior', 'operator'],
   'products.write': ['owner'],
   admins: ['owner'],
-  audit: ['owner'],
-  export: ['owner', 'operator'],
+  settings: ['owner'],
+  audit: ['owner', 'senior'],
+  analytics: ['owner', 'senior'],
+  export: ['owner', 'senior', 'operator'],
 }
+export const PERMS = Object.keys(CAN)
 export function can(role: AdminRole, perm: string) { return (CAN[perm] || []).includes(role) }
 
 export async function startAdminSession(e: H3Event, adminId: string) {
@@ -70,3 +73,6 @@ export function csv(e: H3Event, name: string, rows: any[], cols: string[]) {
   setHeader(e, 'content-disposition', `attachment; filename="${name}"`)
   return '﻿' + [cols.join(';'), ...rows.map(r => cols.map(c => esc(r[c])).join(';'))].join('\n')
 }
+
+// дата из фильтра периода: YYYY-MM-DD или null
+export function dateOrNull(v: unknown) { return /^\d{4}-\d{2}-\d{2}$/.test(String(v ?? '')) ? String(v) : null }

@@ -34,6 +34,7 @@ const catName = (id: string) => r.value.categories.find((c: any) => c.id === id)
     <Column field="plans" header="Тарифов" />
     <Column header="Комиссия"><template #body="{ data }">{{ data.commission_pct == null ? 'формула' : data.commission_pct + ' %' }}</template></Column>
     <Column field="orders_30d" header="Заказов за 30 дн." />
+    <Column header="Изменён"><template #body="{ data }">{{ dt(data.updated_at) }}<div class="muted" style="font-size:12px">{{ data.updated_by_name || '' }}</div></template></Column>
     <Column header=""><template #body="{ data }"><Tag v-if="!data.active" value="Архив" severity="secondary" /></template></Column>
   </DataTable>
   <Dialog v-model:visible="nw.open" modal header="Новый товар" :style="{ width: 'min(460px, 94vw)' }">

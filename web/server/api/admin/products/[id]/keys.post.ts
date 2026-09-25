@@ -10,6 +10,7 @@ export default defineEventHandler(async (e) => {
   if (!keys.length) fail(422, 'no_keys', 'Вставьте ключи — по одному на строку.')
   if (keys.length > 1000) fail(422, 'too_many', 'Не больше 1000 ключей за раз.')
   await tx(async (c) => { for (const k of keys) await c.query(`insert into product_keys (product_id, plan_id, secret_enc, added_by) values ($1, $2, $3, $4)`, [p.id, planId, encrypt(k.slice(0, 2000)), a.id]) })
+  await q(`update products set updated_at = now(), updated_by = $2 where id = $1`, [p.id, a.id])
   await audit(e, a, 'keys.add', p.id, { product: p.slug, plan_id: planId, count: keys.length })
   // заказы, ждавшие ключей, — выдать сейчас
   const waiting = await q(`select o.id from orders o join products pr on pr.id = o.product_id where o.product_id = $1 and pr.delivery = 'auto' and o.status = 'paid' order by o.created_at`, [p.id])

@@ -68,3 +68,12 @@ export async function refundOrderSafe(orderId: string, adminId: string, reason: 
   })
   return o
 }
+
+// отметить заказ подарком и сообщить другу
+export async function setGift(o: any, giftTo: string, buyer: { id: string; email: string }) {
+  await q(`update orders set gift_to = $2 where id = $1`, [o.id, giftTo])
+  o.gift_to = giftTo
+  const b = await one(`select username from users where id = $1`, [buyer.id])
+  const what = o.product_name === 'Виртуальная карта' ? `виртуальную карту Marscap на $${(o.price_cents / 100).toFixed(2).replace(/\.00$/, '')}` : `${o.product_name} (${o.plan_label}) — оформим на эту почту`
+  sendMail(giftMail(giftTo, b?.username || 'Друг', what, String(useRuntimeConfig().public.siteUrl || ''))).catch(() => {})
+}

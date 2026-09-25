@@ -1,6 +1,6 @@
 // тестовое письмо: показывает, уходит ли почта на самом деле и что ответил провайдер
 export default defineEventHandler(async (e) => {
-  const a = await requireAdmin(e, 'admins')
+  const a = await requireAdmin(e, 'settings')
   const to = normEmail((await readBody(e))?.to)
   const r: any = await sendMail({ to, subject: 'Проверка почты Marscap', text: 'Если вы читаете это письмо — почта сайта работает.\n\nMarscap' })
   await audit(e, a, 'settings.mail_test', null, { to, ok: r.ok, provider: r.provider })

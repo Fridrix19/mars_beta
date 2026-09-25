@@ -1,9 +1,10 @@
 <script setup lang="ts">
 const { api, ok } = useAdm()
 const emit = defineEmits(['changed'])
+const period = ref({ from: '', to: '' })
 const rows = ref<any[]>([]), status = ref('new'), dlg = reactive({ open: false, r: null as any, action: '', note: '', busy: false })
-async function load() { rows.value = (await api('GET', '/refunds' + (status.value === 'all' ? '' : '?status=' + status.value)) as any).refunds }
-watch(status, load); onMounted(load)
+async function load() { rows.value = (await api('GET', '/refunds?x=1' + (status.value === 'all' ? '' : '&status=' + status.value) + periodQS(period.value)) as any).refunds }
+watch(status, load); watch(period, load, { deep: true }); onMounted(load)
 function open(r: any, action: string) { Object.assign(dlg, { open: true, r, action, note: '' }) }
 async function run() {
   dlg.busy = true
@@ -14,6 +15,7 @@ const TITLE: Record<string, string> = { approve: 'Одобрить возвра�
 <template>
   <div class="adm-head"><div><span class="eyebrow">Деньги</span><h1>Возвраты</h1></div>
     <SelectButton v-model="status" :options="[{ v: 'new', l: 'Новые' }, { v: 'approved', l: 'Одобренные (на карту)' }, { v: 'all', l: 'Все' }]" option-label="l" option-value="v" :allow-empty="false" /></div>
+  <div class="toolbar"><AdmPeriod v-model="period" allow-all /><span class="muted">{{ rows.length }} заявок</span></div>
   <p class="muted" style="margin-top:-8px">На баланс — одобрение сразу возвращает деньги. На карту — одобрите, верните через платёжного провайдера и отметьте «Отправлено».</p>
   <DataTable :value="rows" size="small">
     <Column header="Клиент"><template #body="{ data }"><NuxtLink :to="'/admin/users/' + data.user_id">{{ data.email }}</NuxtLink></template></Column>

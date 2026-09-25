@@ -8,6 +8,7 @@
   <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h5M10 17h5"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8C10.5 5 7 4.5 7 6.7 7 8 9.5 8 12 8zm0 0c1.5-3 5-3.5 5-1.3C17 8 14.5 8 12 8z"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
   <symbol id="i-out" viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
@@ -37,12 +38,12 @@
   <!-- боковая колонка -->
   <aside class="cab-side">
     <div class="cab-user">
-      <span class="avatar" id="uAvatar">Ф</span>
+      <span class="avatar" id="uAvatar"></span>
       <div class="cab-user-t">
-        <b id="uName">Фёдор</b>
-        <span class="mono" id="uId">+7 900 ···-··-77</span>
+        <b id="uName">&nbsp;</b>
+        <span class="mono" id="uId">&nbsp;</span>
       </div>
-      <button type="button" class="icon-btn plain cab-bell" data-go="overview" aria-label="Уведомления"><svg><use href="#i-bell"/></svg><i id="bellDot" class="dot"></i></button>
+      <button type="button" class="icon-btn plain cab-bell" id="bell" aria-label="Уведомления о заказах"><svg><use href="#i-bell"/></svg><i id="bellDot" class="dot"></i></button>
     </div>
     <nav class="side-nav cab-nav" aria-label="Разделы кабинета">
       <button type="button" data-go="overview"><svg><use href="#i-home"/></svg>Обзор<span class="n" data-cnt="action"></span></button>
@@ -66,7 +67,7 @@
     <!-- ===== Обзор ===== -->
     <section class="cab-screen" id="s-overview" hidden>
       <header class="cab-head">
-        <div><span class="eyebrow">Личный кабинет</span><h1 id="hello">Добрый день, Фёдор</h1></div>
+        <div><span class="eyebrow">Личный кабинет</span><h1 id="hello">Личный кабинет</h1></div>
         <div class="cab-head-btns"><button type="button" class="btn btn-ghost cab-head-btn" id="ovTopup" data-go="payments:topup" hidden>Пополнить баланс</button><button type="button" class="btn btn-primary cab-head-btn" data-go="new"><svg class="bi"><use href="#i-plus"/></svg>Новый заказ</button></div>
       </header>
 
@@ -181,8 +182,7 @@
           <button type="button" class="cat" role="tab" aria-selected="true" data-f="all">Все<span class="n"></span></button>
           <button type="button" class="cat" role="tab" aria-selected="false" data-f="active">Активные<span class="n"></span></button>
           <button type="button" class="cat" role="tab" aria-selected="false" data-f="action">Ждут действия<span class="n"></span></button>
-          <button type="button" class="cat" role="tab" aria-selected="false" data-f="done">Выполнены<span class="n"></span></button>
-          <button type="button" class="cat" role="tab" aria-selected="false" data-f="closed">Отменены и возвраты<span class="n"></span></button>
+          <button type="button" class="cat" role="tab" aria-selected="false" data-f="done">Исполнено<span class="n"></span></button>
         </div>
         <div class="search"><svg><use href="#i-search"/></svg><input type="search" id="ordSearch" placeholder="Номер или сервис" autocomplete="off"></div>
       </div>
@@ -197,7 +197,7 @@
 
     <!-- ===== Мои карты ===== -->
     <section class="cab-screen" id="s-cards" hidden>
-      <header class="cab-head"><div><span class="eyebrow">Виртуальные карты</span><h1>Мои карты</h1></div><button type="button" class="btn btn-primary cab-head-btn" data-go="new" data-prod="issue"><svg class="bi"><use href="#i-plus"/></svg>Выпустить карту</button></header>
+      <header class="cab-head"><div><span class="eyebrow">Виртуальные карты</span><h1>Мои карты</h1></div><div class="cab-head-btns"><button type="button" class="btn btn-ghost cab-head-btn" id="giftBtn" hidden><svg class="bi"><use href="#i-gift"/></svg>Подарить другу</button><button type="button" class="btn btn-primary cab-head-btn" data-go="new" data-prod="issue"><svg class="bi"><use href="#i-plus"/></svg>Выпустить карту</button></div></header>
       <div class="cards-grid" id="cardsGrid"></div>
       <div class="alert alert-info"><svg><use href="#i-lock"/></svg><div><b>Как показываются реквизиты</b>Номер, срок и CVV не хранятся в кабинете. «Показать реквизиты» запрашивает их у эмитента после подтверждения кодом и скрывает через 60 секунд.</div></div>
     </section>
@@ -317,7 +317,7 @@
           <div class="card">
             <h3>Согласия</h3>
             <div class="kv" id="consentList"></div>
-            <p class="hint">Версии документов и дата акцепта — в разделе «Документы».</p>
+            <p class="hint">Какие редакции вы приняли и когда — в разделе <button type="button" class="auth-link" data-go="docs">«Документы»</button>.</p>
           </div>
           <div class="card">
             <h3>Рассылки</h3>
@@ -343,7 +343,8 @@
       <header class="cab-head"><div><span class="eyebrow">Документы</span><h1>Документы и файлы</h1></div></header>
       <div class="cab-cols">
         <div class="cab-col">
-          <div class="cab-block-head"><h2>Принятые условия</h2></div>
+          <div class="cab-block-head"><h2>Условия сервиса</h2></div>
+          <div id="docPending"></div>
           <div class="doc-list" id="docAccepted"></div>
         </div>
         <div class="cab-col">

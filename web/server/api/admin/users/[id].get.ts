@@ -2,7 +2,7 @@
 export default defineEventHandler(async (e) => {
   await requireAdmin(e, 'users')
   const id = getRouterParam(e, 'id')
-  const u = await one(`select id, email, username, name, phone, status, kyc_status, kyc_reason, consent_offer, consent_news, created_at, last_login_at, failed_logins, locked_until,
+  const u = await one(`select id, email, username, name, phone, telegram, status, kyc_status, kyc_reason, consent_offer, consent_news, created_at, last_login_at, failed_logins, locked_until,
                               user_balance(id) balance_kop from users where id::text = $1`, [id])
   if (!u) fail(404, 'not_found', 'Пользователь не найден.')
   const [ledger, orders, payments, cards, kyc, sessions, refunds] = await Promise.all([
