@@ -14,7 +14,9 @@ async function loadMe() {
   if (r.admin && isLogin.value) return navigateTo('/admin')
 }
 async function loadCounts() { if (me.value.admin) counts.value = await api('GET', '/summary', undefined, { quiet: true }).catch(() => ({})) }
-onMounted(async () => { await loadMe(); ready.value = true; if (me.value.admin?.must_change) pw.open = true; else loadCounts() })
+let cT: any
+onUnmounted(() => clearInterval(cT))
+onMounted(async () => { await loadMe(); ready.value = true; cT = setInterval(() => { if (!isLogin.value && document.visibilityState === 'visible') loadCounts() }, 30000); if (me.value.admin?.must_change) pw.open = true; else loadCounts() })
 watch(() => route.path, () => { if (!isLogin.value) loadCounts() })
 
 const nav = computed(() => [
@@ -22,7 +24,9 @@ const nav = computed(() => [
   { to: '/admin/orders', label: 'Заказы', icon: 'pi-shopping-bag', perm: 'orders', n: counts.value.orders_open + (counts.value.orders_need_info || 0) || 0 },
   { to: '/admin/kyc', label: 'Верификация', icon: 'pi-id-card', perm: 'kyc', n: counts.value.kyc_pending, warn: true },
   { to: '/admin/refunds', label: 'Возвраты', icon: 'pi-replay', perm: 'refunds', n: counts.value.refunds_new, warn: true },
+  { to: '/admin/chats', label: 'Чаты', icon: 'pi-comments', perm: 'chats', n: counts.value.chats_waiting, warn: true },
   { to: '/admin/users', label: 'Пользователи', icon: 'pi-users', perm: 'users' },
+  { to: '/admin/reviews', label: 'Отзывы', icon: 'pi-star', perm: 'reviews' },
   { to: '/admin/analytics', label: 'Аналитика', icon: 'pi-chart-line', perm: 'analytics' },
   { to: '/admin/products', label: 'Товары и цены', icon: 'pi-box', perm: 'products' },
   { to: '/admin/export', label: 'Выгрузки CSV', icon: 'pi-download', perm: 'export' },

@@ -348,3 +348,43 @@
 .ord-t .badge{font-size:11px}
 .cardp .alert{margin:0}
 .cab-bell{position:relative}
+/* лимит расходов и бонус */
+.lim-card{border:1px solid var(--line); border-radius:var(--r-lg); background:var(--surface); padding:16px 18px; display:grid; gap:8px; margin-block:14px}
+.lim-card.lim-in{margin:12px 0 4px; padding:12px 14px}
+.lim-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+.lim-head .k{font-family:var(--font-label); font-size:11.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--text-4)}
+.lim-head b{font-family:var(--font-mono); font-size:15px; color:var(--text)} .lim-head b.warn{color:var(--status-warn)} .lim-head b.hot{color:var(--status-err)}
+.lim-bar{height:8px; border-radius:8px; background:var(--surface-2); overflow:hidden; box-shadow:inset 0 0 0 1px var(--line)}
+.lim-bar i{display:block; height:100%; border-radius:8px; background:linear-gradient(90deg,var(--blue-500,#3D7EFC),var(--accent)); transition:width .4s var(--ease)}
+.lim-bar i.warn{background:var(--status-warn)} .lim-bar i.hot{background:var(--status-err)}
+.lim-foot{display:flex; justify-content:space-between; gap:6px 14px; flex-wrap:wrap; font-size:13px; color:var(--text-3)} .lim-foot b{color:var(--text)}
+.lim-note{margin:0; font-size:13.5px; color:var(--text-3)}
+.bonus-line{display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:var(--r-md); background:color-mix(in oklab,var(--accent) 12%,transparent); border:1px solid color-mix(in oklab,var(--accent) 30%,var(--line)); font-size:13.5px; color:var(--text-2)}
+.bonus-line svg{width:20px; height:20px; flex:none; color:var(--accent)} .bonus-line b{color:var(--text)}
+/* отзыв и чат в заказе */
+.ordx{display:grid; gap:14px; margin-top:14px}
+.ordx .row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap}
+.ordx h3{margin:0}
+.rev-ask{display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap}
+.rev-ask > div{display:flex; gap:12px; align-items:center} .rev-ask > div > div{display:grid; gap:2px} .rev-ask svg{width:26px; height:26px; color:var(--status-warn)} .rev-ask span{font-size:13.5px; color:var(--text-3)}
+.rev-mine p{margin:8px 0; color:var(--text-2); white-space:pre-wrap}
+.rev-reply{border-left:2px solid var(--accent); padding:6px 10px; font-size:13.5px; color:var(--text-2); margin-bottom:8px} .rev-reply b{display:block; color:var(--text); font-size:12.5px}
+.stars{color:var(--status-warn); letter-spacing:2px; font-size:16px} .stars i{font-style:normal; color:var(--line-strong)}
+.rate{display:flex; gap:6px; margin-bottom:12px}
+.rate button{font-size:30px; line-height:1; background:none; border:0; cursor:pointer; color:var(--line-strong); padding:2px; transition:transform .12s, color .12s}
+.rate button.on{color:var(--status-warn)} .rate button:hover{transform:scale(1.12)}
+.ochat .chat-box, #tkView .chat-box{display:flex; flex-direction:column; min-height:0}
+.chat-msgs{max-height:420px; min-height:140px; overflow:auto; padding:10px 2px}
+#tkView .chat-msgs{max-height:none; flex:1}
+.chat-reply{margin-top:8px}
+.msg .att-img img{display:block; max-width:240px; max-height:200px; border-radius:10px; margin-top:6px}
+.chat-file{margin-top:4px}
+/* избранное */
+.fav-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px}
+.fav{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface)}
+.fav-main{display:flex; gap:12px; align-items:center; min-width:0; text-decoration:none; color:inherit} .fav-main b{display:block; color:var(--text)} .fav-main .ord-ico{grid-row:auto}
+.fav-act{display:flex; gap:6px; align-items:center; flex:none}
+.fav-on{color:var(--status-err)} .fav-on svg{fill:currentColor}
+.fav-grid .empty{grid-column:1/-1}
+.chat-msgs .msg{white-space:pre-wrap; overflow-wrap:anywhere}
+.tk b,.tk > span:not(.badge){grid-column:1} .tk-list > .hint{font-size:13px; color:var(--text-4); margin:0}

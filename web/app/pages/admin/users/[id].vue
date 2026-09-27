@@ -4,6 +4,13 @@ const route = useRoute()
 const r = ref<any>(null)
 const adj = reactive({ open: false, rub: null as number | null, sign: 1, comment: '', busy: false, idem: '' })
 const blk = reactive({ open: false, reason: '', busy: false })
+const bon = reactive({ open: false, rub: null as number | null, sign: 1, note: '', busy: false })
+async function saveBonus() {
+  bon.busy = true
+  try { await api('POST', `/users/${u.value.id}/bonus`, { amount_kop: Math.round((bon.rub || 0) * 100) * bon.sign, note: bon.note }); ok('Бонусный счёт изменён'); bon.open = false; await load() } finally { bon.busy = false }
+}
+async function resetLimit() { await api('POST', `/users/${u.value.id}/limit-reset`, {}); ok('Период лимита обнулён'); await load() }
+const BONUS: Record<string, string> = { grant: 'Начислен', spend: 'Скидка по заказу', burn: 'Сгорел остаток', refund: 'Возвращён', adjust: 'Корректировка' }
 async function load() { r.value = await api('GET', '/users/' + route.params.id) }
 onMounted(load)
 const u = computed(() => r.value?.user)
@@ -27,15 +34,26 @@ async function block(blocked: boolean) {
         <template v-if="can('users.write')"><Button v-if="u.status === 'active'" label="Заблокировать" severity="danger" outlined @click="blk.open = true; blk.reason = ''" /><Button v-else label="Разблокировать" severity="success" outlined :loading="blk.busy" @click="block(false)" /></template>
       </div>
     </div>
-    <div class="grid g4" style="margin-bottom:14px">
+    <div class="grid g3" style="margin-bottom:14px">
       <div class="kpi"><span class="k">Баланс</span><span class="v">{{ kop(u.balance_kop) }}</span></div>
       <div class="kpi"><span class="k">KYC</span><span class="v" style="font-size:18px"><Tag :value="KYC_ST[u.kyc_status][0]" :severity="KYC_ST[u.kyc_status][1]" /></span><span class="muted">{{ u.kyc_reason || '' }}</span></div>
+      <div class="kpi"><span class="k">Лимит расходов</span><AdmLimit :limit="r.limit.limit_kop" :spent="r.limit.spent_kop" :resets="r.limit.resets_at" />
+        <Button v-if="can('balance.adjust') && r.limit.resets_at" label="Обнулить период" size="small" text severity="secondary" style="justify-self:start;padding:2px 0" @click="resetLimit" /></div>
+      <div class="kpi"><span class="k">Бонусный счёт</span><span class="v">{{ kop(u.bonus_kop) }}</span>
+        <span v-if="can('balance.adjust')" style="display:flex;gap:4px"><Button label="Начислить" size="small" text @click="Object.assign(bon, { open: true, sign: 1, rub: null, note: '' })" /><Button v-if="u.bonus_kop" label="Списать" size="small" text severity="secondary" @click="Object.assign(bon, { open: true, sign: -1, rub: null, note: '' })" /></span></div>
       <div class="kpi"><span class="k">Заказов</span><span class="v">{{ r.orders.length }}</span></div>
       <div class="kpi"><span class="k">Статус</span><span class="v" style="font-size:18px"><Tag :value="u.status === 'active' ? 'Активен' : 'Заблокирован'" :severity="u.status === 'active' ? 'success' : 'danger'" /></span></div>
     </div>
     <Tabs value="ledger">
-      <TabList><Tab value="ledger">Баланс и операции</Tab><Tab value="orders">Заказы</Tab><Tab value="payments">Пополнения</Tab><Tab value="cards">Карты</Tab><Tab value="profile">Профиль</Tab></TabList>
+      <TabList><Tab value="ledger">Баланс и операции</Tab><Tab value="bonus">Бонусы</Tab><Tab value="orders">Заказы</Tab><Tab value="payments">Пополнения</Tab><Tab value="cards">Карты</Tab><Tab value="profile">Профиль</Tab></TabList>
       <TabPanels>
+        <TabPanel value="bonus"><DataTable :value="r.bonus" size="small">
+          <Column header="Когда"><template #body="{ data }">{{ dt(data.created_at) }}</template></Column>
+          <Column header="Что"><template #body="{ data }">{{ data.reason === 'kyc' ? 'За верификацию' : BONUS[data.kind] }}<div class="muted" style="font-size:12px">{{ data.note }}{{ data.admin_name ? ' · ' + data.admin_name : '' }}</div></template></Column>
+          <Column header="Заказ"><template #body="{ data }"><NuxtLink v-if="data.order_id" :to="'/admin/orders/' + data.order_id" class="mono">{{ data.order_id }}</NuxtLink></template></Column>
+          <Column header="Сумма"><template #body="{ data }"><span class="mono" :class="data.amount_kop > 0 ? 'ok' : ''">{{ data.amount_kop > 0 ? '+' : '' }}{{ kop(data.amount_kop) }}</span></template></Column>
+          <template #empty><span class="muted">Бонусов не было</span></template>
+        </DataTable></TabPanel>
         <TabPanel value="ledger"><DataTable :value="r.ledger" size="small" paginator :rows="25">
           <Column header="Когда"><template #body="{ data }">{{ dt(data.created_at) }}</template></Column>
           <Column header="Операция"><template #body="{ data }">{{ LEDGER[data.kind] }}<div class="muted">{{ data.comment }}<span v-if="data.admin_name"> · {{ data.admin_name }}</span></div></template></Column>
@@ -72,6 +90,14 @@ async function block(blocked: boolean) {
         <div class="field"><label>Комментарий (обязательно; клиент увидит его в уведомлении)</label><Textarea v-model="adj.comment" rows="2" auto-resize fluid /></div>
       </div>
       <template #footer><Button label="Отмена" severity="secondary" text @click="adj.open = false" /><Button :label="adj.sign > 0 ? 'Начислить' : 'Списать'" :loading="adj.busy" :disabled="!adj.rub || !adj.comment.trim()" @click="saveAdj" /></template>
+    </Dialog>
+    <Dialog v-model:visible="bon.open" modal :header="bon.sign > 0 ? 'Начислить бонус' : 'Списать бонус'" :style="{ width: 'min(420px, 94vw)' }">
+      <p class="muted" style="margin-top:0">Бонус — скидка при следующей оплате: списывается целиком, остаток сгорает. На балансе и лимите не отражается.</p>
+      <div class="grid">
+        <div class="field"><label>Сумма, ₽</label><InputNumber v-model="bon.rub" :min-fraction-digits="0" :max-fraction-digits="2" :min="0.01" locale="ru-RU" fluid /></div>
+        <div class="field"><label>Комментарий (обязательно)</label><Textarea v-model="bon.note" rows="2" auto-resize fluid /></div>
+      </div>
+      <template #footer><Button label="Отмена" severity="secondary" text @click="bon.open = false" /><Button :label="bon.sign > 0 ? 'Начислить' : 'Списать'" :loading="bon.busy" :disabled="!bon.rub || !bon.note.trim()" @click="saveBonus" /></template>
     </Dialog>
     <Dialog v-model:visible="blk.open" modal header="Заблокировать пользователя" :style="{ width: 'min(420px, 94vw)' }">
       <p style="margin-top:0">Все сессии завершатся, вход и покупки станут недоступны. Баланс сохранится.</p>

@@ -21,6 +21,8 @@ const CAN: Record<string, AdminRole[]> = {
   audit: ['owner', 'senior'],
   analytics: ['owner', 'senior'],
   export: ['owner', 'senior', 'operator'],
+  chats: ['owner', 'senior', 'operator'],
+  reviews: ['owner', 'senior', 'operator'],
 }
 export const PERMS = Object.keys(CAN)
 export function can(role: AdminRole, perm: string) { return (CAN[perm] || []).includes(role) }

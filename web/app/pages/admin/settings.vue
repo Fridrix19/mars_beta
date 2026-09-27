@@ -5,7 +5,10 @@ const contacts = ref({ email: '', telegram: '', max: '' })
 const KIND: Record<string, string> = { offer: 'Публичная оферта', privacy: 'Политика конфиденциальности', tariffs: 'Тарифы' }
 const doc = ref<{ kind: string; version: string; title: string; note: string; url: string; file: File | null }>({ kind: 'offer', version: '', title: '', note: '', url: '', file: null })
 const fileInput = ref<HTMLInputElement | null>(null)
-async function load() { s.value = await api('GET', '/settings'); domains.value = s.value.email_domains.join('\n'); contacts.value = { email: '', telegram: '', max: '', ...s.value.contacts } }
+const lim = ref({ unverified_rub: '' as any, verified_rub: '' as any, kyc_bonus_rub: '' as any })
+const toRub = (k: any) => k == null ? '' : String(k / 100)
+async function saveLimits() { busy.value = 'l'; try { await api('POST', '/settings/limits', lim.value); ok('Сохранено', 'Лимиты действуют для следующих покупок'); await load() } finally { busy.value = '' } }
+async function load() { s.value = await api('GET', '/settings'); lim.value = { unverified_rub: toRub(s.value.limits.unverified_kop), verified_rub: toRub(s.value.limits.verified_kop), kyc_bonus_rub: toRub(s.value.limits.kyc_bonus_kop) }; domains.value = s.value.email_domains.join('\n'); contacts.value = { email: '', telegram: '', max: '', ...s.value.contacts } }
 async function saveContacts() { busy.value = 'c'; try { await api('POST', '/settings/contacts', contacts.value); ok('Контакты обновлены', 'Сайт покажет их при следующем открытии страницы'); await load() } finally { busy.value = '' } }
 async function publish() {
   busy.value = 'p'
@@ -46,6 +49,16 @@ async function test() { busy.value = 't'; try { await api('POST', '/settings/mai
       </Message>
       <div class="field"><label>Тестовое письмо на адрес</label><div style="display:flex;gap:8px;flex-wrap:wrap"><InputText v-model="to" placeholder="you@gmail.com" style="flex:1;min-width:200px" /><Button label="Отправить" :loading="busy === 't'" :disabled="!to" @click="test" /></div></div>
     </div>
+  </div>
+  <div v-if="s" class="panel grid" style="margin-top:16px">
+    <h2>Лимиты расходов и бонус</h2>
+    <p class="muted" style="margin:0">Лимит считается за месяц с первой покупки: через месяц обнуляется, следующая покупка открывает новый период. Возвраты возвращают лимит. Пустое поле — без лимита.</p>
+    <div class="grid g3" style="gap:12px">
+      <div class="field"><label>Без верификации, ₽ в месяц</label><InputText v-model="lim.unverified_rub" inputmode="decimal" placeholder="без лимита" fluid /></div>
+      <div class="field"><label>После верификации, ₽ в месяц</label><InputText v-model="lim.verified_rub" inputmode="decimal" placeholder="без лимита" fluid /></div>
+      <div class="field"><label>Бонус за верификацию, ₽</label><InputText v-model="lim.kyc_bonus_rub" inputmode="decimal" placeholder="0 — не начислять" fluid /></div>
+    </div>
+    <div><Button label="Сохранить" :loading="busy === 'l'" @click="saveLimits" /></div>
   </div>
   <div v-if="s" class="grid g2" style="align-items:start;margin-top:16px">
     <div class="panel grid">

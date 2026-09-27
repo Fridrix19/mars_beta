@@ -381,6 +381,53 @@ window.MC = (function(){
     return { gift: function(){ return mode === 'gift' ? input.value.trim().toLowerCase() : null; }, mode: function(){ return mode; } };
   }
 
+  /* — отзывы: ?product=slug на странице товара, все вместе — на странице виртуальной карты — */
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]; }); }
+  function initReviews(slug){
+    var list = document.querySelector('[data-rv-list]'); if (!list) return;
+    var more = document.querySelector('[data-rv-more]'), sum = document.querySelector('[data-rv-sum]'), off = 0, all = !slug;
+    function star(n){ return '<span class="rv-stars" aria-label="' + n + ' из 5">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(0, 5 - n) + '</i></span>'; }
+    function item(r){
+      var d = new Date(r.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+      var prod = all ? '<a class="rv-prod" href="' + (window.MC_BASE || '') + (r.slug === 'virtual-card' ? 'virtual-card.html' : 'service/' + esc(r.slug) + '/') + '">' + (r.product_icon ? '<img src="' + esc(r.product_icon) + '" alt="">' : '') + esc(r.product_name) + '</a>' : (r.plan_label ? '<span class="rv-plan">' + esc(r.plan_label) + '</span>' : '');
+      return '<article class="rv-item"><header><span class="rv-av">' + esc(String(r.author || 'П').charAt(0).toUpperCase()) + '</span><div><b>' + esc(r.author) + '</b><span>' + d + '</span></div>' + star(r.rating) + '</header>' + prod +
+        '<p>' + esc(r.text) + '</p>' + (r.reply ? '<div class="rv-reply"><b>Ответ Marscap</b>' + esc(r.reply) + '</div>' : '') + '</article>';
+    }
+    function load(){
+      api('GET', '/reviews?limit=12&offset=' + off + (slug ? '&product=' + encodeURIComponent(slug) : '')).then(function(r){
+        document.querySelectorAll('[data-rv-count]').forEach(function(el){ el.textContent = r.total; });
+        if (!off) list.innerHTML = '';
+        if (!r.total) { list.innerHTML = '<p class="rv-empty">' + (all ? 'Пока нет отзывов — они появятся после первых покупок.' : '0 отзывов — станьте первым после покупки.') + '</p>'; return; }
+        list.insertAdjacentHTML('beforeend', r.reviews.map(item).join(''));
+        off += r.reviews.length; if (more) more.hidden = off >= r.total;
+        if (sum && r.total) { sum.hidden = false; sum.innerHTML = '<b>' + String(r.avg).replace('.', ',') + '</b>' + star(Math.round(r.avg)) + '<span>' + r.total + ' ' + plural(r.total, ['отзыв', 'отзыва', 'отзывов']) + '</span>'; }
+      }).catch(function(){});
+    }
+    if (more) more.addEventListener('click', load);
+    isLive().then(function(on){ if (on) load(); });
+  }
+  /* — избранное: сердечко на странице товара; без входа — запомним и вернёмся после входа — */
+  function initFav(slug){
+    var btn = document.querySelector('[data-fav]'); if (!btn || !slug) return;
+    var on = false, label = btn.querySelector('span');
+    function set(v){ on = v; btn.setAttribute('aria-pressed', v); btn.classList.toggle('is-on', v); label.textContent = v ? 'В избранном' : 'В избранное'; }
+    isLive().then(function(live){
+      if (!live) { btn.hidden = true; return; }
+      me().then(function(u){
+        if (!u) { btn.addEventListener('click', function(){ try { sessionStorage.setItem('mc-fav', slug); } catch (e) {} location.href = (window.MC_BASE || '') + 'login.html?next=' + encodeURIComponent(location.pathname.replace(/^\//, '').replace(/index\.html$/, '')); }); return; }
+        api('GET', '/favorites').then(function(r){
+          set(r.favorites.some(function(f){ return f.slug === slug; }));
+          var pend = null; try { pend = sessionStorage.getItem('mc-fav'); sessionStorage.removeItem('mc-fav'); } catch (e) {}
+          if (pend === slug && !on) api('POST', '/favorites', { slug: slug }).then(function(){ set(true); });
+        });
+        btn.addEventListener('click', function(){
+          var v = !on; set(v);
+          (v ? api('POST', '/favorites', { slug: slug }) : api('DELETE', '/favorites/' + encodeURIComponent(slug))).catch(function(){ set(!v); });
+        });
+      });
+    });
+  }
+
   initPaybar();
   initTheme();
   initSession();
@@ -389,5 +436,5 @@ window.MC = (function(){
   initTrack();
   initNumbers();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing, site: site, contacts: CONTACTS, docs: DOCS, applyDocs: applyDocs, recipient: recipient };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing, site: site, contacts: CONTACTS, docs: DOCS, applyDocs: applyDocs, recipient: recipient, initReviews: initReviews, initFav: initFav };
 })();

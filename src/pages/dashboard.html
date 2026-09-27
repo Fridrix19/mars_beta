@@ -9,6 +9,8 @@
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></symbol>
   <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h5M10 17h5"/></symbol>
   <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8C10.5 5 7 4.5 7 6.7 7 8 9.5 8 12 8zm0 0c1.5-3 5-3.5 5-1.3C17 8 14.5 8 12 8z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
   <symbol id="i-out" viewBox="0 0 24 24"><path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
@@ -50,6 +52,7 @@
       <button type="button" data-go="new" class="cab-nav-new"><svg><use href="#i-plus"/></svg>Новый заказ</button>
       <button type="button" data-go="orders"><svg><use href="#i-orders"/></svg>Мои заказы<span class="n" data-cnt="orders"></span></button>
       <button type="button" data-go="cards"><svg><use href="#i-card"/></svg>Мои карты<span class="n" data-cnt="cards"></span></button>
+      <button type="button" data-go="favs"><svg><use href="#i-heart"/></svg>Избранное<span class="n" data-cnt="favs"></span></button>
       <button type="button" data-go="payments"><svg><use href="#i-pay"/></svg>Платежи и возвраты</button>
       <button type="button" data-go="kyc"><svg><use href="#i-shield"/></svg>Верификация<span class="n" id="navKyc"></span></button>
       <button type="button" data-go="profile"><svg><use href="#i-user"/></svg>Профиль и безопасность</button>
@@ -74,6 +77,8 @@
       <div class="cab-actions" id="ovActions"></div>
 
       <div class="kpi-grid cab-kpis" id="ovKpis"></div>
+
+      <div class="lim-card" id="ovLimit" hidden></div>
 
       <div class="cab-cols">
         <div class="cab-col">
@@ -338,6 +343,12 @@
       </div>
     </section>
 
+    <!-- ===== Избранное ===== -->
+    <section class="cab-screen" id="s-favs" hidden>
+      <header class="cab-head"><div><span class="eyebrow">Отложено</span><h1>Избранное</h1></div><a class="btn btn-ghost cab-head-btn" href="{{BASE}}catalog.html"><svg class="bi"><use href="#i-search"/></svg>Каталог</a></header>
+      <div class="fav-grid" id="favList"></div>
+    </section>
+
     <!-- ===== Документы ===== -->
     <section class="cab-screen" id="s-docs" hidden>
       <header class="cab-head"><div><span class="eyebrow">Документы</span><h1>Документы и файлы</h1></div></header>
@@ -369,6 +380,7 @@
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cabSheetT">
       <span class="sheet-grip" aria-hidden="true"></span>
       <div class="sheet-head"><h3 id="cabSheetT">Кабинет</h3><button type="button" class="icon-btn plain" data-cab-close aria-label="Закрыть"><svg><use href="#i-x"/></svg></button></div>
+      <a href="#favs" data-go="favs"><svg><use href="#i-heart"/></svg>Избранное</a>
       <a href="#payments" data-go="payments"><svg><use href="#i-pay"/></svg>Платежи и возвраты</a>
       <a href="#kyc" data-go="kyc"><svg><use href="#i-shield"/></svg>Верификация</a>
       <a href="#profile" data-go="profile"><svg><use href="#i-user"/></svg>Профиль и безопасность</a>

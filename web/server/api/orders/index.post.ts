@@ -23,7 +23,7 @@ export default defineEventHandler(async (e) => {
   if (giftTo && plan.slug !== 'virtual-card' && 'account_email' in fields) fields.account_email = giftTo
   const amount = b?.amount_cents != null ? Math.round(Number(b.amount_cents)) : null
   try {
-    let o = await one(`select * from place_order($1, $2, $3, $4, $5)`, [u.id, plan.id, fields, 'u:' + u.id + ':' + idem, amount])
+    let o = await one(`select * from place_order($1, $2, $3, $4, $5, $6)`, [u.id, plan.id, fields, 'u:' + u.id + ':' + idem, amount, b?.use_bonus !== false])
     if (giftTo && !o.gift_to) await setGift(o, giftTo, u)
     await fulfillOrder(o.id)
     o = await one(`select * from orders where id = $1`, [o.id])

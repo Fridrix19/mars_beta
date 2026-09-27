@@ -12,7 +12,7 @@
         </div>
         <div class="hero-cta">
           <a class="btn btn-primary" href="#order">Выпустить карту</a>
-          <a class="btn btn-ghost" href="#how">Как это работает</a>
+          <a class="btn btn-ghost" href="#reviews" data-rv-tab>Отзывы <span data-rv-count>0</span></a>
         </div>
       </div>
 
@@ -106,6 +106,15 @@
       </div>
 
 {{SHOWCASE}}
+    </section>
+
+    <section class="panel reveal rv" id="reviews">
+      <div class="section-head sec-row">
+        <div><span class="eyebrow">Отзывы</span><h2>Отзывы пользователей <span class="rv-count" data-rv-count>0</span></h2></div>
+        <div class="rv-sum" data-rv-sum hidden></div>
+      </div>
+      <div class="rv-list" data-rv-list><p class="rv-empty">Пока нет отзывов — они появятся после первых покупок.</p></div>
+      <div class="rv-foot"><button type="button" class="btn btn-ghost" data-rv-more hidden>Показать ещё</button><span class="hint">Отзыв можно оставить после покупки — в карточке заказа в личном кабинете.</span></div>
     </section>
 
 {{AFTER}}  </div>

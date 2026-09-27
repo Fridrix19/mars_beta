@@ -12,6 +12,7 @@ export default defineEventHandler(async (e) => {
     email_domains: d?.v || [],
     contacts: c?.v || {},
     documents: docs.map(x => ({ ...x, url: docUrl(x), current: cur.has(x.id) })),
+    limits: await limitSettings(),
     users_total: (await one(`select count(*)::int n from users`)).n,
     mail: {
       provider: cfg.mailProvider === 'unisender' && cfg.unisenderKey ? 'unisender' : 'log',

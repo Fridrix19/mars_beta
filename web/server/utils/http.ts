@@ -34,6 +34,7 @@ export function checkCode(v: unknown): string {
 // переводит ошибки SQL-функций (raise exception 'code') в HTTP
 const PG_ERRORS: Record<string, [number, string]> = {
   kyc_required: [403, 'Покупки доступны после верификации личности.'],
+  limit_exceeded: [403, 'Превышен лимит расходов.'],
   user_blocked: [403, 'Аккаунт заблокирован. Напишите в поддержку.'],
   insufficient_funds: [402, 'Недостаточно средств на балансе.'],
   plan_not_found: [404, 'Тариф не найден.'],
@@ -48,6 +49,15 @@ export function pgFail(e: any): never {
   if (known) {
     const extra: Record<string, any> = {}
     if (e.message === 'insufficient_funds' && e.detail) extra.shortfall_kop = Number(e.detail)
+    if (e.message === 'limit_exceeded' && e.detail) {
+      const [rem, lim, reset, kyc] = String(e.detail).split('|')
+      Object.assign(extra, { remaining_kop: Number(rem), limit_kop: Number(lim), resets_at: reset || null, kyc_status: kyc })
+      const rub = (k: number) => new Intl.NumberFormat('ru-RU').format(Math.round(k / 100)) + ' ₽'
+      const until = reset ? ' Лимит обновится ' + new Date(reset).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'Europe/Moscow' }) + '.' : ''
+      fail(403, 'limit_exceeded', kyc === 'approved'
+        ? `Превышен месячный лимит ${rub(Number(lim))}: осталось ${rub(Number(rem))}.${until}`
+        : `Без верификации можно тратить до ${rub(Number(lim))} в месяц — осталось ${rub(Number(rem))}.${until} Пройдите верификацию, чтобы снять лимит.`, extra)
+    }
     if (e.message === 'amount_out_of_range' && e.detail) { const [a, b] = String(e.detail).split('-').map(Number); extra.min_cents = a; extra.max_cents = b }
     fail(known[0], e.message, known[1], extra)
   }

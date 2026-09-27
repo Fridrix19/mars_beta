@@ -145,6 +145,7 @@
     });
   });
 
+  MC.initReviews(SLUG); MC.initFav(SLUG);
   MC.initShowcase({ cat: SVC.cat || 'all', current: SVC.href });
   MC.initReveal();
 })();

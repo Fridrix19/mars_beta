@@ -102,7 +102,7 @@ test('деньги: пополнение, KYC, недостача, покупк�
   assert.equal((await client()('POST', `/api/topups/${t.body.payment.id}/test`, {})).status, 401)
 
   const noKyc = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-kyc-1', fields: { account_email: 'a@b.ru' } })
-  assert.equal(noKyc.code, 'kyc_required')
+  assert.equal(noKyc.code, 'insufficient_funds', 'без верификации покупки идут в пределах лимита')
   await db.query(`update users set kyc_status = 'approved' where id = $1`, [u.id])
 
   assert.equal((await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-f-1', fields: {} })).code, 'bad_fields')

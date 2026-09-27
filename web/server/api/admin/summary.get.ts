@@ -13,6 +13,9 @@ export default defineEventHandler(async (e) => {
       (select count(*)::int from orders where status in ('paid','in_work')) orders_open,
       (select count(*)::int from orders where status = 'need_info') orders_need_info,
       (select count(*)::int from refund_requests where status = 'new') refunds_new,
+      (select count(*)::int from chat_threads where last_from = 'user' and status = 'open') chats_waiting,
+      (select count(*)::int from reviews where created_at > now() - interval '7 days') reviews_week,
+      (select coalesce(sum(user_bonus(id)), 0) from users) bonus_total_kop,
       (select coalesce(sum(b),0) from (select distinct on (user_id) balance_after b from ledger_entries order by user_id, id desc) t) balances_kop,
       (select value::text::numeric from settings where key = 'rate_rub_per_usd') rate`)
   const per = await one(`select

@@ -71,6 +71,7 @@
   }
 
 
+  MC.initReviews(null);
   MC.initShowcase({ cat: 'all' });
   MC.initReveal();
   render();

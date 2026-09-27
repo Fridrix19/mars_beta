@@ -14,13 +14,15 @@ watch(() => f.kyc, () => { f.first = 0; load() }); onMounted(load)
   <div class="adm-head"><div><span class="eyebrow">Клиенты</span><h1>Пользователи</h1></div><span class="muted">{{ total }}</span></div>
   <div class="toolbar">
     <IconField class="grow"><InputIcon class="pi pi-search" /><InputText v-model="f.q" placeholder="Логин, почта, имя, телефон или id" fluid /></IconField>
-    <Select v-model="f.kyc" :options="[{ v: null, l: 'Любой KYC' }, { v: 'none', l: 'Без KYC' }, { v: 'pending', l: 'На проверке' }, { v: 'approved', l: 'Пройден' }, { v: 'rejected', l: 'Отклонён' }]" option-label="l" option-value="v" style="min-width:180px" />
+    <Select v-model="f.kyc" :options="[{ v: null, l: 'Любой KYC' }, { v: 'none', l: 'Без KYC' }, { v: 'pending', l: 'На проверке' }, { v: 'approved', l: 'Пройден' }, { v: 'rejected', l: 'Отклонён' }]" option-label="l" option-value="v" placeholder="Любой KYC" style="min-width:180px" />
   </div>
   <DataTable :value="rows" :loading="loading" lazy paginator :rows="50" :total-records="total" :first="f.first" @page="e => { f.first = e.first; load() }"
     row-hover :row-class="() => 'clickable'" @row-click="e => navigateTo('/admin/users/' + e.data.id)" size="small">
     <Column header="Пользователь"><template #body="{ data }"><b style="color:var(--text)">{{ data.username }}</b><div class="muted">{{ data.email }}{{ data.name ? ' · ' + data.name : '' }}{{ data.phone ? ' · ' + data.phone : '' }}</div></template></Column>
     <Column header="Баланс"><template #body="{ data }"><span class="mono">{{ kop(data.balance_kop) }}</span></template></Column>
     <Column header="KYC"><template #body="{ data }"><Tag :value="KYC_ST[data.kyc_status][0]" :severity="KYC_ST[data.kyc_status][1]" /></template></Column>
+    <Column header="Лимит расходов"><template #body="{ data }"><AdmLimit :limit="data.limit_kop == null ? null : Number(data.limit_kop)" :spent="Number(data.spent_kop)" :resets="data.resets_at" compact /></template></Column>
+    <Column header="Бонус"><template #body="{ data }"><span v-if="+data.bonus_kop" class="mono">{{ kop(+data.bonus_kop) }}</span><span v-else class="muted">—</span></template></Column>
     <Column field="orders" header="Заказов" />
     <Column header="Статус"><template #body="{ data }"><Tag v-if="data.status === 'blocked'" value="Заблокирован" severity="danger" /><span v-else class="muted">активен</span></template></Column>
     <Column header="Регистрация"><template #body="{ data }">{{ d(data.created_at) }}</template></Column>

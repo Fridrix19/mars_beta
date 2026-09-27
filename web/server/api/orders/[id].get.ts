@@ -7,5 +7,7 @@ export default defineEventHandler(async (e) => {
   const events = await q(`select kind, status, text, created_at from order_events where order_id = $1 order by id`, [o.id])
   let delivery: string | null = null
   if (o.delivery_enc) { try { delivery = decrypt(o.delivery_enc) } catch { delivery = null } }
-  return { order: { ...orderView(o), delivery }, events }
+  const review = await one(`select id, rating, text, author, status, reply, created_at from reviews where order_id = $1`, [o.id])
+  const chat = await one(`select id, unread_user, last_from from chat_threads where order_id = $1`, [o.id])
+  return { order: { ...orderView(o), delivery }, events, review, chat }
 })
