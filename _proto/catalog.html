@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -929,6 +951,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="index.html">Главная</a></li><li><span aria-current="page">Каталог</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero cat-hero">
@@ -1916,8 +1939,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();

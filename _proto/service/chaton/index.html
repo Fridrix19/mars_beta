@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/ai/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/ai/index.html">Нейросети</a></li><li><span aria-current="page">ChatOn</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/ai/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8cmFkaWFsR3JhZGllbnQgaWQ9ImNvcmUiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzIpIHJvdGF0ZSg5MCkgc2NhbGUoMTQpIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzZFRTdGRiIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3QzVDRkYiLz4gPC9yYWRpYWxHcmFkaWVudD4gPC9kZWZzPiA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSI4LjUiIGZpbGw9InVybCgjY29yZSkiLz4gPGNpcmNsZSBjeD0iMTkiIGN5PSIyMSIgcj0iNC41IiBmaWxsPSIjN0REM0ZDIi8+IDxjaXJjbGUgY3g9IjQ1IiBjeT0iMjEiIHI9IjQuNSIgZmlsbD0iI0E3OEJGQSIvPiA8Y2lyY2xlIGN4PSIxOSIgY3k9IjQzIiByPSI0LjUiIGZpbGw9IiMzOEJERjgiLz4gPGNpcmNsZSBjeD0iNDUiIGN5PSI0MyIgcj0iNC41IiBmaWxsPSIjODE4Q0Y4Ii8+IDxwYXRoIGQ9Ik0yNCAyMy41IDI4IDI3TTQwIDI3bDQtMy41TTI0IDQwLjUgMjggMzdNNDAgMzdsNCAzLjUiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPiA8cGF0aCBkPSJNMzEgMTYuNWgyTTMxIDQ1LjVoMk00Ni41IDMxdjJNMTUuNSAzMXYyIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS1vcGFjaXR5PSIwLjc4IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDwvc3ZnPg==">Нейросети</a><span class="sep">/</span>
-          <span aria-current="page">ChatOn</span>
-        </nav>
         <h1 class="svc-h1">ChatOn<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjI1IiBoZWlnaHQ9IjIyNSIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMjI1IDIyNSI+IDxpbWFnZSB3aWR0aD0iMjI1IiBoZWlnaHQ9IjIyNSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBT0VBQUFEaENBTUFBQUFKYlNKSUFBQUFoRkJNVkVVQUFBRC8vLy9SMGRGQlFVSE16TXhKU1VuRnhjVTlQVDMzOS9mNysvdjA5UFR0N2UzeDhmSGo0K1BxNnVyMjl2YlYxZFZwYVdtQWdJQnpjM08zdDdldnI2K1RrNU9MaTR1K3ZyNFFFQkJlWGw2UGo0K2pvNk9pb3FJM056ZGpZMk1iR3hzd01EQlFVRkFqSXlPYW1wcHljbkl5TWpKVlZWVXFLaXA5ZlgwY0hCd1VGQlNIOWJnVkFBQUxVa2xFUVZSNG5PMmQ2M2FxT2hTRnJZQ0tpdVVpZUxkMGU2djEvZC92Mko3VGJsMXpvaEVTOEl5UjcrL09Mb1FrNnpLekVsc3RpOFZpc1Znc0ZvdkZZckZZTEJhTHhXS3hXQ3dXaThWaXNWVG13L21YajZaZnhBamVQRG1tN1cvY05ON052YVpmU0M5ZWtybWpsMHNHN1VYeXArblgwc1ZzbnJtdkwwalBYYncxL1c1YU9DeERuL1R2bTJBNWgvYm54ZW81enFhQk55M0hiRnZjdnkvQ2JmZHY0L2Rvc2t5bnJ0dDIyOVBsYWpKL2IrNjlsZkU2Ykg1ZXpkWE9mOFA0ZVJ5N3dmRHY1L0NIZ1pzbXo5N0pPTGpUdisrcGVqeTNkSmJoQVAvSkg0V3JkZE9kdU1XMnI5REJsNWQrdGs2RFh0RVlCOHZuWFpPcm15dndndGZCclpiKzZOaDBUd3BRN3VCOU9rMzNoYklvbW5kbDZEL2hhandPTlhid1ROeDBoeVI3RlN2NkVJdW11eVNZNnU3Z3MzVnhvbm1PZnVFLzAwUjEydlFkaDBGNGpzakNRTTFONG4vSElMWXBadFJSQk5ORjlQM1A4MndjbFBJa1lmZk9nMnRqVHN4TWtGNm1Tb2RsR1V2a2p6OGI2OU1WSHltK1hDY1JqYUpPaVM0T25tUXBSaGhEangxbzVSVDBZaFIyT3Ayd0lJNXo4ZTgwd0JvOXhaZ2tRVnZhdlRTT0RvN2pIS0pqU25LTmw5NjIvdjRnQ1h6K05wR2RQTktCL3Zid1Y0YjdlTnVTM0RKOEFudnFoUEt0Qml3M0lNc3c5UEtySnFmSXhVYkx4bzNOYVFFdmxaSm1SL1NKVTVSUm5URzBHa1htKzNDYk5VeXRnQ2xxTU5BdmJmclh5SnJlRys3QkhVN3cxWDAyaExqRVJ2enZIZkJUTkN4Qm9nOElpUjExME44WEpZQXhSTGhob3g1akJxL2VaeWxCQ3VaMk9TdjZpN2dVR3hVMVluZ2RsN1NLNER1TWluTjRiRHhvY00vakJCWnlTRmJOQ2MzSHBHZ0l6eXhod05NYnJRMnpoRmNmazFZeE9QdjJyYVRCUTJQVG1OdDNRSHhpczY4THpyNTNlMlZsWUhpcFo2a0RqRk15YkRUTFlOYXhzUFdDRFlZMkRSa2JERWdEMGdvOTNPaWVoM3NEanpGb1pDWG1TczU1ZzJ2MXZteVBwbWxsb2dmMzJNSVFNazh4QnpNVDN0OEw3c0lnOWhzUU5QNkEzL0tKMzNvSEI5NGpheFhBWkxJQm9SOWpEemFUZHZpcVNsdExJL25mZWxJV01VNEM3OEE4eFRzbWoyclN5eHQ4bVZCekIrNXhRay9CTERwR2RWUEZCOENucVZ2UVFKRzdUZks0SEtJNjVZVDJIYjVOVU92T3FZY2lON09RSURQUzVKR0RFaVdMQ0kyQm5pSWxwVjBmT0E3cVJqK0hXVktub1BHRzZkQ0JOSU5XNkNsbXAxUEJNMmE0aHV2ekdKODRneklTVmlYUVN0cERaeDVuaStUQXc5UjNXQW5EaWY2K2NCSk1oOGdxM0lBL2VkMWROY2lUOXZkazc0OTVvQnBoMEZTVG9JR0NXSTk5WEF4SWhhZlkvaVpmQVhYbkh4Z1BiV3VKd0djeGZOc3BNU0FlV0lyaGRhdkxkVWFYY2VzQXM2QWVDUnhGN2hFYkFnd0pyZ2M2djBxZldkRGUrbHpCMzBocmNJbzVSc1ZqOHRnRWpmMTFnK3o2WCtrOC9ZTkJYdzBlWXcydkhwQ3A4NGtoZ1RBbndwVU02TU1XSUdoTWpWZmFvSjdaVzVKbXFMWEllU2ovbllhZGE1anIvbzYxMHdrSitza2NSYjNNbC81RU5uaWxnNE02bmZITmZYajFQdk1VR0JLQTVnbEJPWTFZaUFSK1MydlZ3QVNIa0xUYVlWUUgrVDhJYWoxcVJGQUNINXBkaWVBS2g4eVRxWHo0UDByZml1MTVwRVdockE3VVVwb0p6RUFtY3VOU3BjWm1qNUtld1ZKcFRJZUdwSldEaWk0TFBITm94WE5jTk11aHVaV0lUbzd0cFdYUUtxVmZIZk5qbnVQaVU0MlYyZXlVUkc2c2tDb1F1VC9CRTlBTjhsYUVFYTZoUWR6Z1RpNHhmeVNZTE1nSVpsamtNTTFaUTVUQVdaQ2hBYXpQWXk0TUs2UkNtamkwMUxWR0I5VlRJMjdmUTFGQ1RlUXVMb1U5NGplanpxNG1DWHdNcjhPc08yNUlkWXEvTjh0eFdUc3NGL0FONUJnN21Db0JzWkJrNHQzYSszdFR6SEVqR0VUOUV2aGVTZVNlb2FlWTNpcmJ5dEVzOGIwM2NMRyt5Z2JQUTJDYzBpRUtLWXJjTEhtOFFIWC8xRU5IcGJsQ0EwVnV1aExVS3FRdUlYdmcxTmhVa2MrVlFHdkdGQk9NcG9ON3A1eFZjMXpjTkIxcHpZV0p5TTFtbjRMSURXQ1pWNXVxb21RblVtZGtnd2FCdlRxSzNDeXFreWlXZWExaHhlcVV3Qk1vbkdFaWR3dEdvMWNVelZ5Q09XNmZEdUlCdmdRZjdESVFrWnQ5Wmt3ZTFiWkRzY3lMMXZXUkl3SGFOazJQK09yRTNua3cwRDIxUDAvS3ZLZ25RQW44aml0U0J0OUFVZVJXZGNxS1pWNUVpeTRzNG53SUVxZU1pVktTcUpZQmsxZkhISmQ2QWlLQmEvRVlCeVdSZTROVFRiMCtaQWVoRUMvem1zQkN1Rk1pcHdRcWxqNHJuTm5Dd3g5SmNEREhwVVlFeXh4OURUVjl1RS9KVkdkTUhsOVZQTVh2ZjhjeUwrb0pqbytWcXFxQklqZkx3eCtvNUthZ0VhR2Vab1BoUVZaVlBjWE16Q1d2amw3N3dkRC9oQUVmTlNJb2N3MnF1bjBjUW1KbTNuRWRQU3I0cVpaNUVRbThtc2ZZdzROcEpUY3NJL2ZoNVFFZWcwZnR4R1pYYy9zUUtURXpqbEdkLzNnbElYN0xnQ2FLQzl3eWVQaFpsNER0WWg5MkR0KzF6SGE3YW82TGcvaUkxWmJNNUIramNjcEVybzFTdSswZmFtZkVXbTh3aUZWVUtmaXV0SUlaZWxqdXNnRFZVazMwR0htcDUzMGpZd2ordFdMeFZXbnllQjlVSW5tT3V3RzdWa0d5a2Q2SEI3cENNS01WVWlxUU1pOXFraUU4VUk3eEViRTBmTjVLUkJvM1JPN2I0STRBM3pSRlBhajhVVnJSUTFxNTFCSWhUWVVyZ3NqUkJlcnNRSlVxTFE4ZlJNSlFPTjh2aXFLclZOZHRpQVJPaDBjT1l1bU5ta2owc1BCVHpTWS96d3l5dk96VFdpekg1WVhCY2hCVk5EMks3T0dOWVBOdEZRYWpJRnhXVExwSmprdFBPb3RtcjJXZnB6eUdYeHlpSktxc0RLRUV6by95aVNpMmRBK1YxNkUrRkhOY1lYV1ZoRm1Lb2kzVnlDZEdMQXVTNHdwMWpOZFRxU0I2cUNpQVZvS2NkQ1k1aG9qd3l2ZFFhckRHU3g5YmltVmVvcjZ1ZkEvVjRsSzlkRld1SjVEcnNMU0pnM3I3T203S1JXRVNQNnpJdVY5TFJ4bFFlMWJhdFQ0Q1N1RGdNY1JNN3BkL0dHeUcxT0F3U0ptWDdJRlVBRmtCb1NLNG8xWEh5Wnk3SjUxbGNGZWhnR2dOei9JWDVvODg3TUh0OTY3cUFidzdIK0FoVVBmeFUvTTNjZHd1ODVyQlMxVXBqTVlDZ2JOcGk0MmJWQ3p6dWxDbG9QOFZsbUdMRGVMNWNlMXRISGxkYmV3aENTUmxYdm5QditHNXEycm1qdzNpbVg3Z2RyUXhIVytsY0lnVlNqK0NCbFpudlZUYnVpQW5IZ3pnQnlJek94U1VlWGxMdkVpMHFwUEdBZ0VqOU1SVW94TDRmdEVtMXc5VzNpVkZwZFlJb3RyUUFZOHgyaTVEZGhOc2tGZnRJU2xWTUlJNDZJMFZWcS84K2tnTnhiUll5bXNFLzdvK2ZjOHZ0Z1U2T3U0ZDlNaUZoZ1lRc1JkdW1qTDZldUlQY29lQ0FjUkdJTHY1RmRGMTV3blp4OWFQM09xY0s5d3d2ZEozTitheTVJM09EeUF6QkFVVFYzcVBoSEUwN1JkOU9BbURFcmlBM1FWYkFaU0k5RExDNEF2MlhrVUhxK3h2RSs1OTBJcXc4d1UzamJqZjBaemk1TnAvSE9ENmZXbUNnTmZFL0RKTWRSOSsyckhMbXJVUjhMMVFQRkg4UXpqUmZsaFdYcHdVdXZvWXJ3b0VUM0llOVp2QjJNQU5HYkpVSjNZOGJSU2Z5cUFCWTMrY21CQ0xNdEhEZXE3Y3hEdGdYb0owWitiMlpObkRlbTR3RmozMGd6UTVtQkw3bnFLSHc5amdEZVp5SGRZelMwWDBiZlQyRm1sTHQ3bkJoLzNRRmJiVTZJMW1zb2lVWGJLbkhWa1RYTEtnVEEzNHdhTTZMcUdXeHhQTjNrRXY0OUtWK1l1MzlqSXRUWE9UajVOUEc1cS9GMWF1RE1PL2tBU1hOaG0vcXRHUnUrejB3SlUrdWhCNkd5NWNPRUdabTlhVW5xQjBNa0VmTXhsam1MOFNHamQ5OUo0MkZtUjR1Tm4wWmNJelZHcEdtU256N1MzeGgzWElEN2RvaGdUNmZpYzI4ZGg5UmpTVEdtNzMzREJGY2VDdUVyM1hiM25IdE0xK2RkZXQ0U2ZNdVlEWkc0VnRqYmdCMTB1R3RmeEdtVmsxNmpaYWJ4Z29CQS9GMThhb3BwOUZJc2FtSGtxZjRuaVV6M28yMmhEVnk5eXI4OUhNVXF5aFBQa1g5aXQ0eHFtbEp2S1htb296bXV2ZzE2YVg0VjBvZ1YvbkZQMFhiNnJ6Ujdqdk1heWpwbFd5MzlabWIveWd0cnZtcjRtbTVuZTl2eGlsZFpTV1U5N2pEb3VPTmZmUHpCYU1LdDA0Tld0VmcyVlNRelp4azAwMEtmbUQxSGZwaFdrOE4zbGhzREw3ZVhUY2RuUW1UMmVtV1JJWjIyRXFRNzUyOUxKK2lzR3pXQ3dXaThWaXNWZ3NGb3ZGWXJGWUxCYUx4V0t4V0N5Vy94Ly9BQUZtcnErb1hsLzdBQUFBQUVsRlRrU3VRbUNDIi8+IDwvc3ZnPg=="></h1>
         <p>Ассистент для повседневных задач. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к ChatOn придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

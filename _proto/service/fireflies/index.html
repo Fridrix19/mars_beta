@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/ai/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/ai/index.html">Нейросети</a></li><li><span aria-current="page">Fireflies AI</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/ai/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8cmFkaWFsR3JhZGllbnQgaWQ9ImNvcmUiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzIpIHJvdGF0ZSg5MCkgc2NhbGUoMTQpIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzZFRTdGRiIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3QzVDRkYiLz4gPC9yYWRpYWxHcmFkaWVudD4gPC9kZWZzPiA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSI4LjUiIGZpbGw9InVybCgjY29yZSkiLz4gPGNpcmNsZSBjeD0iMTkiIGN5PSIyMSIgcj0iNC41IiBmaWxsPSIjN0REM0ZDIi8+IDxjaXJjbGUgY3g9IjQ1IiBjeT0iMjEiIHI9IjQuNSIgZmlsbD0iI0E3OEJGQSIvPiA8Y2lyY2xlIGN4PSIxOSIgY3k9IjQzIiByPSI0LjUiIGZpbGw9IiMzOEJERjgiLz4gPGNpcmNsZSBjeD0iNDUiIGN5PSI0MyIgcj0iNC41IiBmaWxsPSIjODE4Q0Y4Ii8+IDxwYXRoIGQ9Ik0yNCAyMy41IDI4IDI3TTQwIDI3bDQtMy41TTI0IDQwLjUgMjggMzdNNDAgMzdsNCAzLjUiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPiA8cGF0aCBkPSJNMzEgMTYuNWgyTTMxIDQ1LjVoMk00Ni41IDMxdjJNMTUuNSAzMXYyIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS1vcGFjaXR5PSIwLjc4IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDwvc3ZnPg==">Нейросети</a><span class="sep">/</span>
-          <span aria-current="page">Fireflies AI</span>
-        </nav>
         <h1 class="svc-h1">Fireflies AI<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJMYXllcl8xIiB4bWxuczp4PSJuc19leHRlbmQ7IiB4bWxuczppPSJuc19haTsiIHhtbG5zOmdyYXBoPSJuc19ncmFwaHM7IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDU2IDU2IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA1NiA1NjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPiA8c3R5bGUgdHlwZT0idGV4dC9jc3MiPiAuc3Qwe2ZpbGw6dXJsKCNTVkdJRF8xXyk7fSAuc3Qxe2ZpbGw6dXJsKCNTVkdJRF8yXyk7fSAuc3Qye2ZpbGw6dXJsKCNTVkdJRF8zXyk7fSAuc3Qze2ZpbGw6dXJsKCNTVkdJRF80Xyk7fSAuc3Q0e29wYWNpdHk6MC4xODtmaWxsOnVybCgjU1ZHSURfNV8pO2VuYWJsZS1iYWNrZ3JvdW5kOm5ldyA7fSAuc3Q1e29wYWNpdHk6MC4xODtmaWxsOnVybCgjU1ZHSURfNl8pO2VuYWJsZS1iYWNrZ3JvdW5kOm5ldyA7fSAuc3Q2e29wYWNpdHk6MC4xODtmaWxsOnVybCgjU1ZHSURfN18pO2VuYWJsZS1iYWNrZ3JvdW5kOm5ldyA7fSAuc3Q3e29wYWNpdHk6MC4xODtmaWxsOnVybCgjU1ZHSURfOF8pO2VuYWJsZS1iYWNrZ3JvdW5kOm5ldyA7fSA8L3N0eWxlPiA8bWV0YWRhdGE+IDxzZncgeG1sbnM9Im5zX3NmdzsiPiA8c2xpY2VzPiA8L3NsaWNlcz4gPHNsaWNlU291cmNlQm91bmRzIGJvdHRvbUxlZnRPcmlnaW49InRydWUiIGhlaWdodD0iNTYiIHdpZHRoPSI1NiIgeD0iLTEyOS44IiB5PSItMTcyLjgiPiA8L3NsaWNlU291cmNlQm91bmRzPiA8L3Nmdz4gPC9tZXRhZGF0YT4gPGc+IDxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfMV8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMTQ0LjY2NDQiIHkxPSItMTMzLjc3ODEiIHgyPSI1NC4zODExIiB5Mj0iLTM4LjkxOTUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMC44NTcxIDAgMCAtMC44NTcxIC03OS4yMzg5IC02OC4xNzM2KSI+IDxzdG9wIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U4MkE3MyI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjExMyIgc3R5bGU9InN0b3AtY29sb3I6I0RFMkQ3QSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNTM4OEYiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC41NCIgc3R5bGU9InN0b3AtY29sb3I6IzlCNEFCMCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjgxOCIgc3R5bGU9InN0b3AtY29sb3I6IzYyNjJERSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzNCNzNGRiI+IDwvc3RvcD4gPC9saW5lYXJHcmFkaWVudD4gPHBhdGggY2xhc3M9InN0MCIgZD0iTTE4LjQsMEgwdjE4LjNoMTguNFYweiI+IDwvcGF0aD4gPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF8yXyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIxNDUuMTY2NCIgeTE9Ii0xMzMuMzA4NCIgeDI9IjU0Ljg4MzEiIHkyPSItMzguNDQ5OSIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgwLjg1NzEgMCAwIC0wLjg1NzEgLTc5LjIzODkgLTY4LjE3MzYpIj4gPHN0b3Agb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojRkYzQzgyIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuMTAzIiBzdHlsZT0ic3RvcC1jb2xvcjojRjUzRTg4Ij4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuMjc0IiBzdHlsZT0ic3RvcC1jb2xvcjojREM0NTk4Ij4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuNDkyIiBzdHlsZT0ic3RvcC1jb2xvcjojQjI1MUIyIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuNzQ1IiBzdHlsZT0ic3RvcC1jb2xvcjojNzk2MUQ3Ij4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuOTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojM0I3M0ZGIj4gPC9zdG9wPiA8L2xpbmVhckdyYWRpZW50PiA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNDAuMiwyMi4xSDIxLjh2MTguM2gxOC40VjIyLjF6Ij4gPC9wYXRoPiA8bGluZWFyR3JhZGllbnQgaWQ9IlNWR0lEXzNfIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjE0NC43NjI1IiB5MT0iLTEyMy4yMDExIiB4Mj0iMTE0LjE3MSIgeTI9Ii0xMi4zNDAzIiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDAuODU3MSAwIDAgLTAuODU3MSAtNzkuMjM4OSAtNjguMTczNikiPiA8c3RvcCBvZmZzZXQ9IjAiIHN0eWxlPSJzdG9wLWNvbG9yOiNFODJBNzMiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC4xMTMiIHN0eWxlPSJzdG9wLWNvbG9yOiNERTJEN0EiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC4zIiBzdHlsZT0ic3RvcC1jb2xvcjojQzUzODhGIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuNTQiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjRBQjAiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC44MTgiIHN0eWxlPSJzdG9wLWNvbG9yOiM2MjYyREUiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC45OTQiIHN0eWxlPSJzdG9wLWNvbG9yOiMzQjczRkYiPiA8L3N0b3A+IDwvbGluZWFyR3JhZGllbnQ+IDxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik00MC4yLDBIMjEuOHYxOC4zSDU2di0yLjZjMC00LjItMS43LTguMS00LjYtMTEuMUM0OC40LDEuNyw0NC40LDAsNDAuMiwwTDQwLjIsMHoiPiA8L3BhdGg+IDxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfNF8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iMTM0LjgyMzciIHkxPSItMTMyLjMyNzEiIHgyPSIyNS4zMDk4IiB5Mj0iLTk4Ljk2MzYiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMC44NTcxIDAgMCAtMC44NTcxIC03OS4yMzg5IC02OC4xNzM2KSI+IDxzdG9wIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U4MkE3MyI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjExMyIgc3R5bGU9InN0b3AtY29sb3I6I0RFMkQ3QSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjMiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNTM4OEYiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC41NCIgc3R5bGU9InN0b3AtY29sb3I6IzlCNEFCMCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjgxOCIgc3R5bGU9InN0b3AtY29sb3I6IzYyNjJERSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzNCNzNGRiI+IDwvc3RvcD4gPC9saW5lYXJHcmFkaWVudD4gPHBhdGggY2xhc3M9InN0MyIgZD0iTTAsMjIuMXYxOC4zYzAsNC4yLDEuNyw4LjEsNC42LDExLjFjMywyLjksNyw0LjYsMTEuMiw0LjZoMi42VjIyLjFIMHoiPiA8L3BhdGg+IDxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfNV8iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iODIuMjA3OCIgeTE9Ii01Mi43OTA4IiB4Mj0iMTEyLjg4MzYiIHkyPSItMTIzLjA4MDUiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMC44NTcxIDAgMCAtMC44NTcxIC03OS4yMzg5IC02OC4xNzM2KSI+IDxzdG9wIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U4MkE3MyI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjExNCIgc3R5bGU9InN0b3AtY29sb3I6I0RFMjg2RSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjMwMyIgc3R5bGU9InN0b3AtY29sb3I6I0M1MjM2MSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjU0NCIgc3R5bGU9InN0b3AtY29sb3I6IzlCMUE0RCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjgyNSIgc3R5bGU9InN0b3AtY29sb3I6IzYyMEYzMCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzNEMDgxRSI+IDwvc3RvcD4gPC9saW5lYXJHcmFkaWVudD4gPHBhdGggY2xhc3M9InN0NCIgZD0iTTAsMGwxOC40LDE4LjNIMFYweiI+IDwvcGF0aD4gPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF82XyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIxMDcuNjU0MiIgeTE9Ii03OC41Mjk2IiB4Mj0iMTM4LjMzIiB5Mj0iLTE0OC44MTk0IiBncmFkaWVudFRyYW5zZm9ybT0ibWF0cml4KDAuODU3MSAwIDAgLTAuODU3MSAtNzkuMjM4OSAtNjguMTczNikiPiA8c3RvcCBvZmZzZXQ9IjAiIHN0eWxlPSJzdG9wLWNvbG9yOiNFODJBNzMiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC4xMTQiIHN0eWxlPSJzdG9wLWNvbG9yOiNERTI4NkUiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC4zMDMiIHN0eWxlPSJzdG9wLWNvbG9yOiNDNTIzNjEiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC41NDQiIHN0eWxlPSJzdG9wLWNvbG9yOiM5QjFBNEQiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC44MjUiIHN0eWxlPSJzdG9wLWNvbG9yOiM2MjBGMzAiPiA8L3N0b3A+IDxzdG9wIG9mZnNldD0iMC45OTQiIHN0eWxlPSJzdG9wLWNvbG9yOiMzRDA4MUUiPiA8L3N0b3A+IDwvbGluZWFyR3JhZGllbnQ+IDxwYXRoIGNsYXNzPSJzdDUiIGQ9Ik0yMS44LDIyLjFsMTguNCwxOC4zSDIxLjhWMjIuMXoiPiA8L3BhdGg+IDxsaW5lYXJHcmFkaWVudCBpZD0iU1ZHSURfN18iIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIiB4MT0iNzAuODMxMSIgeTE9Ii05OS4zMjA5IiB4Mj0iMTQwLjMwNDYiIHkyPSItMTQ1LjQ3NCIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgwLjg1NzEgMCAwIC0wLjg1NzEgLTc5LjIzODkgLTY4LjE3MzYpIj4gPHN0b3Agb2Zmc2V0PSIwIiBzdHlsZT0ic3RvcC1jb2xvcjojRTgyQTczIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuMTE0IiBzdHlsZT0ic3RvcC1jb2xvcjojREUyODZFIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuMzAzIiBzdHlsZT0ic3RvcC1jb2xvcjojQzUyMzYxIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuNTQ0IiBzdHlsZT0ic3RvcC1jb2xvcjojOUIxQTREIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuODI1IiBzdHlsZT0ic3RvcC1jb2xvcjojNjIwRjMwIj4gPC9zdG9wPiA8c3RvcCBvZmZzZXQ9IjAuOTk0IiBzdHlsZT0ic3RvcC1jb2xvcjojM0QwODFFIj4gPC9zdG9wPiA8L2xpbmVhckdyYWRpZW50PiA8cGF0aCBjbGFzcz0ic3Q2IiBkPSJNMCw0MC4zYzAsNC4yLDEuNyw4LjEsNC42LDExLjFjMywyLjksNyw0LjYsMTEuMiw0LjZoMi42VjIyLjFMMCw0MC4zeiI+IDwvcGF0aD4gPGxpbmVhckdyYWRpZW50IGlkPSJTVkdJRF84XyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIyOTcuNjkwNCIgeTE9Ii0xMzYwLjg4NTEiIHgyPSIzMDkuNTk0NiIgeTI9Ii0xNDU0Ljg3NTQiIGdyYWRpZW50VHJhbnNmb3JtPSJtYXRyaXgoMC44NTcxIDAgMCAtMC44NTcxIC03OS4yMzg5IC02OC4xNzM2KSI+IDxzdG9wIG9mZnNldD0iMCIgc3R5bGU9InN0b3AtY29sb3I6I0U4MkE3MyI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjExNCIgc3R5bGU9InN0b3AtY29sb3I6I0RFMjg2RSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjMwMyIgc3R5bGU9InN0b3AtY29sb3I6I0M1MjM2MSI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjU0NCIgc3R5bGU9InN0b3AtY29sb3I6IzlCMUE0RCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjgyNSIgc3R5bGU9InN0b3AtY29sb3I6IzYyMEYzMCI+IDwvc3RvcD4gPHN0b3Agb2Zmc2V0PSIwLjk5NCIgc3R5bGU9InN0b3AtY29sb3I6IzNEMDgxRSI+IDwvc3RvcD4gPC9saW5lYXJHcmFkaWVudD4gPHBhdGggY2xhc3M9InN0NyIgZD0iTTQwLjIsMGM0LjIsMCw4LjIsMS43LDExLjIsNC42YzMsMi45LDQuNiw2LjksNC42LDExLjF2Mi42SDIxLjhMNDAuMiwweiI+IDwvcGF0aD4gPC9nPiA8L3N2Zz4="></h1>
         <p>Расшифровка и конспекты встреч. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Fireflies AI придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/ai/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/ai/index.html">Нейросети</a></li><li><span aria-current="page">Magically</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/ai/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8cmFkaWFsR3JhZGllbnQgaWQ9ImNvcmUiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzIpIHJvdGF0ZSg5MCkgc2NhbGUoMTQpIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzZFRTdGRiIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3QzVDRkYiLz4gPC9yYWRpYWxHcmFkaWVudD4gPC9kZWZzPiA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSI4LjUiIGZpbGw9InVybCgjY29yZSkiLz4gPGNpcmNsZSBjeD0iMTkiIGN5PSIyMSIgcj0iNC41IiBmaWxsPSIjN0REM0ZDIi8+IDxjaXJjbGUgY3g9IjQ1IiBjeT0iMjEiIHI9IjQuNSIgZmlsbD0iI0E3OEJGQSIvPiA8Y2lyY2xlIGN4PSIxOSIgY3k9IjQzIiByPSI0LjUiIGZpbGw9IiMzOEJERjgiLz4gPGNpcmNsZSBjeD0iNDUiIGN5PSI0MyIgcj0iNC41IiBmaWxsPSIjODE4Q0Y4Ii8+IDxwYXRoIGQ9Ik0yNCAyMy41IDI4IDI3TTQwIDI3bDQtMy41TTI0IDQwLjUgMjggMzdNNDAgMzdsNCAzLjUiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPiA8cGF0aCBkPSJNMzEgMTYuNWgyTTMxIDQ1LjVoMk00Ni41IDMxdjJNMTUuNSAzMXYyIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS1vcGFjaXR5PSIwLjc4IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDwvc3ZnPg==">Нейросети</a><span class="sep">/</span>
-          <span aria-current="page">Magically</span>
-        </nav>
         <h1 class="svc-h1">Magically<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjI1IiBoZWlnaHQ9IjIyNSIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMjI1IDIyNSI+IDxpbWFnZSB3aWR0aD0iMjI1IiBoZWlnaHQ9IjIyNSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBT0VBQUFEaENBTUFBQUFKYlNKSUFBQUJCVkJNVkVYLy8vK0YycXZTczhuK2xISjkyS1o4MktYUnNNZlByY1dCMmFuOC92MytrbS8raTJYL2oyN1dzY3YraldqUHRjNzEvUGova216bTkrMlAzYkhyNXVxZjRiekE2OUxIN2RmejhmUFF0TWpTdWN2YXlkYXM1Y1dtNDhEYTgrVzE2TXQ3M3E3NTV0N2oyZUhPNzl6NHVxVDZtSGFNM0xEWnh0VHMrZkhVdnM3Zjllajc5L1Q1M05HN3Y1V1ExYWZTc1lyNTBzVDVwb25KdDQvaDFON2dxYkRuNE9ib3BLR1UwN0Nhelo3M3JwWDJsRzZzeDV2NTROZjZubjYvdkpQUHM0djV5N3I1d2E2VzBxWHJvWHozNytqNXE1RHNvSHl6dzVqanBvSHBvNWJ2bm9yVnNMMzBsWDd1dTdISjJOSEd0OFBwd3NMeDF0VGFwcktnemJYbHBxZkN3OFhQNDlnZ0U2N2lBQUFNQjBsRVFWUjRuTzFkYTF2aVNCWldrMEFTYkNRaTRBVUJCUlRGNmRXMm5SMTMyMWw3dHAyZGJudW5lNXllL2Y4L1paTkE3dStwVk5FVkNNOVQ3MGNsZWVybDNLdk9LVFkyRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlRXRFpOZXU5ODliclZhM1g1N2VObFk5WExrd3VyMW00YWhteEYwUTIvMVZyMHNhZWdkNnk2NXpUUk0vYWY3YTJ2VmkvdCtXTzFOUGN0dXp2SDFQMnFqRDZ0ZTRmZkJhdXM2UWMrbnVEbmVyajJ0TThlaHllTG5TOUhXN05wb1hYVjEwc3poNTFIODU3YW1PZmE3VmE5MUlReU5YSDR1Qm45ektXcHJLY1l1RjBFWHRzdFFxejlNVjcxZ1FWZ2NHam9YNHMrZUVEWGJQbG4xbW9YUTJLUWlSQmFtTmtQdGF0V3JGb0FJd2MzQnY3Ym5GSzlYdlc1dU5QanBlZmhwVzFzM2lrMEJDWHBDSE5zQnhUV0pHc2RpQk4yQUVURFU2bXVSMzNSNHZXZ0E4NGVRb1QxZWc3ZzRFU1c0YVlhRzZBcHh0T3IxNStOTVVFZGR2STRZYXJYU2gwVmhIZlVRWTFoNlBiV1l4WktwdS9DSy9lVGZCM2JFVUtzL3Jwb0RHMzFTUjExMng4UGRoclZoTlM3YkxjT2tHR3IxVWd1eFFhYmJlbk9ZK0dBN1ZqcWFDWWJPKzFXdG5nZVVDTTNOWWVhejdaRGlXWUpocVlWSVdhSFJSWitlQk5uckw5dEpobzlMWHJZQWhwaWgwY0VmdDJicG5WL254ekZlN3FwRjBNSUVzeG9hUHVCUmpPVTBaWStKMk04d0NNN3lnMWhlT28rSnBVMXNoc2pQbUgzV0k5NlhNdmgzaXFGbUwydkZva0JGaGRsa1ArT2FycGt5d3hLWEdFaUV4bTdPUTgyTW8zRVpsclFVUmxXRjJjcDdxcGN4dy9JYVlnOHd6QldoSzhSeG1xQm1QeXhodVF1Z2piUTAvN0YzOVF4RHpTbG5XdE1GSjJoTVJ6ckRmVVpKM1loWXp2M2hWcGFobm44S2FnRVJsdFdaTm9FWlRuS2Z1b1lNeTVuVm9GaVJiMDhQUUVuTHloQTRHajMzb1pNYUlGaFdoa2lHdVEvZElCR1dsZUhaQWxxS1JhalYxc2ZUNUxYTllCRnF0YVVzV0JnTFJJc3JMRUt0cEZ1S0tPSzNtVTlZbUo5bVB5MXB5WUlBV1Z0TzdUUnlNTU95YnJmQnpKdGxpSVNiY1YxcFNZK0RZZlhFVUZOcmpOMU1hZE5TWEFIcnRNK2dkRlN6YjVhNGFDSEFYUXhTaUpRZkxXK0pUK3hFVVpZNFJSbjNuR0ZabFhTamdUYUVpWDBNMmdnMSszN0o2eFlBeUdwY1M0UTczdmVVRVpaNVE1amExZGZCWHMwanJhUGw5VE1lOE5HVG1URkYyc3VVVzRUeEU3TUV6bElmTzZFbFdHb3I5SUFacHJ6TmxMYkJNanZTR1loR2hRUkZoaHN0Y3l3TUFNcGduK0p4K0FrTDdzeXNoWnZ4Y1VtYzVPc2h4YWQxMWxFUG9FcWNVWnlmZE44enZNeWE5SmhpZ25NcFdrOHNndXZROCtWaWwrbzQ4YVRJSkxnR1JqaERoNmJJVk5IU04zeEZvRXd4NkZxbkdLNkJsd2xBTmdrUGZxTWpSVWxQWXpBc3l0dVlteVREa201elQ0YnRmci9iN1hkNnlVT21Cam11OWg5Q1Q3UDU5djdlNmUzdDBlM3QzZjZxekxQUmJ1bmgxS1J1bU1lOTJFcklUdUhCcjFDS3FSNTI2KzU4cTFxWm8xbzl2TjFmTWprWHcxWjZhdExVOVc0a1NZcGl2T1U1UmpBUjZmZVBYRjViY1ZTcWgzZEw1b2ZISmsyakZYS2tLR2I3ZzFJRTl5K3FTWHB6a3BYVDVmSGJQU003Z1UwOVBMa25Jait3eE5wajlHN3J2QXJvelRnZTdDMkpZTjlnTmF1Ylo0RVlLWXBwR2RaamUvaDNGU1MvQU5YelpUaWRDUzNBUUl6QjFoT3VNOUl4c1I0cjZvOUlBUVppTE43bDlNaTU1UWg2YS81Vncvek5mSk5RMDFoM2tIWElFdUJjakVWYkk1bHpKa21ZODNORHVBdWVOTVFvVjVzZTVCTjBLUjRWU3BEWWFjckM2UHBpaEljMWlYZ1JSWHJyZ0lPZnA2bEZVbXp6VHI1NjF0aHV1TTRHZlNOeGhsRlBOeS9CUWltS3pjT1lSaE5uNERHR2tSSHlFM1FWOWJZZ2dqMStDUVlrNFI5ai9hUlJQWEhCWTRNaHhXSVNISGp1c2dCaWpldVJqdDZLRUhRcEZoSTA0TEhMQW9oM3pBWUJmQzhuRG1ad1VFRG9weWVhUkJtRys2WGhjZjIrbUFTM0N2RTJFMkVqcEJCT0c5cmg1TWloS0VGWFQ2WG5xSUxUeXpRR2IwSVJCaHY0Z2tZNHc0RmtnZ3NOVG1LRzRhbEYwT3E4TDJxRVBpUVhVNHpCU1c5c0V0d2dSQkw4SVZUU29LUVFpSVFKaWxLZERlbG1kTE0vdkx3Y2RuV09oTnovUGphaldEalAxMGdkZFF2N2kvTkRXQTc3LzVZWjl5a1JtbWZoVE5Nd3I2aWFpL0MzZEtpZ0FrWDFZcy8vZ0hWSFZSeFZpVUlrRW00OTBZbmZZUmJHYzRKUjVUUS82eVd6dFppdlBNVmZna3doNHFYcnFhRzBSaXN2b2d4aWhkUGNreDVCQVZVT0UvSWg0cVU4UzBRdGVYRHFic2kyeHNqTGhHYUlkVFJGa0tKWWtaYWVndFpZWWxqRU9tYUljWFpoVWxnWWVwWHZGQXNuRyt2d04zRWhpU0FjbktRNlIzZWJoRGtPZnZrMVVkdjdqYzQ0bWFtQXZCcDZYRmtKT0l6MjlLeElEM0VjbUcrMlV4dFExTEtKaEF4NUpGbFJIMDMzTWdlYUxwUFhDSnFtOGZyblRQOUZqVFJDN0NMaGgrV29LUXlHT1UzNDFtVzdaUm96bkhVN0RURDZVLzlnWVNNOEpONkpORnBPU0VTZTFJUUQ5aWswSmk1bTN3U1l3S3RmWVNNa2JRc0pzU0tsd2tBWkc4ZmdaQUxUYkIrYjh4WVNaSVJ4WUlseXlrUmtodWxHdFZ4a1RtT2NqenVRSWFNb1FuNkpVbWtoQ1Bhbll6eWxLRHFmTUVGV1lZdXFMQmxwRFNydVVjY29HKzhkTG9Kc3JRTnFLaU1pUWtjai9KYXJoS3VoVkhScml5bVM4NnlheW5BMUhUQUprenVDbmtIQzFUZy9FZ1J6OWtGUEFVTUo5UVZ3cGVKbXVMRVJqYVRiemx1Q1lPV2MvWTQ5d0ZDQ013WHRQeHp6eXhtTUFsZGpqNThwRldYcktIWTFPVjhLRDlETW5iQ2ppUXpSK1VSdXkrUnVFS0lrU0VLNEFOdUl1WE9UYUhYMUhCL0RZMUxnS1FtYmlvQWhZNWFKaGg4Um5XODBRWTRzR29pL0lJYUx2TWROdm0ySE5rR3Vrd2lReVphSW9WVzNOUVpCcnRCZERFT1FsaTdFY0dNMFptejk4aDFERk1RUWVKcUZra0VRelNLQ2ZNVjZNWFlJNHVFaXZwUkprRE51bzJnaGdTSElhUmFKaDNlTTQ1ZThYQ2FBQmQ0aElSNkNmYWowVmpBSGlHMXJJWUl3cDVHd1V3TnFDL0c4VkFyQmpidGk4bExVRWlOYVc3QUlDdlE0Z1JNQUdiV0ZoU3BnTVdmS3NrR1IzaGdRTEtSczdHY0pDaFlYckVhTEhZRUtGcG1obEYxdjBIMFhtMFJiYkdFaFBndk1XSUFDV002R0tkclVGNGo1RmtPQXo1b2pNQWlFOWxlbDdMV2hWbCtkMjV0YWRDZkp6bHRIWktJU2JyWEphYXVCWjJ1OEQ5UDlhanNmL2YwMzdvbERkSllxNlFSUjdES0kvR1hOOFhtMndXZy84R2s4TkdkSlIvbHd5cDR2TnlVRG9XdUNZVnNOMy9BMjJFcVVaSVk0SXZMdEtKS0JjT2RiYkllNHpuUGZEZ3c1MHJxRzRDazNSM0pLQnNLZEh4TmI0QnkvM0lFOXNyUW1US0pUSWUvR1FKcmd4OVN3Y3o1RjdMQmtuZU9Ubzcxc1V5UUx3cDFQbVdudVBJcEVUNHE4Vm1Hd3M1OUxrYmJCTEVIdko2M0VDZWJ1SUF2QW90cGthRVc5SlhNMVJOQjFOemRrWExTSW1DcTFzWTNxM0tQY3paUU05SlgvRXNQT2R2MFJpMlNmR2pTUjJweElkbDhhTGFDcEZ0MFNXejNGMTNuNlloeURIM3lja3FOUVVrVkkzQkhzd1RTNmFWVzkyeUlKZXZVOGZVR1VYYmZmSjhlZHZWbEw2bDJ5bTlrSmdqN0haaWNrMmRqOS9RdGpVODFmMVRYaitoMm45dm5ySHljZnB0UHB4djdkN1FIWlhDclZrYzdBR2lmeGZqZTEyZXIydS8wdjdwcFkyNkt6Q00yNEkwcHpubmNxbGVlWGw1Y3E4MDNTRXJZWWNuNm55cDkzZnNWdVNRK09lRmtYMURqUHpGZWt2eXlaSUdmc0k1Si92bUl1S2lybVB0Q1hSeEJ0TnBsM0ZUSDZSTjA4dzh1d0V0T3JkNlFwMmtTWFJncnlkZFJEM3ZDaCtYY213NFR2bzI4emM3aEVXTkN3TEt3eGVCbW1ER2RFVVNRYk5lTHZLbXlvbXowNHcyU1lXZFFONVZESHVRd0xuQVZtZXhzV3cyeW5qRVZSelBXbWhYaVpBT3hmcDZRWndtK2RTTi95dkdtaGM4RHNYeGlsWllqVmlwQ2lUYmRyTElHZ3V5ejYxLy9JYUVFMWN4SFhZakVOc2VCaGRSOHRLbWhRREJtZWI0VGlJcU1scGZnTEIzejBpZENQdFpSOTBjTjFEUmdqN1d2a2REM25vMGRONHdHRzFRdDJrWE9pWlkyUmFweXFIQzd0SWg0TFR6Z1pXWVljV2pVQ1lvUU1DeHZEaCtnaG4ycGtCY2p6cFo4OHBCMk84eUtxN1VXZ25aM2lNcEw5THBWRFhxdTV0cE1jczVuYlVtOFlDbURGZjRZeXcxRHNaaWZyVWF2SGREVWRFaXNIcHl1NjcydllNaElrWDBYOHprVzkzdFZOTFNJWkQ0bVY2c1dTYjhGS29ORnA2ZUdRa3hjdHZNdkhLaGVuaTF3UU9MMit0K3QxMjU2cDZZNnZtOVdYdDljcnYyelEydTEwbTdxaEc0YnhwZkxscjkvL04xbGNvNnlUNjlHRFhYT2hmZnoyOHZYckh5Y3JweGNoTnVYMHZiQ21IcVM4U2tGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUZCUVVGQlFVRkJRVUVJL3dlVkZmdm5FTzFLbndBQUFBQkpSVTVFcmtKZ2dnPT0iLz4gPC9zdmc+"></h1>
         <p>Мобильные приложения без кода. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Magically придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/work/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/work/index.html">Для работы</a></li><li><span aria-current="page">JetBrains</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/work/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9Indvcmstc2NyZWVuIiB4MT0iMTQiIHkxPSIxNSIgeDI9IjUwIiB5Mj0iNDciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzYwQTVGQSIvPiA8c3RvcCBvZmZzZXQ9IjAuNTUiIHN0b3AtY29sb3I9IiMzOEJERjgiLz4gPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjQTc4QkZBIi8+IDwvbGluZWFyR3JhZGllbnQ+IDxsaW5lYXJHcmFkaWVudCBpZD0id29yay1nbG93IiB4MT0iMjAiIHkxPSIyNCIgeDI9IjQ0IiB5Mj0iNDIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iI0UwRjJGRSIgc3RvcC1vcGFjaXR5PSIwLjk1Ii8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0M0QjVGRCIgc3RvcC1vcGFjaXR5PSIwLjkyIi8+IDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz4gPHJlY3QgeD0iMTIuNSIgeT0iMTUiIHdpZHRoPSIzOSIgaGVpZ2h0PSIyNyIgcng9IjcuOCIgZmlsbD0idXJsKCN3b3JrLXNjcmVlbikiIGZpbGwtb3BhY2l0eT0iMC4xOCIgc3Ryb2tlPSIjRjhGQkZGIiBzdHJva2Utd2lkdGg9IjIuOCIvPiA8cGF0aCBkPSJNMTguOCAyMy41aDI2LjQiIHN0cm9rZT0iI0Q4RjFGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNTgiIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTMyIDQyLjN2NS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTI0LjQgNDkuMmgxNS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHJlY3QgeD0iMjAuMiIgeT0iMjcuMiIgd2lkdGg9IjEwLjQiIGhlaWdodD0iNy42IiByeD0iMi4zIiBmaWxsPSIjMzREMzk5IiBmaWxsLW9wYWNpdHk9IjAuOTYiLz4gPHBhdGggZD0iTTM1LjIgMjkuNGg4LjYiIHN0cm9rZT0idXJsKCN3b3JrLWdsb3cpIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Ik0zNS4yIDM0aDYuMSIgc3Ryb2tlPSIjOTNDNUZEIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Im0yNC4yIDMwLjggMS43IDEuNyAzLjUtMy44IiBzdHJva2U9IiMwQjEyMjciIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPC9zdmc+">Для работы</a><span class="sep">/</span>
-          <span aria-current="page">JetBrains</span>
-        </nav>
         <h1 class="svc-h1">JetBrains<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOTgiIGhlaWdodD0iNjQiIGZpbGw9Im5vbmUiIHZpZXdCb3g9IjAgMCAyOTggNjQiPiA8ZGVmcz4gPGxpbmVhckdyYWRpZW50IGlkPSJhIiB4MT0iLjg1MDAwMSIgeDI9IjYyLjYyIiB5MT0iNjIuNzIiIHkyPSIxLjgxIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+IDxzdG9wIHN0b3AtY29sb3I9IiNGRjk0MTkiLz4gPHN0b3Agb2Zmc2V0PSIuNDMiIHN0b3AtY29sb3I9IiNGRjAyMUQiLz4gPHN0b3Agb2Zmc2V0PSIuOTkiIHN0b3AtY29sb3I9IiNFNjAwRkYiLz4gPC9saW5lYXJHcmFkaWVudD4gPC9kZWZzPiA8cGF0aCBmaWxsPSIjMDAwIiBkPSJNODYuNDg0NCA0MC41ODU4YzAgLjg0NjQtLjE3OTIgMS41OTMzLS41Mzc3IDIuMjUwNS0uMzU4NS42NTczLS44NTY0IDEuMTY1MS0xLjUxMzcgMS41MjM2LS42NTcyLjM1ODUtMS4zOTQxLjUzNzgtMi4yNDA2LjUzNzhINzh2Ni4xMDQ0aDUuMDc4N2MxLjkxMiAwIDMuNjI0OC0uNDI4MiA1LjE0ODQtMS4yODQ2IDEuNTIzNi0uODU2NCAyLjcxODYtMi4wNDE1IDMuNTg1LTMuNTQ1Mi44NjYzLTEuNTAzNyAxLjMwNDUtMy4xOTY2IDEuMzA0NS01LjA4ODZWMjEuMDE3OGgtNi42MzIydjE5LjU2OFptMTcuODU1Ni0xLjgyMjRoMTMuODkxdi01LjYwNjVIMTA0LjM0di02LjM2MzNoMTUuMzU1di01Ljc3NThIOTcuODc2NnYyOS45NzQzaDIyLjI0NjR2LTUuNzc1N0gxMDQuMzR2LTYuNDUzWm0xNy44NjUtMTEuODAwNWg4Ljg4MnYyNC4wMTkzaDYuNjMzVjI2Ljk2MjloOC44NDJ2LTUuOTQ1MWgtMjQuMzY3djUuOTU1MWwuMDEtLjAxWm00Ny4wMjIgOS4wMDIyYy0uNTE3LS4yNzg4LTEuMDg1LS40ODc5LTEuNjczLS42NDcyLjQ0OS0uMTI5NS44NzctLjI4ODggMS4yNzUtLjQ4OCAxLjA5Ni0uNTY3NiAxLjk2Mi0xLjM2NDMgMi41NzktMi4zOS42MTgtMS4wMjU3LjkzNi0yLjIwMDcuOTM2LTMuNTM1MSAwLTEuNTIzNy0uNDE4LTIuODg3OS0xLjI0NC00LjA5MjktLjgyNy0xLjE5NS0xLjk5Mi0yLjEzMS0zLjQ4Ni0yLjgwODItMS40OTQtLjY2NzItMy4yMDYtMS4wMDU4LTUuMTE4LTEuMDA1OGgtMTMuMzE1djI5Ljk3NDNoMTMuNTc0YzIuMDExIDAgMy44MDQtLjM0ODUgNS4zODctMS4wNTU2IDEuNTczLS43MDcgMi43OTgtMS42ODI5IDMuNjc1LTIuOTQ3Ni44NjYtMS4yNTQ3IDEuMzA0LTIuNjg4NyAxLjMwNC00LjMwMiAwLTEuNDgzNy0uMzM4LTIuODA4Mi0xLjAyNi0zLjk4MzMtLjY4Ny0xLjE3NS0xLjYzMy0yLjA4MTItMi44NTgtMi43Mjg1bC0uMDEuMDA5OVptLTEzLjYwMy05LjkxODRoNS44ODZjLjgxNiAwIDEuNTMzLjE0OTQgMi4xNjEuNDM4Mi42MjcuMjg4OCAxLjExNS43MDcgMS40NjQgMS4yNTQ3LjM0OC41Mzc4LjUyNyAxLjE3NTEuNTI3IDEuOTAyMSAwIC43MjY5LS4xNzkgMS40MTQtLjUyNyAxLjk4MTctLjM0OS41Njc2LS44MzcuOTk1OC0xLjQ2NCAxLjMwNDUtLjYyOC4zMDg3LTEuMzQ1LjQ1ODEtMi4xNjEuNDU4MWgtNS44ODZ2LTcuMzQ5Mi4wMDk5Wm0xMC4xMzggMTguMTM0Yy0uMzc4LjU2NzYtLjkxNiAxLjAwNTgtMS42MDMgMS4zMTQ1LS42OTcuMzA4Ny0xLjQ4NC40NTgxLTIuMzkuNDU4MWgtNi4xNDV2LTcuNjg3OGg2LjE0NWMuODg2IDAgMS42NzMuMTY5MyAyLjM3LjQ5NzkuNjg3LjMyODYgMS4yMzUuNzg2NyAxLjYxMyAxLjM4NDIuMzc4LjU5NzUuNTc4IDEuMjc0Ny41NzggMi4wNDE0IDAgLjc2NjgtLjE5IDEuNDI0MS0uNTY4IDEuOTkxN1ptMjkuNTk2LTUuMzA3N2MxLjY2My0uNzk2NyAyLjk0Ny0xLjkyMiAzLjg2NC0zLjM2NTkuOTE2LTEuNDQ0IDEuMzc0LTMuMTE3IDEuMzc0LTUuMDI4OSAwLTEuOTEyLS40NDgtMy41MjUzLTEuMzQ0LTQuOTU5Mi0uODk3LTEuNDM0LTIuMTcxLTIuNTM5NC0zLjgxNC0zLjMyNjEtMS42NDQtLjc4NjctMy41NDYtMS4xNzUxLTUuNzE3LTEuMTc1MWgtMTMuMTI0djI5Ljk3NDNoNi42NDJWNDAuMDc3OWg0LjMyMmw2LjA4NCAxMC45MTQyaDcuNTc4bC02Ljg1MS0xMS43MjA4Yy4zMzktLjExOTUuNjc3LS4yNDkuOTk2LS4zOTgzaC0uMDFabS0yLjE1MS02LjEyNDRjLS4zNjkuNjI3NC0uODk2IDEuMTE1NC0xLjU4MyAxLjQ0NC0uNjg4LjMzODYtMS40OTQuNTA3OS0yLjQyLjUwNzloLTUuOTc1di04LjI5NTNoNS45NzVjLjkyNiAwIDEuNzMyLjE2OTMgMi40Mi40OTc5LjY4Ny4zMjg3IDEuMjE0LjgxNjYgMS41ODMgMS40MzQuMzY4LjYxNzQuNTU4IDEuMzU0NC41NTggMi4xOTA4IDAgLjgzNjUtLjE5IDEuNTczNC0uNTU4IDIuMjAwOHYuMDE5OVptMjAuNTk0LTExLjczMDgtMTAuNzA2IDI5Ljk3NDNoNi43NDJsMi4xMjEtNi42MTIyaDExLjExNGwyLjI3IDYuNjEyMmg2LjYxMkwyMjAuOTkgMjEuMDE3OGgtNy4xODlabS0uMzM5IDE4LjM0MzEgMy40NDUtMTAuNTc1Ni40MDktMS45MjIuNDA4IDEuOTIyIDMuNjg1IDEwLjU3NTZoLTcuOTQ3Wm0yMC42OTMgMTEuNjMxMmg2Ljg1MVYyMS4wMTc4aC02Ljg1MXYyOS45NzQzWm0zMS4wMi05LjY5OTMtMTIuODk2LTIwLjI3NWgtNi40NjN2MjkuOTc0M2g2LjA1NVYzMC43MTcybDEyLjgyNiAyMC4yNzQ5aDYuNTMzVjIxLjAxNzhoLTYuMDU1djIwLjI3NVptMzEuNTI4LTMuMzU1OWMtLjY0Ny0xLjI0NDgtMS41NjQtMi4yOTA0LTIuNzI5LTMuMTM2OS0xLjE2NS0uODQ2NC0yLjUwOS0xLjQwNDEtNC4wMjMtMS42OTI5bC01LjA5OC0xLjA0NTZjLS43OTctLjE4OTItMS40MzQtLjUxNzgtMS45MDItLjk5NTgtLjQ2OS0uNDc4LS43MDgtMS4wNzU1LS43MDgtMS43ODI1IDAtLjY0NzMuMTctMS4yMDUuNTE4LTEuNjgzLjMzOS0uNDc4LjgyNy0uODQ2NCAxLjQ0NC0xLjExNTMuNjE4LS4yNjg5IDEuMzM1LS4zOTgzIDIuMTUxLS4zOTgzLjgxNyAwIDEuNTU0LjEzOTQgMi4xODEuNDE4Mi42MjcuMjc4OCAxLjExNS42NjcyIDEuNDY0IDEuMTc1MXMuNTI4IDEuMDc1NS41MjggMS43MjI4aDYuNjQyYy0uMDQtMS43NDI3LS41MjgtMy4yODYzLTEuNDQ0LTQuNjIwNy0uOTE2LTEuMzQ0My0yLjIwMS0yLjM4OTktMy44MzQtMy4xNDY4LTEuNjMzLS43NTY4LTMuNTA1LTEuMTM1Mi01LjU5Ny0xLjEzNTItMi4wOTEgMC0zLjk0My4zODg0LTUuNTY2IDEuMTc1MS0xLjYyMy43ODY3LTIuODk4IDEuODcyMS0zLjgwNCAzLjI2NjMtLjkwNiAxLjM5NDEtMS4zNjQgMi45Nzc1LTEuMzY0IDQuNzYgMCAxLjQ0NC4yODggMi43NDg1Ljg3NiAzLjkwMzYuNTg3IDEuMTY1MiAxLjQxNCAyLjEzMTEgMi40NzkgMi44OTc5IDEuMDc2Ljc2NjggMi4zMTEgMS4zMDQ1IDMuNzI1IDEuNjAzM2w1LjM5NyAxLjExNTNjLjg4Ni4yMDkxIDEuNTg0LjU5NzUgMi4xMDEgMS4xNTUxLjUxOC41NTc3Ljc2NyAxLjI0NDguNzY3IDIuMDgxMyAwIC42NjcyLS4xODkgMS4yNzQ3LS41NjcgMS44MDI1LS4zNzkuNTI3Ny0uOTA3LjkzNi0xLjU4NCAxLjIyNDgtLjY3Ny4yODg4LTEuNDc0LjQyODItMi4zOS40MjgyLS45MTYgMC0xLjc4Mi0uMTU5My0yLjUyOS0uNDc4LS43NDctLjMxODYtMS4zMjUtLjc3NjctMS43MzMtMS4zNzQyLS40MTgtLjU4NzUtLjYxNy0xLjI3NDctLjYxNy0yLjA0MTRoLTYuNjQyYy4wMjkgMS44NzIxLjUyNyAzLjUxNTIgMS41MTMgNC45NDkyLjk3NiAxLjQyNCAyLjMyIDIuNTM5NCA0LjAzMyAzLjMzNiAxLjcxMy43OTY3IDMuNjc1IDEuMTk1IDUuODg2IDEuMTk1IDIuMjEgMCA0LjIwMi0uNDA4MyA1LjkxNS0xLjIyNDkgMS43MjMtLjgxNjUgMy4wNTctMS45NDE4IDQuMDIzLTMuMzc1OC45NjYtMS40MzQgMS40NDQtMy4wNTcyIDEuNDQ0LTQuODY5NiAwLTEuNDgzOC0uMzI5LTIuODQ4LS45NzYtNC4xMDI4bC4wMi4wMVoiLz4gPHBhdGggZmlsbD0idXJsKCNhKSIgZD0iTTIwLjM0IDMuNjYgMy42NiAyMC4zNEMxLjMyIDIyLjY4IDAgMjUuODYgMCAyOS4xOFY1OWMwIDIuNzYgMi4yNCA1IDUgNWgyOS44MmMzLjMyIDAgNi40OS0xLjMyIDguODQtMy42NmwxNi42OC0xNi42OGMyLjM0LTIuMzQgMy42Ni01LjUyIDMuNjYtOC44NFY1YzAtMi43Ni0yLjI0LTUtNS01SDI5LjE4Yy0zLjMyIDAtNi40OSAxLjMyLTguODQgMy42NloiLz4gPHBhdGggZmlsbD0iIzAwMCIgZD0iTTQ4IDE2SDh2NDBoNDBWMTZaIi8+IDxwYXRoIGZpbGw9IiNmZmYiIGQ9Ik0zMCA0N0gxM3Y0aDE3di00WiIvPiA8L3N2Zz4="></h1>
         <p>IDE: IntelliJ, PyCharm, WebStorm. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к JetBrains придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

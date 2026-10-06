@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/international/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/international/index.html">Зарубежные покупки</a></li><li><span aria-current="page">eBay</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/international/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9Imdsb2JhbC1nbG9iZSIgeDE9IjE2IiB5MT0iMTciIHgyPSI0NyIgeTI9IjQ4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+IDxzdG9wIHN0b3AtY29sb3I9IiM2MEE1RkEiLz4gPHN0b3Agb2Zmc2V0PSIwLjUyIiBzdG9wLWNvbG9yPSIjMzhCREY4Ii8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzM0RDM5OSIvPiA8L2xpbmVhckdyYWRpZW50PiA8bGluZWFyR3JhZGllbnQgaWQ9Imdsb2JhbC1kb2xsYXIiIHgxPSIzMSIgeTE9IjE4IiB4Mj0iNDciIHkyPSI0MyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPiA8c3RvcCBzdG9wLWNvbG9yPSIjRkRFNjhBIi8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0Y1OUUwQiIvPiA8L2xpbmVhckdyYWRpZW50PiA8L2RlZnM+IDxjaXJjbGUgY3g9IjI4LjUiIGN5PSIzMyIgcj0iMTMuOCIgZmlsbD0idXJsKCNnbG9iYWwtZ2xvYmUpIiBmaWxsLW9wYWNpdHk9IjAuMTgiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjgiLz4gPHBhdGggZD0iTTE1LjIgMzNoMjYuNk0yOC41IDE5LjhjMy4xIDMuMiA0LjggNy4xIDQuOCAxMy4yIDAgNi0xLjcgMTAtNC44IDEzLjItMy4xLTMuMi00LjgtNy4yLTQuOC0xMy4yIDAtNi4xIDEuNy0xMCA0LjgtMTMuMloiIHN0cm9rZT0iI0RGRjdGRiIgc3Ryb2tlLXdpZHRoPSIyLjMiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPiA8cGF0aCBkPSJNMTguNiAyNS4yYzIuOCAyIDYuMSAzIDkuOSAzIDMuOCAwIDcuMS0xIDkuOS0zTTE4LjYgNDAuOGMyLjgtMiA2LjEtMyA5LjktMyAzLjggMCA3LjEgMSA5LjkgMyIgc3Ryb2tlPSIjQkZGNkUzIiBzdHJva2Utd2lkdGg9IjIuMSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Ik00My41IDIxLjh2MjIuNCIgc3Ryb2tlPSJ1cmwoI2dsb2JhbC1kb2xsYXIpIiBzdHJva2Utd2lkdGg9IjIuOCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Ik00OC42IDI2LjRjLS45LTEuNS0yLjctMi41LTUtMi41LTMgMC01LjEgMS43LTUuMSA0IDAgMiAxLjQgMy4yIDQuNyAzLjlsMS4xLjJjMy4xLjcgNC41IDEuOCA0LjUgMy45IDAgMi41LTIuMiA0LjItNS40IDQuMi0yLjUgMC00LjQtLjgtNS42LTIuNSIgc3Ryb2tlPSIjRkZGMUI1IiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+IDwvc3ZnPg==">Зарубежные покупки</a><span class="sep">/</span>
-          <span aria-current="page">eBay</span>
-        </nav>
         <h1 class="svc-h1">eBay<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyBpZD0iZUJheV9sb2dvIiBkYXRhLW5hbWU9ImVCYXkgbG9nbyIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMTAwMCA0MDAuNzUwOTgiIHNvZGlwb2RpOmRvY25hbWU9ImVCYXkuc3ZnIiB3aWR0aD0iMTAwMCIgaGVpZ2h0PSI0MDAuNzUwOTgiIGlua3NjYXBlOnZlcnNpb249IjEuNCAoODZhOGFkNywgMjAyNC0xMC0xMSkiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIiB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHNvZGlwb2RpOm5hbWVkdmlldyBpZD0ibmFtZWR2aWV3NCIgcGFnZWNvbG9yPSIjZmZmZmZmIiBib3JkZXJjb2xvcj0iIzAwMDAwMCIgYm9yZGVyb3BhY2l0eT0iMC4yNSIgaW5rc2NhcGU6c2hvd3BhZ2VzaGFkb3c9IjIiIGlua3NjYXBlOnBhZ2VvcGFjaXR5PSIwLjAiIGlua3NjYXBlOnBhZ2VjaGVja2VyYm9hcmQ9IjAiIGlua3NjYXBlOmRlc2tjb2xvcj0iI2QxZDFkMSIgaW5rc2NhcGU6em9vbT0iMC41IiBpbmtzY2FwZTpjeD0iNTQ2IiBpbmtzY2FwZTpjeT0iMTk5IiBpbmtzY2FwZTp3aW5kb3ctd2lkdGg9IjEzNjYiIGlua3NjYXBlOndpbmRvdy1oZWlnaHQ9IjcwNSIgaW5rc2NhcGU6d2luZG93LXg9Ii04IiBpbmtzY2FwZTp3aW5kb3cteT0iLTgiIGlua3NjYXBlOndpbmRvdy1tYXhpbWl6ZWQ9IjEiIGlua3NjYXBlOmN1cnJlbnQtbGF5ZXI9ImVCYXlfbG9nbyIgLz48ZGVmcyBpZD0iZGVmczEiPjxzdHlsZSBpZD0ic3R5bGUxIj4gLmNscy0xIHsgZmlsbDogIzA5NjhmNjsgfSAuY2xzLTEsIC5jbHMtMiwgLmNscy0zLCAuY2xzLTQgeyBzdHJva2Utd2lkdGg6IDBweDsgfSAuY2xzLTIgeyBmaWxsOiAjOTJjODIxOyB9IC5jbHMtMyB7IGZpbGw6ICNmMDJkMmQ7IH0gLmNscy00IHsgZmlsbDogI2ZmYmQxNDsgfSA8L3N0eWxlPjwvZGVmcz48ZyBpZD0iZzQiPjxwYXRoIGNsYXNzPSJjbHMtNCIgZD0ibSA2MzMuMDc4MDMsMjEyLjUzMzIzIGMgLTQ1LjQzODczLDEuNDg5MjkgLTczLjY3MTUsOS42ODkgLTczLjY3MTUsMzkuNjE4OTcgMCwxOS4zNzU5MSAxNS40NDcxMyw0MC4zODE2MiA1NC42NjMzNCw0MC4zODE2MiA1Mi41NzY5OCwwIDgwLjY0MjU5LC0yOC42NTkwMiA4MC42NDI1OSwtNzUuNjYzMzEgbCAwLjAwMywtNS4xNjk5NCBjIC0xOC40MzMwMiwwIC00MS4xNjQxNCwwLjE2MDg5IC02MS42MzcwNCwwLjgzMjY2IHogbSAxMTEuNzUxMDMsNjIuMTAyNDggYyAwLDE0LjU4MzEzIDAuNDIxNTUsMjguOTc4MiAxLjY5NDA2LDQxLjk0MDkyIGggLTQ2LjYxNDA4IGMgLTEuMjQzMjUsLTEwLjY3MzY4IC0xLjY5NzIsLTIxLjI3OTQ1IC0xLjY5NzIsLTMxLjU2NjU2IC0yNS4yMDE5NSwzMC45Nzk0MSAtNTUuMTc3MzUsMzkuODg1MzcgLTk2Ljc2MTQ5LDM5Ljg4NTM3IC02MS42NzY3NCwwIC05NC43MDA3MiwtMzIuNTk5ODIgLTk0LjcwMDcyLC03MC4zMDY4OSAwLC01NC42MTIxNSA0NC45MTU4MywtNzMuODY3MzkgMTIyLjg5MDEzLC03NS42NTM5MSAyMS4zMjMzMiwtMC40ODY4NiA0NS4yNzQxOSwtMC41NTg5NCA2NS4wNzUzMSwtMC41NTg5NCBsIC0wLjAwMywtNS4zMzYwNiBjIDAsLTM2LjU2MDk4IC0yMy40NDM2NCwtNTEuNTkzMzUgLTY0LjA2NzY1LC01MS41OTMzNSAtMzAuMTU4NzYsMCAtNTIuMzg1NzksMTIuNDgwNTcgLTU0LjY3NjQsMzQuMDQ2OCBoIC01Mi42NTE2OCBjIDUuNTcyMTcsLTUzLjc3MTY1IDYyLjA2NjQzLC02Ny4zNzExNSAxMTEuNzQwMDUsLTY3LjM3MTE1IDU5LjUwODM3LDAgMTA5Ljc3MjI4LDIxLjE3Mjg4IDEwOS43NzIyOCw4NC4xMTQ4MSB6IiBpZD0icGF0aDEiIHN0eWxlPSJmaWxsOiNmZmJjMTM7ZmlsbC1vcGFjaXR5OjEiIC8+PHBhdGggY2xhc3M9ImNscy0zIiBkPSJtIDE5OS42MzYzMywxODUuODY2MDIgYyAtMS45NDQyNywtNDYuODc3MzUgLTM1Ljc3OTUxLC02NC40MTk3MyAtNzEuOTQxMzksLTY0LjQxOTczIC0zOC45OTQyMSwwIC03MC4xMjY2NywxOS43MzI3IC03NS41ODAyNiw2NC40MTk3MyB6IE0gNTEuMDM0NDA4LDIxOS4xOTA5IGMgMi43MDQzMzIsNDUuNDgzNjUgMzQuMDY5NzgyLDcyLjM4NDM3IDc3LjE5NzUzMiw3Mi4zODQzNyAyOS44ODAzMywwIDU2LjQ1OTc5LC0xMi4xNzQ5OCA2NS4zNTk0OCwtMzguNjYwNDEgaCA1MS42ODQyNCBjIC0xMC4wNTIwNSw1My43Mzk3OSAtNjcuMTUzODQsNzEuOTgwNTggLTExNi4zMDMsNzEuOTgwNTggQyAzOS42MDY0MjQsMzI0Ljg5NTQ0IDAsMjc1LjY3ODg5IDAsMjA5LjMwNjUzIDAsMTM2LjI0MjAzIDQwLjk2NTY0Miw4OC4xMjE5NCAxMjkuNzg4MDksODguMTIxOTQgYyA3MC42OTg2NywwIDEyMi40OTk5MiwzNi45OTkyNiAxMjIuNDk5OTIsMTE3Ljc1NTcyIHYgMTMuMzEzMjQgeiIgaWQ9InBhdGgyIiBzdHlsZT0iZmlsbDojZjEyYzJkO2ZpbGwtb3BhY2l0eToxIiAvPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0ibSAzODAuODMxODEsMjkwLjYyMzUgYyA0Ni41NzIyOCwwIDc4LjQ0MDc4LC0zMy41MjE4MSA3OC40NDA3OCwtODQuMTA4NTQgMCwtNTAuNTgyMDMgLTMxLjg2ODUsLTg0LjEwODU0IC03OC40NDA3OCwtODQuMTA4NTQgLTQ2LjMxMDU4LDAgLTc4LjQ0MzkyLDMzLjUyNjUxIC03OC40NDM5Miw4NC4xMDg1NCAwLDUwLjU4NjczIDMyLjEzMzM0LDg0LjEwODU0IDc4LjQ0MzkyLDg0LjEwODU0IHogTSAyNTIuMjg1NCwwIGggNTAuMTAyNDkgbCAtMC4wMDUsMTI1Ljg3NzA3IGMgMjQuNTU2ODIsLTI5LjI1OTc1IDU4LjM4ODkyLC0zNy43NTUxMyA5MS42ODk3NiwtMzcuNzU1MTMgNTUuODM1MDMsMCAxMTcuODUxMzIsMzcuNjc3MyAxMTcuODUxMzIsMTE5LjAyODc1IDAsNjguMTIyMzIgLTQ5LjMyMTU1LDExNy43NDQ3NSAtMTE4Ljc4MTE0LDExNy43NDQ3NSAtMzYuMzU3MjYsMCAtNzAuNTgwNjIsLTEzLjA0MjY1IC05MS42ODY2MywtMzguODgyOTQgMCwxMC4zMjEwNyAtMC41NzYxOCwyMC43MjM2NCAtMS43MDUwMywzMC41NjQxMyBoIC00OS4xNzE2MiBjIDAuODU1MTMsLTE1LjkwOTQ0IDEuNzA1NTUsLTM1LjcxODQgMS43MDU1NSwtNTEuNzQ2OTMgeiIgaWQ9InBhdGgzIiBzdHlsZT0iZmlsbDojMDk2OGY2O2ZpbGwtb3BhY2l0eToxIiAvPjxwYXRoIGNsYXNzPSJjbHMtMiIgZD0iTSAxMDAwLDk2LjQ1NzQ3IDg0NS4wNTU0MSw0MDAuNzUwOTkgSCA3ODguOTQ5MjYgTCA4MzMuNDk1NzgsMzE2LjI1NTg5IDcxNi44OTAzMyw5Ni40NTc0NyBoIDU4LjYyNjYgbCA4NS44MDQ2OSwxNzEuNzMwNTcgODUuNTYyODMsLTE3MS43MzA1NyB6IiBpZD0icGF0aDQiIHN0eWxlPSJmaWxsOiM5M2M4MjI7ZmlsbC1vcGFjaXR5OjEiIC8+PC9nPjwvc3ZnPg=="></h1>
         <p>Аукционы и редкие товары. Пополните баланс виртуальной картой через СБП — реквизиты и инструкция по привязке к eBay придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

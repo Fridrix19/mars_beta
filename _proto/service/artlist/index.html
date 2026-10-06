@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/work/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/work/index.html">Для работы</a></li><li><span aria-current="page">Artlist</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/work/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9Indvcmstc2NyZWVuIiB4MT0iMTQiIHkxPSIxNSIgeDI9IjUwIiB5Mj0iNDciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzYwQTVGQSIvPiA8c3RvcCBvZmZzZXQ9IjAuNTUiIHN0b3AtY29sb3I9IiMzOEJERjgiLz4gPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjQTc4QkZBIi8+IDwvbGluZWFyR3JhZGllbnQ+IDxsaW5lYXJHcmFkaWVudCBpZD0id29yay1nbG93IiB4MT0iMjAiIHkxPSIyNCIgeDI9IjQ0IiB5Mj0iNDIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iI0UwRjJGRSIgc3RvcC1vcGFjaXR5PSIwLjk1Ii8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0M0QjVGRCIgc3RvcC1vcGFjaXR5PSIwLjkyIi8+IDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz4gPHJlY3QgeD0iMTIuNSIgeT0iMTUiIHdpZHRoPSIzOSIgaGVpZ2h0PSIyNyIgcng9IjcuOCIgZmlsbD0idXJsKCN3b3JrLXNjcmVlbikiIGZpbGwtb3BhY2l0eT0iMC4xOCIgc3Ryb2tlPSIjRjhGQkZGIiBzdHJva2Utd2lkdGg9IjIuOCIvPiA8cGF0aCBkPSJNMTguOCAyMy41aDI2LjQiIHN0cm9rZT0iI0Q4RjFGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNTgiIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTMyIDQyLjN2NS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTI0LjQgNDkuMmgxNS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHJlY3QgeD0iMjAuMiIgeT0iMjcuMiIgd2lkdGg9IjEwLjQiIGhlaWdodD0iNy42IiByeD0iMi4zIiBmaWxsPSIjMzREMzk5IiBmaWxsLW9wYWNpdHk9IjAuOTYiLz4gPHBhdGggZD0iTTM1LjIgMjkuNGg4LjYiIHN0cm9rZT0idXJsKCN3b3JrLWdsb3cpIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Ik0zNS4yIDM0aDYuMSIgc3Ryb2tlPSIjOTNDNUZEIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Im0yNC4yIDMwLjggMS43IDEuNyAzLjUtMy44IiBzdHJva2U9IiMwQjEyMjciIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPC9zdmc+">Для работы</a><span class="sep">/</span>
-          <span aria-current="page">Artlist</span>
-        </nav>
         <h1 class="svc-h1">Artlist<img class="svc-inline on-dark" alt="" src="data:image/svg+xml;base64,PCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIzLjAuMSwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgLS0+IDxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA0OTYgMTI5IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCA0OTYgMTI5OyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+IDxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+IC5zdDB7ZmlsbDojRkZEQTJBO30gPC9zdHlsZT4gPHRpdGxlPkFydGxpc3QgTG9nbzwvdGl0bGU+IDxnIGlkPSJMYXllcl8yXzFfIj4gPGcgaWQ9IkxheWVyXzEtMiI+IDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNzguNiw1N2MtNi41LDAtMTIuOSwxLjQtMTguOCw0Yy01LjIsMi4zLTkuNCw2LjUtMTEuOCwxMS42djU0LjdoLTIzLjFWMzdoMjEuMnYxOS4zYzEuNS0zLDMuNC01LjgsNS43LTguNCBjMi4xLTIuNCw0LjUtNC42LDcuMS02LjVjMi40LTEuNyw0LjktMy4yLDcuNy00LjJjMi40LTAuOSw1LTEuNCw3LjUtMS41aDIuOGMwLjYsMCwxLjIsMC4xLDEuOCwwLjJMMTc4LjYsNTd6Ii8+IDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yNDkuOSwxMjIuNmMtMy43LDEuNi03LjUsMy0xMS40LDQuMWMtNC42LDEuNC05LjMsMi4xLTE0LjEsMi4xYy0zLjEsMC02LjEtMC40LTkuMS0xLjIgYy0yLjctMC43LTUuMi0yLjEtNy40LTMuOWMtMi4yLTEuOS0zLjktNC4yLTUuMS02LjljLTEuNC0zLjItMi02LjctMS45LTEwLjJWNTQuN0gxODlWMzdoMTEuOVY3LjdIMjI0VjM3aDE5djE3LjdoLTE5djQ0LjEgYzAsMy4yLDAuOCw1LjUsMi41LDYuOGMxLjcsMS40LDMuOSwyLjEsNi4xLDJjMi40LDAsNC44LTAuNCw3LjEtMS4yYzIuMy0wLjgsNC4xLTEuNSw1LjUtMi4xTDI0OS45LDEyMi42eiIvPiA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjU5LjYsMS41aDIzLjF2OTYuOGMwLDMuMywwLjgsNS45LDIuNCw3LjhjMS44LDEuOSw0LjMsMi45LDYuOSwyLjhjMS41LDAsMy4xLTAuMyw0LjYtMC43IGMxLjYtMC40LDMuMi0xLDQuNy0xLjdsMy4xLDE3LjZjLTMuNSwxLjYtNy4xLDIuOC0xMC45LDMuNGMtMy43LDAuOC03LjQsMS4yLTExLjIsMS4yYy03LjIsMC0xMi44LTEuOS0xNi44LTUuOHMtNS45LTkuMy02LTE2LjQgTDI1OS42LDEuNXoiLz4gPHBhdGggY2xhc3M9InN0MCIgZD0iTTMxNi41LDEyNy4zVjM3aDIzLjF2OTAuM0gzMTYuNXoiLz4gPHBhdGggY2xhc3M9InN0MCIgZD0iTTM0MS4xLDEzLjFjMC4yLDMuNi0xLjIsNy0zLjksOS40Yy0yLjUsMi4zLTUuNywzLjYtOS4xLDMuNWMtMy40LDAuMS02LjgtMS4yLTkuMy0zLjUgYy0yLjYtMi40LTQtNS45LTMuOS05LjRjMC00LjEsMS4zLTcuMywzLjktOS42YzIuNS0yLjMsNS45LTMuNiw5LjMtMy41YzMuNCwwLDYuNiwxLjIsOS4xLDMuNUMzMzkuOCw1LjgsMzQxLjEsOC45LDM0MS4xLDEzLjF6IiAvPiA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMzkyLjQsMTI5Yy03LjYsMC0xNS4xLTEuMi0yMi4yLTMuNmMtNi44LTIuMi0xMy4xLTUuNy0xOC42LTEwLjNsOC42LTE0LjVjNSwzLjYsMTAuNCw2LjYsMTYuMSw4LjkgYzUsMiwxMC4zLDMsMTUuNiwzYzQuNiwwLDguMi0wLjksMTAuOS0yLjZjMi42LTEuNiw0LjEtNC40LDQtNy40YzAuMS0zLjEtMS44LTUuOS00LjYtNy4xYy00LjktMi4xLTEwLTMuOC0xNS4yLTUuMiBjLTUuOS0xLjYtMTAuOS0zLjEtMTUtNC42Yy0zLjYtMS4yLTYuOS0yLjktMTAtNS4xYy0yLjQtMS43LTQuMy0zLjktNS41LTYuNmMtMS4yLTIuOC0xLjgtNS44LTEuNy04LjljLTAuMS00LjMsMC44LTguNSwyLjctMTIuNCBjMS44LTMuNiw0LjMtNi45LDcuNS05LjRjMy40LTIuNyw3LjItNC43LDExLjMtNmM0LjUtMS40LDkuMy0yLjEsMTQtMi4xYzYuNCwwLDEyLjksMC45LDE5LDIuOWM2LDIsMTEuNiw1LjIsMTYuMyw5LjVsLTkuMywxNCBjLTQuMS0zLjEtOC42LTUuNy0xMy40LTcuNmMtNC4xLTEuNi04LjQtMi40LTEyLjgtMi40Yy0zLjQtMC4xLTYuOCwwLjctOS44LDIuNGMtMi42LDEuNi00LDQuMi00LDcuOGMtMC4xLDEuNCwwLjMsMi44LDEsNCBjMC44LDEuMiwxLjgsMi4xLDMsMi44YzEuNywxLDMuNSwxLjcsNS40LDIuM2MyLjIsMC43LDUsMS41LDguNCwyLjNjNi4yLDEuNiwxMS41LDMuMiwxNS45LDQuOGMzLjksMS4zLDcuNSwzLjIsMTAuOSw1LjUgYzIuNiwxLjgsNC43LDQuMyw2LjIsNy4yYzEuNCwzLDIuMSw2LjQsMiw5LjdjMCw4LjgtMy4zLDE1LjgtOS44LDIwLjlDNDEyLjUsMTI2LjUsNDAzLjcsMTI5LDM5Mi40LDEyOXoiLz4gPHBhdGggY2xhc3M9InN0MCIgZD0iTTQ5NiwxMjIuNmMtMy43LDEuNi03LjUsMy0xMS40LDQuMWMtNC42LDEuNC05LjMsMi4xLTE0LjEsMi4xYy0zLjEsMC02LjEtMC40LTktMS4yIGMtMi43LTAuNy01LjItMi4xLTcuNC0zLjljLTIuMi0xLjktMy45LTQuMi01LjEtNi45Yy0xLjQtMy4yLTItNi43LTEuOS0xMC4yVjU0LjdoLTExLjlWMzdoMTEuOVY3LjdoMjMuMVYzN2gxOXYxNy43aC0xOXY0NC4xIGMwLDMuMiwwLjgsNS41LDIuNSw2LjhjMS43LDEuNCwzLjksMi4xLDYuMSwyYzIuNCwwLDQuOC0wLjQsNy4xLTEuMnM0LjEtMS41LDUuNS0yLjFMNDk2LDEyMi42eiIvPiA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNjcuOCwxMy4xSDQ0LjdMMCwxMDkuNXYxNy45YzE4LDAuOCwzNi44LDEuMiw1Ni4yLDEuMnMzOC4yLTAuNCw1Ni4yLTEuMnYtMTcuOUw2Ny44LDEzLjF6IE01Ni4yLDEwOC43IGMtMTAuNCwwLTIwLjktMC4xLTMxLjQtMC40bDMxLjQtNjcuOGwzMS40LDY3LjhDNzcuMiwxMDguNSw2Ni43LDEwOC43LDU2LjIsMTA4Ljd6Ii8+IDwvZz4gPC9nPiA8L3N2Zz4="></h1>
         <p>Музыка и футажи по лицензии. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Artlist придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

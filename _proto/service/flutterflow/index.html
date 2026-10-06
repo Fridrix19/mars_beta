@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/work/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/work/index.html">Для работы</a></li><li><span aria-current="page">FlutterFlow</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/work/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9Indvcmstc2NyZWVuIiB4MT0iMTQiIHkxPSIxNSIgeDI9IjUwIiB5Mj0iNDciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzYwQTVGQSIvPiA8c3RvcCBvZmZzZXQ9IjAuNTUiIHN0b3AtY29sb3I9IiMzOEJERjgiLz4gPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjQTc4QkZBIi8+IDwvbGluZWFyR3JhZGllbnQ+IDxsaW5lYXJHcmFkaWVudCBpZD0id29yay1nbG93IiB4MT0iMjAiIHkxPSIyNCIgeDI9IjQ0IiB5Mj0iNDIiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iI0UwRjJGRSIgc3RvcC1vcGFjaXR5PSIwLjk1Ii8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0M0QjVGRCIgc3RvcC1vcGFjaXR5PSIwLjkyIi8+IDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz4gPHJlY3QgeD0iMTIuNSIgeT0iMTUiIHdpZHRoPSIzOSIgaGVpZ2h0PSIyNyIgcng9IjcuOCIgZmlsbD0idXJsKCN3b3JrLXNjcmVlbikiIGZpbGwtb3BhY2l0eT0iMC4xOCIgc3Ryb2tlPSIjRjhGQkZGIiBzdHJva2Utd2lkdGg9IjIuOCIvPiA8cGF0aCBkPSJNMTguOCAyMy41aDI2LjQiIHN0cm9rZT0iI0Q4RjFGRiIgc3Ryb2tlLW9wYWNpdHk9IjAuNTgiIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTMyIDQyLjN2NS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHBhdGggZD0iTTI0LjQgNDkuMmgxNS4yIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPHJlY3QgeD0iMjAuMiIgeT0iMjcuMiIgd2lkdGg9IjEwLjQiIGhlaWdodD0iNy42IiByeD0iMi4zIiBmaWxsPSIjMzREMzk5IiBmaWxsLW9wYWNpdHk9IjAuOTYiLz4gPHBhdGggZD0iTTM1LjIgMjkuNGg4LjYiIHN0cm9rZT0idXJsKCN3b3JrLWdsb3cpIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Ik0zNS4yIDM0aDYuMSIgc3Ryb2tlPSIjOTNDNUZEIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxwYXRoIGQ9Im0yNC4yIDMwLjggMS43IDEuNyAzLjUtMy44IiBzdHJva2U9IiMwQjEyMjciIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPC9zdmc+">Для работы</a><span class="sep">/</span>
-          <span aria-current="page">FlutterFlow</span>
-        </nav>
         <h1 class="svc-h1">FlutterFlow<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyBpZD0ia2F0bWFuXzEiIGRhdGEtbmFtZT0ia2F0bWFuIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgODQxLjg5IDU5NS4yOCI+IDxkZWZzPiA8c3R5bGU+IC5jbHMtMSB7IGZpbGw6ICM0YjM5ZWY7IH0gLmNscy0xLCAuY2xzLTIgeyBmaWxsLXJ1bGU6IGV2ZW5vZGQ7IHN0cm9rZS13aWR0aDogMHB4OyB9IC5jbHMtMiB7IGZpbGw6ICMxZDFkMWI7IH0gPC9zdHlsZT4gPC9kZWZzPiA8ZyBpZD0ibG9nbyI+IDxnIGlkPSJVSS1FbGVtZW50LV9sb2dvTWFyayIgZGF0YS1uYW1lPSJVSS1FbGVtZW50LS9sb2dvTWFyayI+IDxwYXRoIGlkPSJsb2dvX2ZpbGwiIGRhdGEtbmFtZT0ibG9nbyBmaWxsIiBjbGFzcz0iY2xzLTEiIGQ9Ik0xNzguODgsMjMyLjk2YzMuODgsMCw3LjQ3LDIuMSw5LjI5LDUuNTEsMS43NCwzLjI3LDEuNjcsNy4xMi0uMTksMTAuMzJsLS4wNi4xMS0xNi4zMiwyNy4zYy0xLjg1LDMuMDktNS4xOCw1LjAxLTguNzQsNS4wNWgtLjEycy0xOC42NCwwLTE4LjY0LDBsNy43NSwxNy43My4wMy4wNS4wNS4wOGMxLjgyLDMuMywxLjc4LDcuMjItLjExLDEwLjQ2bC0uMDYuMTEtMTYuMzIsMjcuM2MtMS44NSwzLjA5LTUuMTgsNS4wMS04Ljc0LDUuMDVoLS4xMnMtMjIuODcsMC0yMi44NywwbC0xNi40NCwxNy4zNC0uMDMuMDNjLTEuNTUsMS41Ny0zLjY0LDIuNDUtNS44MiwyLjQ1LS41NCwwLTEuMDktLjA2LTEuNjMtLjE3LTIuNjYtLjU0LTQuODctMi4zNy01LjkzLTQuODhsLS4wMy0uMDctOC42NS0xOS44Ni0uMDUtLjA4LS4wNS0uMDhzLS4wMi0uMDMtLjAyLS4wNGMtMS44Mi0zLjMtMS43OC03LjIyLjExLTEwLjQ2bC4wNi0uMTEsMTUuODMtMjYuNDgtMTEuNjYtMjYuNy4yMS0uMTF2LS4wMmMtLjUtMi40Ni0uMS01LjAyLDEuMTctNy4yNmwuMDctLjEyLjA2LS4xMSwxNi4zMi0yNy4zYzEuODUtMy4wOSw1LjE4LTUuMDEsOC43NC01LjA2aDgyLjkyWk05My4xOSwzNDEuODNoLTE3LjM0czUuMDksMTEuNzgsNS4wOSwxMS43OHYuMDNjLjEuMjEuMjMuMzMuNDQuMzcuMTguMDQuMzMsMCwuNDctLjEzbC4wMi0uMDIsMTEuMzItMTIuMDNaTTE0Mi43NSwzMDEuMzNoLTUyLjQxYy0uMDYsMC0uMTIsMC0uMTcsMGgtLjAyczE0LjM3LDMyLjg3LDE0LjM3LDMyLjg3aDIyLjA1Yy45MSwwLDEuNzgtLjQ5LDIuMjgtMS4yNmwuMDQtLjA2LDE2LjM0LTI3LjMyYy40OS0uODEuNTQtMS43Ni4xNi0yLjYxLS40NS0uOTgtMS40OC0xLjYyLTIuNjMtMS42MlpNODQuODksMzA4LjA4bC0xMi45NywyMS44NmMtLjUyLjg3LS41NSwxLjg5LS4wOCwyLjc5bC4wNS4wOS4wMy4wNC4wNS4wOS4xLjE1LjEyLjE1LjExLjEzLjAyLjAyLjA3LjA4LjA3LjA2Yy40MS4zNy45MS42LDEuNDcuNjVoLjEycy4wNy4wMS4wNy4wMWguMDlzMjIuMDEsMCwyMi4wMSwwbC0xMS4zMy0yNi4xM1pNODEuNDgsMjgxLjNsNS43LDEzLjA3LjExLS4wNGMuOTgtLjMzLDIuMDEtLjUxLDMuMDUtLjUyaC4xNnM1MC44MSwwLDUwLjgxLDBsLTUuNDUtMTIuNWgtNTQuMzdaTTE3OC43MywyNDAuNThoLTUyLjZsMTQuMzgsMzIuODhoMjIuMDRjLjkxLDAsMS43OC0uNDksMi4yOC0xLjI3bC4wNC0uMDYsMTYuMzQtMjcuMzJjLjQ5LS44MS41NC0xLjc2LjE2LTIuNjEtLjQ0LS45Ni0xLjQ0LTEuNi0yLjU2LTEuNjNoLS4wN1pNMTE4LjA4LDI0MC41OGgtMjEuOTJjLS45LDAtMS43Ny40OC0yLjI3LDEuMjZsLS4wNC4wNi0xNi4zLDI3LjMyYy0uNDkuODItLjU0LDEuNzYtLjE1LDIuNjEuNDMuOTYsMS40MywxLjYsMi41NCwxLjYyaC4wN3M1Mi40LDAsNTIuNCwwbC0xNC4zNC0zMi44OFoiLz4gPC9nPiA8cGF0aCBpZD0iRmx1dHRlckZsb3ciIGNsYXNzPSJjbHMtMiIgZD0iTTI2NS43NCwyNzMuOWwuMDYtMTYuNzRoLTQ1Ljk4djc2LjA5aDE3LjMxdi0yNy45M2gyMi42NmwuMDYtMTYuNzRoLTIyLjcydi0xNC42N2gyOC42MVpNMjc1LjU0LDMzMy4yNWgxNi4yM3YtNzkuMzVoLTE2LjIzdjc5LjM1Wk0zMzguNjIsMjc4Ljl2MjkuNjdjMCw3LjcyLTQuMTEsMTEuMi0xMC4wNiwxMS4yLTUuMTksMC05LjQxLTMuMTUtOS40MS05Ljg5di0zMC45OGgtMTYuMjN2MzMuMzdjMCwxNC42Nyw5LjMsMjIuNSwyMC4yMywyMi41LDcuMTQsMCwxMi41NS0yLjYxLDE1LjQ3LTYuNjN2NS4xMWgxNi4yM3YtNTQuMzVoLTE2LjIzWk0zOTguNDUsMjk0LjU2di0xNS42NWgtMTEuMTR2LTE1LjIybC0xNi4yMyw0Ljg5djEwLjMzaC04LjY2djE1LjY1aDguNjZ2MTkuMjRjMCwxNS4yMiw2LjE3LDIxLjYzLDI3LjM3LDE5LjQ2di0xNC43OGMtNy4xNC40My0xMS4xNCwwLTExLjE0LTQuNjd2LTE5LjI0aDExLjE0Wk00NDAuNDIsMjk0LjU2di0xNS42NWgtMTEuMTR2LTE1LjIybC0xNi4yMyw0Ljg5djEwLjMzaC04LjY2djE1LjY1aDguNjZ2MTkuMjRjMCwxNS4yMiw2LjE3LDIxLjYzLDI3LjM3LDE5LjQ2di0xNC43OGMtNy4xNC40My0xMS4xNCwwLTExLjE0LTQuNjd2LTE5LjI0aDExLjE0Wk00NjUuMiwzMTIuNmgzOC40MWMuNDMtMi4wNy42NS00LjI0LjY1LTYuNTIsMC0xNi40MS0xMS42OC0yOC43LTI3LjQ4LTI4LjctMTcuMDksMC0yOC43OCwxMi41LTI4Ljc4LDI4LjdzMTEuNDcsMjguNywyOS45NywyOC43YzEwLjI4LDAsMTguMjgtMy44LDIzLjU5LTExLjJsLTEyLjk4LTcuNWMtMi4xNiwyLjM5LTUuOTUsNC4xMy0xMC4zOSw0LjEzLTUuOTUsMC0xMC45My0xLjk2LTEyLjk4LTcuNjFaTTQ2NC44OCwzMDAuNDJjMS41MS01LjU0LDUuNjMtOC41OSwxMS43OS04LjU5LDQuODcsMCw5Ljc0LDIuMjgsMTEuNDcsOC41OWgtMjMuMjZaTTUyOS42OCwyODguNTh2LTkuNjdoLTE2LjIzdjU0LjM1aDE2LjIzdi0yNC41NmMwLTEwLjc2LDkuNTItMTMuNDgsMTYuMjMtMTIuMzl2LTE4LjQ4Yy02LjgyLDAtMTQuMDYsMy40OC0xNi4yMywxMC43NlpNNTk5Ljk0LDI3My45bC4wNi0xNi43NGgtNDUuOTh2NzYuMDloMTcuMzF2LTI3LjkzaDIyLjY2bC4wNi0xNi43NGgtMjIuNzJ2LTE0LjY3aDI4LjYxWk02MDkuNzQsMzMzLjI1aDE2LjIzdi03OS4zNWgtMTYuMjN2NzkuMzVaTTY2My44NCwzMzQuNzdjMTUuOSwwLDI4LjY3LTEyLjUsMjguNjctMjguN3MtMTIuNzctMjguNy0yOC42Ny0yOC43LTI4LjY3LDEyLjUtMjguNjcsMjguNywxMi43NywyOC43LDI4LjY3LDI4LjdaTTY2My44NCwzMTguOWMtNy4wMywwLTEyLjQ0LTUuMTEtMTIuNDQtMTIuODNzNS40MS0xMi44MywxMi40NC0xMi44MywxMi40NCw1LjExLDEyLjQ0LDEyLjgzLTUuNDEsMTIuODMtMTIuNDQsMTIuODNaTTc2MS4yMSwyNzguOWwtNy43OSwyOS4xMy04LjQ0LTI5LjEzaC0xNS4xNWwtOC40NCwyOS4xMy03Ljc5LTI5LjEzaC0xNy4zMWwxNy4zMSw1NC4zNWgxNS4xNWw4LjY2LTI5LjAyLDguNjYsMjkuMDJoMTUuMTVsMTcuMzEtNTQuMzVoLTE3LjMxWiIvPiA8L2c+IDwvc3ZnPg=="></h1>
         <p>Мобильные приложения без кода. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к FlutterFlow придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

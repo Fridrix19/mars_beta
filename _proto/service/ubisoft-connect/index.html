@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/games/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/games/index.html">Игры</a></li><li><span aria-current="page">Ubisoft Connect</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/games/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9InBhZCIgeDE9IjE4IiB5MT0iMjAiIHgyPSI0NiIgeTI9IjQ4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+IDxzdG9wIHN0b3AtY29sb3I9IiMzOEJERjgiLz4gPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjODE4Q0Y4Ii8+IDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz4gPHBhdGggZD0iTTIwIDIzLjVoMjQuMmM1LjIgMCA5LjQgNS4zIDguMiAxMC4ybC0yIDguNGMtLjggMy41LTUuMiA0LjgtNy44IDIuM2wtNC40LTQuMkgyNS44bC00LjQgNC4yYy0yLjYgMi41LTcgMS4yLTcuOC0yLjNsLTItOC40Yy0xLjItNC45IDMtMTAuMiA4LjQtMTAuMloiIGZpbGw9InVybCgjcGFkKSIgZmlsbC1vcGFjaXR5PSIwLjI1IiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+IDxwYXRoIGQ9Ik0yMyAyOXY5TTE4LjUgMzMuNWg5IiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPGNpcmNsZSBjeD0iNDIuNSIgY3k9IjMxLjUiIHI9IjIuNiIgZmlsbD0iIzYwQTVGQSIvPiA8Y2lyY2xlIGN4PSI0OCIgY3k9IjM3IiByPSIyLjYiIGZpbGw9IiNDMDg0RkMiLz4gPC9zdmc+">Игры</a><span class="sep">/</span>
-          <span aria-current="page">Ubisoft Connect</span>
-        </nav>
         <h1 class="svc-h1">Ubisoft Connect<img class="svc-inline on-dark" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAwIiBoZWlnaHQ9IjkxNC43NDYiIHZlcnNpb249IjEuMSI+IDxnIGZpbGw9IndoaXRlIiBzdHJva2U9Im5vbmUiPiA8cGF0aCBkPSJNMCA3MjcuNjF2MTExLjYyYzAgNDUuMzIyIDMwLjg5NSA3NC4yMSA3NS44OTEgNzQuMjEgNDcuMzMgMCA3Ni4zLTMwLjQ2NCA3Ni4zLTc3LjI2N1Y3MjcuNjFoLTQwLjA2djEwNi41MjRjMCAyNS41Mi0xMi44NTIgNDEuMzQ2LTM1LjgxMyA0MS4zNDYtMjUuMTY0IDAtMzYuMjU3LTE4LjItMzYuMjU3LTM5LjMwN1Y3MjcuNjF6TTE3MS42NjggNzI5LjE1MnYxODIuNDY3aDYzLjgwNmMzNS4zMzkgMCA2NS4zNjctMTguMDI0IDY1LjM2Ny01My43NzIgMC0zNy4zMTQtMzIuNjUyLTQ1LjU4NS0zMi42NTItNDUuNTg1czI0LjE3OC02LjcxNiAyNC4xNzgtMzguNjRjMC0zMS45MDMtMzAuNTYtNDQuNDctNTYuODkzLTQ0LjQ3aC02My44MDZ6bTQwLjM2IDM0LjY1OGgxOS4zNjljMTMuNDQyIDAgMjIuMDQzIDcuMDggMjIuMDQzIDE5LjQgMCAxMS4wMi03LjI5NyAxOS4zMzYtMjEuMDI0IDE5LjMzNmgtMjAuMzg3Vjc2My44MXptMCA2Ny4yNzloMjEuNDA3YzIwLjEzIDAgMjcuMTEgMTAuMzQgMjcuMTEgMjIuNjggMCAxNC4zNTktOS4wMjkgMjIuNzc3LTI1LjA3MSAyMi43NzdoLTIzLjQ0NVY4MzEuMDl6TTMxNi4wMDQgNzI5LjEzOWg0MC4yNjV2MTgyLjQ2N2gtNDAuMjY1ek03NTUuMzUyIDkxMS42MDZoLTQwLjI2NVY3MjkuMTM5aDEyNi40MDF2MzcuNzE3aC04Ni4xMzZ2NDEuNzk0aDc4LjQ5MXYzMC41OGgtNzguNDkxek04NTYuMjcgNzI5LjEzOXYzNy43MTdoNTEuOTg3djE0NC43NWg0MC43NzV2LTE0NC43NUgxMDAwdi0zNy43MTd6TTQwMi4yMzYgODUwLjkzNGwtMzEuOTg3IDIzLjM4N3MxMS4wNTMgNDAuNDI1IDY2LjQ2NSA0MC40MjVjMzYuOSAwIDY0LjA1My0yMS41MzQgNjQuMDUzLTU5LjM5MiAwLTYxLjAxMS04NS4zMS00OC4wNjgtODUuMzEtNzkuNDQ0IDAtOC4yNTcgNy4zNDMtMTUuNTUxIDIwLjg5NS0xNS41NTEgMjEuNzQ0IDAgMzAuMDA4IDIxLjMzIDMwLjAwOCAyMS4zM2wzMS45OTYtMjIuNDU1cy0xMi40OTctMzMuMzEzLTYwLjM5Ny0zMy4zMTNjLTM5LjM2NSAwLTYwLjI3NiAyNS4yNTUtNjAuMjc2IDUxLjMxNSAwIDYyLjE3NSA4Mi44MjYgNDguNjggODIuODI2IDgxLjMxIDAgMTEuMDExLTguNjc3IDE5LjEwMi0yMi4xOTEgMTkuMDA5LTI2Ljc3NSAwLTM2LjA4Mi0yNi42MjEtMzYuMDgyLTI2LjYyMXpNNjA0Ljc0IDcyNS44MzdjLTQ3LjQxNyAwLTY4LjU1MiAyNS43MzktNjguNTUyIDI1LjczOWw2LjExNiA2LjExNnMtMzAuNjc3IDIxLjc5LTMwLjY3NyA2OC41ODRjMCA1My44NDUgNDEuNTI3IDg4LjQzIDkzLjMzNiA4OC40MyA2MC4xOTggMCA5NC4zNTUtNDQuNDE4IDk0LjM1NS05NC4zNTUgMC01My4yNS0zOC45OTYtOTQuNTE0LTk0LjU3OC05NC41MTR6bS44NiAzNy44NzZjMzIuMTUgMCA1My4wMDcgMjQuNTczIDUzLjAwNyA1Ni40NzkgMCAzMS41NzUtMjAuNjA4IDU2LjgzLTUzLjAwNyA1Ni44My0zMi4wMDkgMC01My4wMzktMjIuMzUyLTUzLjAzOS01Mi4wMiAwLTI3LjAwMSAxOC4yODUtMzguNzY4IDE4LjI4NS0zOC43NjhsLTYuNjI2LTYuNjI2czE0LjA5OS0xNS44OTUgNDEuMzgtMTUuODk1ek00ODEuNTE2IDBjLTIwNi43OTggMC0yOTYuMDYgMTg0LjA3Mi0yOTYuMDYgMTg0LjA3MmwyNi4yNzUgMTguODFzLTMzLjA2NSA2Mi44NzktMzIuMTUgMTQzLjUzYzAgMTY0LjY0IDEzMS4wNTggMzE5LjczMiAzMjMuOTg2IDMxOS43MzIgMTc1LjI2OCAwIDMyMC4wNS0xNDIuNjU3IDMyMC4wNS0zMTkuMzI3QzgyMy42MTcgMTE2LjM5OSA2NDQuOTM1IDAgNDgxLjUxNyAwem0xLjc5NCA1Ni4xNjhjMTYxLjU3MSAwIDI4Ni45NDYgMTMwLjIgMjg2Ljk0NiAyODEuNTYzIDAgMTYwLjQ1NS0xMjAuNjggMjcyLjA0Mi0yNjEuMzA3IDI3Mi4wNDItMTAzLjQ5OCAwLTE5Ni44NjMtNzguODE2LTE5Ni44NjMtMTg2Ljg3OSAwLTYyLjQxNCAzMy4xNzQtMTA1LjkyOCA3MC4zNDgtMTI5LjExOWw1LjQ0IDUuOTAzYy0xMC4xNzMgNy45Ni0zOS4xODEgNTQuNTU3LTM5LjE4MSAxMDAuMzU2IDAgODUuMDIyIDY2LjY3NCAxNDMuOTA2IDE1MC42NzggMTQzLjkwNiAxMDcuMDA2IDAgMTc4LjM3MS05MS4yNjcgMTc4LjM3MS0xOTcuMjM4IDAtMTIzLjI5Ni0xMDguODMzLTIyNy45NzEtMjM5LjgwNi0yMjcuOTcxLTcyLjQ0MiAwLTEzMy45MjYgMzEuMTU0LTE2OS4yNTYgNTguNjU3bC01LjQ5OC00Ljk3N0MzMDkuNDAzIDEwMS4xNDQgMzg5LjQ0NiA1Ni4xNjggNDgzLjMxIDU2LjE2OHptLTQ4LjIxIDExNy45NWM4My41OCAwIDE2NS4xOCA1NS4yOTMgMTg1LjU0OCAxMzMuNzc4bC03LjQwOCAyLjgwN2MtMzYuNTcxLTQ4LjI5NC05Ni40OTYtODguMzE3LTE2Ny4yNi04OC4zMTctMTMwLjIxMiAwLTE5OC41OTYgMTE4LjMyMy0xODguNTU3IDIxNy4xNDdsLTcuNjY4IDIuODA4cy0xNC4zODItMzEuNzM0LTE0LjM4Mi02OS4zNjRjMC0xMDguOTcgODkuNDg4LTE5OC44NiAxOTkuNzI3LTE5OC44NnptNTUuMjQyIDEzNi43NThjMzkuNTcgMCA3MS4yMTYgMzIuMDczIDcxLjIxNiA3MC4xNDYgMCAzMS41MDYtMjAuMjI4IDUwLjE3OC0yMC4yMjggNTAuMTc4bDIzLjk2IDE2Ljc1NHMtMjMuNzU5IDM3LjMwMS03Mi4yNTcgMzcuMzAxYy00Ni4zOTEgMC04Ny40Mi0zNy40NDQtODcuNDItODcuNzk3IDAtNTEuODg0IDQ0LjYyOS04Ni41ODIgODQuNzMtODYuNTgyeiIvPiA8L2c+IDwvc3ZnPg=="></h1>
         <p>Игры Ubisoft и Ubisoft+. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Ubisoft Connect придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

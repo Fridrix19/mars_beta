@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/design/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/design/index.html">Дизайн</a></li><li><span aria-current="page">Shutterstock</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/design/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9InBlbiIgeDE9IjE4IiB5MT0iNDUiIHgyPSI0NSIgeTI9IjE5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+IDxzdG9wIHN0b3AtY29sb3I9IiNGQjcxODUiLz4gPHN0b3Agb2Zmc2V0PSIwLjUyIiBzdG9wLWNvbG9yPSIjQTg1NUY3Ii8+IDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZCQkYyNCIvPiA8L2xpbmVhckdyYWRpZW50PiA8L2RlZnM+IDxwYXRoIGQ9Ik0xOSA0NS41IDM3LjIgMjcuM2w3LjUgNy41TDI2LjUgNTNIMTdsMi03LjVaIiBmaWxsPSJ1cmwoI3BlbikiLz4gPHBhdGggZD0iTTE5IDQ1LjUgMzcuMiAyNy4zbDcuNSA3LjVMMjYuNSA1M0gxN2wyLTcuNVoiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPHBhdGggZD0ibTM0LjQgMzAuMSA4LjItOC4yYTQuOCA0LjggMCAwIDAtNi44LTYuOGwtOC4yIDguMiIgc3Ryb2tlPSIjRjhGQkZGIiBzdHJva2Utd2lkdGg9IjIuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDxjaXJjbGUgY3g9IjQ2LjUiIGN5PSI0NC41IiByPSI0IiBmaWxsPSIjN0REM0ZDIi8+IDxjaXJjbGUgY3g9IjQwIiBjeT0iNDguNSIgcj0iMy4yIiBmaWxsPSIjRjQ3MkI2Ii8+IDxjaXJjbGUgY3g9IjQ2LjIiIGN5PSI1My4yIiByPSIyLjciIGZpbGw9IiNGQkJGMjQiLz4gPC9zdmc+">Дизайн</a><span class="sep">/</span>
-          <span aria-current="page">Shutterstock</span>
-        </nav>
         <h1 class="svc-h1">Shutterstock<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMzUwLjY2NjY2IDUwLjY2NjY2OCIgaGVpZ2h0PSI1MC42NjY2NjgiIHdpZHRoPSIzNTAuNjY2NjYiIHhtbDpzcGFjZT0icHJlc2VydmUiIGlkPSJzdmcyIiB2ZXJzaW9uPSIxLjEiPjxtZXRhZGF0YSBpZD0ibWV0YWRhdGE4Ij48cmRmOlJERj48Y2M6V29yayByZGY6YWJvdXQ9IiI+PGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+PGRjOnR5cGUgcmRmOnJlc291cmNlPSJodHRwOi8vcHVybC5vcmcvZGMvZGNtaXR5cGUvU3RpbGxJbWFnZSIgLz48L2NjOldvcms+PC9yZGY6UkRGPjwvbWV0YWRhdGE+PGRlZnMgaWQ9ImRlZnM2IiAvPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEuMzMzMzMzMywwLDAsLTEuMzMzMzMzMywwLDUwLjY2NjY2NykiIGlkPSJnMTAiPjxnIHRyYW5zZm9ybT0ic2NhbGUoMC4xKSIgaWQ9ImcxMiI+PHBhdGggaWQ9InBhdGgxNCIgc3R5bGU9ImZpbGw6IzRlNGU1NTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAxNTY5LjY0LDE2NC4wMTIgYyAtMy45OCwwLjY5OSAtMTcuMzMsMi45MTggLTIxLjI0LDMuNjM2IC0yMS4wOSwzLjc5MyAtMzkuMTUsOC43MjMgLTM5LjE1LDI5Ljk0MiAwLDE4LjIxOSAxOS4xLDI2LjcxOSA0Mi44NywyNi43MTkgMzUuMzcsMCA2Ni4zOSwtMTYuMDI4IDY5LjkzLC0xNy43OTcgbCAxOS4zOSw1MS4xNDggYyAtNy40NiwzLjg3MSAtMzkuMDIsMjAuNzMxIC04OC43MiwyMC43MzEgLTQ1LjUyLDAgLTEwMS4xMiwtMjMuOTAzIC0xMDEuMTIsLTgzLjM3MSAwLC01My4yMTkgMzguMDMsLTcwLjMwMSA3NC42OCwtNzYuNzUgNS4wNiwtMC45MyAyMC45NywtMy42NDkgMjUuNTIsLTQuNDQyIDI0LjY1LC00LjE2OCAzOC4xOSwtMTMuMzQ4IDM4LjE5LC0yOS40NzY0IDAsLTIwLjQ3MjcgLTE5LjIzLC0zMC4wNzAzIC00OC4zNCwtMzAuMDcwMyAtNDYuNjEsMCAtNzMuOTYsMTMuODkwNiAtODEuODYsMTcuMTQwNiBsIC0yMS40OCwtNTAuMDQzIEMgMTQ0NC45OCwxNy45NDE0IDE0NzYuOCwwIDE1MzguODksMCBjIDYwLjI1LDAgMTA4LjYsMjkuODM5OCAxMDguNiw4NS4zNzg5IC0wLjQ3LDUxLjY5OTEgLTM1LjIyLDcxLjMxMjEgLTc3Ljg1LDc4LjYzMzEiIC8+PHBhdGggaWQ9InBhdGgxNiIgc3R5bGU9ImZpbGw6IzRlNGU1NTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAxNzUzLjYxLDM3MS41MzEgLTU3LjAyLC0zMS41NDMgdiAtNjYuNzk3IGggLTMwLjAyIFYgMjE4LjY2IGggMzAuMDIgViAxMDAuNzcgYyAwLC01MC4zNTk4IDIwLjcsLTk1LjU3ODU5IDkzLjcxLC05NS41Nzg1OSBoIDIyLjgzIFYgNTkuNzY5NSBoIC04LjU2IGMgLTM1Ljg5LDAgLTUwLjk2LDIwLjcxMSAtNTAuOTYsNDguODM5NSBWIDIxOC42NiBoIDY1LjQ5IHYgNTQuNTMxIGggLTY1LjQ5IHYgOTguMzQiIC8+PHBhdGggaWQ9InBhdGgxOCIgc3R5bGU9ImZpbGw6IzRlNGU1NTtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAyMTk5LjA5LDIyMi45NDkgYyAyMi4yNiwwIDQ1LjA1LC0xMC4xMjEgNTEuODksLTM0LjYwOSBsIDUxLjc0LDE5LjY4IGMgLTE0LjQ5LDUxLjIxOCAtNjIuMDcsNzAuMzcxIC0xMDQuMDQsNzAuMzcxIC03NS4yLDAgLTEwNS41MiwtNDYuNyAtMTA1LjUyLC05Mi4wOSBWIDkyLjEwOTQgQyAyMDkzLjE2LDQ2LjczODMgMjEyMy40OCwwIDIxOTguNjgsMCBjIDQxLjk3LDAgODkuNTUsMTkuMTc5NyAxMDQuMDQsNzAuMzk4NCBsIC01MS43NCwxOS42NzE5IGMgLTYuODQsLTI0LjQ2MDkgLTI5LjYzLC0zNC42NDA2IC01MS44OSwtMzQuNjQwNiAtMzguNzQsMCAtNDkuMDEsMjEuMjEwOSAtNDkuMDEsNDUuMzkwMyB2IDc2Ljc4OSBjIDAsMjQuMTUzIDEwLjI3LDQ1LjM0IDQ5LjAxLDQ1LjM0IiAvPjxwYXRoIGlkPSJwYXRoMjAiIHN0eWxlPSJmaWxsOiM0ZTRlNTU7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiIGQ9Im0gMjQ0Mi45MSwxNTIuODIgMTA2LjYsMTIwLjM3MSBoIC03MC4xMiBMIDIzODcuNywxNjguMjcgdiAyMDMuMjUgaCAtNTcuMDcgViA1LjE5MTQxIGggNTcuMDcgViA5MC40ODgzIGwgMTguNzIsMjEuMTQwNyA4MS42NSwtMTA2LjQzNzU5IGggNjguNDMgTCAyNDQyLjkxLDE1Mi44MiIgLz48cGF0aCBpZD0icGF0aDIyIiBzdHlsZT0iZmlsbDojZTMyMTI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiBkPSJtIDE5NzguNjEsMjE0LjcxMSBoIC01OS4yOSBjIC05LjQzLDAgLTE3LjA4LC03LjY2IC0xNy4wOCwtMTcuMDUxIHYgLTY0LjM0IGggLTU4LjQ5IHYgNjQuMzQgYyAwLDQxLjczMSAzMy44MSw3NS41MzEgNzUuNTcsNzUuNTMxIGggNTkuMjkgdiAtNTguNDgiIC8+PHBhdGggaWQ9InBhdGgyNCIgc3R5bGU9ImZpbGw6I2UzMjEyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAxOTMwLjM1LDYzLjY3OTcgaCA1OS4zMyBjIDkuMzksMCAxNy4wNiw3LjY0ODQgMTcuMDYsMTcuMDcwMyB2IDY0LjMyIGggNTguNDggViA4MC43NSBjIDAsLTQxLjczMDUgLTMzLjgyLC03NS41NTg1OSAtNzUuNTQsLTc1LjU1ODU5IGggLTU5LjMzIFYgNjMuNjc5NyIgLz48cGF0aCBpZD0icGF0aDI2IiBzdHlsZT0iZmlsbDojZTMyMTI0O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiBkPSJtIDk2My4zNzksMjczLjE5MSBoIDY1LjQ3MSBWIDIxOC42NiBIIDk2My4zNzkgViAxMDguNjA5IGMgMCwtMjguMTI4NSAxNS4wNjIsLTQ4LjgzOTUgNTAuOTIxLC00OC44Mzk1IGggOC41NiBWIDUuMTkxNDEgaCAtMjIuODQgYyAtNzMuMDMyLDAgLTkzLjY2OCw0NS4yMTg3OSAtOTMuNjY4LDk1LjU3ODU5IFYgMjE4LjY2IEggODEwLjM3OSBWIDEwOC42MDkgYyAwLC0yOC4xMjg1IDE1LjA5LC00OC44Mzk1IDUwLjk0OSwtNDguODM5NSBoIDguNTMxIFYgNS4xOTE0MSBoIC0yMi44NDcgYyAtNzMsMCAtOTMuNjg0LDQ1LjIxODc5IC05My42ODQsOTUuNTc4NTkgdiAxMTcuODkgaCAtMjguOTA2IHYgNTQuNTMxIGggMjguOTA2IHYgNjYuNzk3IGwgNTcuMDUxLDMxLjU0MyB2IC05OC4zNCBoIDk1Ljk3MyB2IDY2Ljc5NyBsIDU3LjAyNywzMS41NDMgdiAtOTguMzQiIC8+PHBhdGggaWQ9InBhdGgyOCIgc3R5bGU9ImZpbGw6I2UzMjEyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAzNDcuNzg5LDI3OC4zOTEgYyAtMTguMDM5LDAgLTM2LjM0LC0zLjQ5MyAtNTIuODA5LC0xMC40NjkgViAzNzEuNTMxIEggMjM3Ljk0OSBWIDUuMTkxNDEgSCAyOTQuOTggViAyMTQuNjA5IGMgMTEuNDYxLDcuMiAyNy45NSwxMS41IDQ0LjA3MSwxMS41IDM1Ljg0NywwIDUyLjcxOSwtMTkuOTI5IDUyLjcxOSwtNDkuMzIgViA1LjE5MTQxIGggNTYuOTggViAxODQuNTc4IGMgMCw1NC4wOTQgLTM5LjE4LDkzLjgxMyAtMTAwLjk2MSw5My44MTMiIC8+PHBhdGggaWQ9InBhdGgzMCIgc3R5bGU9ImZpbGw6I2UzMjEyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSA2MzYuODI4LDU4LjQ4ODMgYyAtMTAuODQsLTUuODQ3NyAtMjQuNTU4LC05LjE5OTIgLTM4LjIwNywtOS4xOTkyIC00Mi41NjIsMCAtNTguNTYyLDIxLjY3OTcgLTU4LjU2Miw1MS41ODE5IHYgMTcyLjMyIGggLTU3LjAyIFYgOTkuODIwMyBDIDQ4My4wMzksMzIuNDI5NyA1MjEuOTg4LDAgNTkxLjYwMiwwIDYyNC45NDEsMCA2NjEuODU5LDguNDI5NjkgNjkzLjgyOCwyMi4yNjk1IFYgMjczLjE5MSBoIC01NyBWIDU4LjQ4ODMiIC8+PHBhdGggaWQ9InBhdGgzMiIgc3R5bGU9ImZpbGw6I2UzMjEyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0ibSAxMzEuMzIsMTY0LjAxMiBjIC0zLjk0OSwwLjY5OSAtMTcuMzIsMi45MTggLTIxLjI0MiwzLjYzNiAtMjEuMDQ2NywzLjc5MyAtMzkuMTQ4Myw4LjcyMyAtMzkuMTQ4MywyOS45NDIgMCwxOC4yMTkgMTkuMDgyLDI2LjcxOSA0Mi44NzkzLDI2LjcxOSAzNS4zNjMsMCA2Ni4zODIsLTE2LjAyOCA2OS45MjEsLTE3Ljc5NyBsIDE5LjM3OSw1MS4xNDggYyAtNy40MSwzLjg3MSAtMzksMjAuNzMxIC04OC43MywyMC43MzEgLTQ1LjQ4ODQsMCAtMTAxLjA5NzcsLTIzLjkwMyAtMTAxLjA5NzcsLTgzLjM3MSAwLC01My4yMTkgMzcuOTg4MiwtNzAuMzAxIDc0LjY4NzUsLTc2Ljc1IDUuMDUwNywtMC45MyAyMC45NzIyLC0zLjY0OSAyNS41NTEyLC00LjQ0MiAyNC42NCwtNC4xNjggMzguMTIxLC0xMy4zNDggMzguMTIxLC0yOS40NzY0IDAsLTIwLjQ3MjcgLTE5LjE3MiwtMzAuMDcwMyAtNDguMjcsLTMwLjA3MDMgLTQ2LjY1MjIsMCAtNzMuOTk5OSwxMy44OTA2IC04MS45MTAxLDE3LjE0MDYgTCAwLDIxLjM3ODkgQyA2LjY5MTQxLDE3Ljk0MTQgMzguNSwwIDEwMC41OSwwIDE2MC44NCwwIDIwOS4xOTEsMjkuODM5OCAyMDkuMTkxLDg1LjM3ODkgMjA4LjY3MiwxMzcuMDc4IDE3My45MywxNTYuNjkxIDEzMS4zMiwxNjQuMDEyIiAvPjxwYXRoIGlkPSJwYXRoMzQiIHN0eWxlPSJmaWxsOiNlMzIxMjQ7ZmlsbC1vcGFjaXR5OjE7ZmlsbC1ydWxlOm5vbnplcm87c3Ryb2tlOm5vbmUiIGQ9Im0gMTIwNy42LDE1OS41MTIgaCAtOTYuMTUgdiAxOS41IGMgMCwyMS43NSAxMC45Miw0NS4wNzggNDguMzcsNDUuMDc4IDM2LjEsMCA0Ny43OCwtMjIuNzE5IDQ3Ljc4LC00NC4wMiB6IG0gNTcuMDMsMjYuNzg5IGMgMCw0OS4wMTkgLTM3LjM2LDkyLjEwOSAtMTA0LjU0LDkyLjEwOSAtNzYuMjYsMCAtMTA1LjU0LC00Ny42MjEgLTEwNS41NCwtOTIuMTA5IFYgOTcuMjg5MSBDIDEwNTQuNTUsMzUuNzEwOSAxMDkzLjksMCAxMTYwLjA5LDAgYyA1OC4zOSwwIDg4LjcsMzMuNzYxNyA5Ny43LDU0LjAzOTEgbCAtNDguMTQsMjguOTIxOCBjIC00LjExLC0xMS45MTAxIC0yMy4xNywtMjguNjIxMSAtNDkuMTgsLTI4LjYyMTEgLTM1LjI2LDAgLTQ4LjgyLDE5LjY3MTkgLTQ4LjgyLDQ0LjMyMDQgbCAtMC4yLDE0LjY3OTggaCAxNTMuMTggdiA3Mi45NjEiIC8+PHBhdGggaWQ9InBhdGgzNiIgc3R5bGU9ImZpbGw6I2UzMjEyNDtmaWxsLW9wYWNpdHk6MTtmaWxsLXJ1bGU6bm9uemVybztzdHJva2U6bm9uZSIgZD0iTSAxMzAxLjEyLDE4Ni4xOTkgViA1LjE5MTQxIGggNTYuOTggViAxODEuMzI4IGMgMCwxNS4zODMgOC43Myw0MS42NzIgNTAuNTgsNDEuNjcyIDYuNTcsMCAyMS40MiwtMS44NzEgMjYuMTcsLTIuNzYyIHYgNTUuMjgyIGMgLTUuMTQsMS4yNDIgLTE2LjkyLDIuODkgLTI5LjA5LDIuODkgLTcyLjQ4LDAgLTEwNC42NCwtNDUuNDYxIC0xMDQuNjQsLTkyLjIxMSIgLz48cGF0aCBpZD0icGF0aDM4IiBzdHlsZT0iZmlsbDojNGU0ZTU1O2ZpbGwtb3BhY2l0eToxO2ZpbGwtcnVsZTpub256ZXJvO3N0cm9rZTpub25lIiBkPSJtIDI2MDYuOTcsMjU3Ljk4IGMgMCwyLjEyMiAtMS4zNCw0LjExIC00LjkyLDQuMTEgaCAtMy41OCB2IC05LjAzMSBoIDMuNTggYyAzLjg2LDAgNC45MiwxLjczIDQuOTIsNC41MTkgeiBtIC0wLjUzLC0xOS4xNCBjIC0wLjI3LDAgLTAuNTMsMC4xMjkgLTAuNjcsMC4zOSBsIC00LjI2LDkuMzA5IGggLTMuMDQgdiAtOS4xNjggYyAwLC0wLjI2OSAtMC4xNSwtMC41MzEgLTAuNCwtMC41MzEgaCAtNS4zMyBjIC0wLjI2LDAgLTAuNTMsMC4yNjIgLTAuNTMsMC41MzEgdiAyNy41MDggaCAxMC42NCBjIDcuMTcsMCAxMC4zNiwtNC41MjcgMTAuMzYsLTguNzcgdiAtMC41MzEgYyAwLC0zLjcyNiAtMS45OSwtNy4xOCAtNS41OCwtOC43NzcgbCA1LjMyLC05LjQzIGMgMC4xMywtMC4yNjkgMCwtMC41MzEgLTAuMjcsLTAuNTMxIHogbSAtNC4zOSwzNS4wOSBjIC0xMi4wOSwwIC0yMC44NywtOS40NSAtMjAuODcsLTIxLjUzOSAwLC0xMS4zMDEgOC45MSwtMjAuODcxIDIwLjg3LC0yMC44NzEgMTIuMDksMCAyMC43NCw5LjU3IDIwLjc0LDIwLjg3MSAwLDExLjk2OCAtOS40NCwyMS41MzkgLTIwLjc0LDIxLjUzOSB6IG0gMCwtNDguNjYgYyAtMTUuNDIsMCAtMjcuOTEsMTEuNjk5IC0yNy45MSwyNy4xMjEgMCwxNS40MTggMTIuNDksMjcuNzg5IDI3LjkxLDI3Ljc4OSAxNS4yOCwwIDI3Ljc4LC0xMi41IDI3Ljc4LC0yNy43ODkgMCwtMTUuNDIyIC0xMi4zNiwtMjcuMTIxIC0yNy43OCwtMjcuMTIxIiAvPjwvZz48L2c+PC9zdmc+"></h1>
         <p>Фото, векторы, музыка. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Shutterstock придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

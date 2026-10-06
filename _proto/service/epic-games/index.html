@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/games/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/games/index.html">Игры</a></li><li><span aria-current="page">Epic Games</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/games/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9InBhZCIgeDE9IjE4IiB5MT0iMjAiIHgyPSI0NiIgeTI9IjQ4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+IDxzdG9wIHN0b3AtY29sb3I9IiMzOEJERjgiLz4gPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjODE4Q0Y4Ii8+IDwvbGluZWFyR3JhZGllbnQ+IDwvZGVmcz4gPHBhdGggZD0iTTIwIDIzLjVoMjQuMmM1LjIgMCA5LjQgNS4zIDguMiAxMC4ybC0yIDguNGMtLjggMy41LTUuMiA0LjgtNy44IDIuM2wtNC40LTQuMkgyNS44bC00LjQgNC4yYy0yLjYgMi41LTcgMS4yLTcuOC0yLjNsLTItOC40Yy0xLjItNC45IDMtMTAuMiA4LjQtMTAuMloiIGZpbGw9InVybCgjcGFkKSIgZmlsbC1vcGFjaXR5PSIwLjI1IiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+IDxwYXRoIGQ9Ik0yMyAyOXY5TTE4LjUgMzMuNWg5IiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS13aWR0aD0iMi44IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4gPGNpcmNsZSBjeD0iNDIuNSIgY3k9IjMxLjUiIHI9IjIuNiIgZmlsbD0iIzYwQTVGQSIvPiA8Y2lyY2xlIGN4PSI0OCIgY3k9IjM3IiByPSIyLjYiIGZpbGw9IiNDMDg0RkMiLz4gPC9zdmc+">Игры</a><span class="sep">/</span>
-          <span aria-current="page">Epic Games</span>
-        </nav>
         <h1 class="svc-h1">Epic Games<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjU4IiBoZWlnaHQ9IjU4IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIj48cGF0aCBkPSJNMy41MzcgMEMyLjE2NSAwIDEuNjYuNTA2IDEuNjYgMS44NzlWMTguNDRhNC4yNjIgNC4yNjIgMCAwMC4wMi40MzNjLjAzMS4zLjAzNy41OS4zMTYuOTIuMDI3LjAzMy4zMTEuMjQ1LjMxMS4yNDUuMTUzLjA3NS4yNTguMTMuNDMuMmw4LjMzNSAzLjQ5MWMuNDMzLjE5OS42MTQuMjc2LjkyOC4yN2guMDAyYy4zMTQuMDA2LjQ5NS0uMDcxLjkyOC0uMjdsOC4zMzUtMy40OTJjLjE3Mi0uMDcuMjc3LS4xMjQuNDMtLjIgMCAwIC4yODQtLjIxMS4zMTEtLjI0My4yOC0uMzMuMjg1LS42MjEuMzE2LS45MmE0LjI2MSA0LjI2MSAwIDAwLjAyLS40MzRWMS44NzljMC0xLjM3My0uNTA2LTEuODgtMS44NzgtMS44OHptMTMuMzY2IDMuMTFoLjY4YzEuMTM4IDAgMS42ODguNTUzIDEuNjg4IDEuNjk2djEuODhoLTEuMzc0di0xLjhjMC0uMzY5LS4xNy0uNTQtLjUyMy0uNTRoLS4yMzVjLS4zNjcgMC0uNTM3LjE3LS41MzcuNTM5djUuODFjMCAuMzY5LjE3LjU0LjUzNy41NGguMjYyYy4zNTMgMCAuNTIzLS4xNzEuNTIzLS41NFY4LjYxOWgxLjM3M3YyLjE0M2MwIDEuMTQ0LS41NjIgMS43MS0xLjcgMS43MWgtLjY5NGMtMS4xMzggMC0xLjctLjU2Ni0xLjctMS43MVY0LjgyYzAtMS4xNDQuNTYyLTEuNzA5IDEuNy0xLjcwOXptLTEyLjE4Ni4wOGgzLjExNHYxLjI3NEg2LjExN3YyLjYwM2gxLjY0OHYxLjI3NUg2LjExN3YyLjc3NGgxLjc0djEuMjc1aC0zLjE0em0zLjgxNiAwaDIuMTk4YzEuMTM4IDAgMS43LjU2NCAxLjcgMS43MDh2Mi40NDVjMCAxLjE0NC0uNTYyIDEuNzEtMS43IDEuNzFoLS43OTl2My4zMzhoLTEuNHptNC41MyAwaDEuNHY5LjIwMWgtMS40em0tMy4xMyAxLjIzNXYzLjM5MmguNTc1Yy4zNTQgMCAuNTIzLS4xNzEuNTIzLS41NFY0Ljk2NWMwLS4zNjgtLjE3LS41NC0uNTIzLS41NHptLTMuNzQgMTAuMTQ3YTEuNzA4IDEuNzA4IDAgMDEuNTkxLjEwOCAxLjc0NSAxLjc0NSAwIDAxLjQ5LjI5OWwtLjQ1Mi41NDZhMS4yNDcgMS4yNDcgMCAwMC0uMzA4LS4xOTUuOTEuOTEgMCAwMC0uMzYzLS4wNjguNjU4LjY1OCAwIDAwLS4yOC4wNi43MDMuNzAzIDAgMDAtLjIyNC4xNjMuNzgzLjc4MyAwIDAwLS4xNTEuMjQzLjc5OS43OTkgMCAwMC0uMDU2LjI5OXYuMDA4YS44NTIuODUyIDAgMDAuMDU2LjMxLjcuNyAwIDAwLjE1Ny4yNDUuNzM2LjczNiAwIDAwLjIzOC4xNi43NzQuNzc0IDAgMDAuMzAzLjA1OC43OS43OSAwIDAwLjQ0NS0uMTE2di0uMzM5aC0uNTQ4di0uNTY1SDcuMzd2MS4yNTVhMi4wMTkgMi4wMTkgMCAwMS0uNTI0LjMwNyAxLjc4OSAxLjc4OSAwIDAxLS42ODMuMTIzIDEuNjQyIDEuNjQyIDAgMDEtLjYwMi0uMTA3IDEuNDYgMS40NiAwIDAxLS40NzgtLjMgMS4zNzEgMS4zNzEgMCAwMS0uMzE4LS40NTUgMS40MzggMS40MzggMCAwMS0uMTE1LS41OHYtLjAwOGExLjQyNiAxLjQyNiAwIDAxLjExMy0uNTcgMS40NDkgMS40NDkgMCAwMS4zMTItLjQ2IDEuNDE4IDEuNDE4IDAgMDEuNDc0LS4zMDkgMS41OCAxLjU4IDAgMDEuNTk4LS4xMTEgMS43MDggMS43MDggMCAwMS4wNDUgMHptMTEuOTYzLjAwOGEyLjAwNiAyLjAwNiAwIDAxLjYxMi4wOTQgMS42MSAxLjYxIDAgMDEuNTA3LjI3N2wtLjM4Ni41NDZhMS41NjIgMS41NjIgMCAwMC0uMzktLjIwNSAxLjE3OCAxLjE3OCAwIDAwLS4zODgtLjA3LjM0Ny4zNDcgMCAwMC0uMjA4LjA1Mi4xNTQuMTU0IDAgMDAtLjA3LjEyN3YuMDA4YS4xNTguMTU4IDAgMDAuMDIyLjA4NC4xOTguMTk4IDAgMDAuMDc2LjA2Ni44MzEuODMxIDAgMDAuMTQ3LjA2Yy4wNjIuMDIuMTQuMDQuMjM2LjA2MWEzLjM4OSAzLjM4OSAwIDAxLjQzLjEyMiAxLjI5MiAxLjI5MiAwIDAxLjMyOC4xNy42NzguNjc4IDAgMDEuMjA3LjI0LjczOS43MzkgMCAwMS4wNzEuMzM3di4wMDhhLjg2NS44NjUgMCAwMS0uMDgxLjM4Mi44Mi44MiAwIDAxLS4yMjkuMjg1IDEuMDMyIDEuMDMyIDAgMDEtLjM1My4xOCAxLjYwNiAxLjYwNiAwIDAxLS40Ni4wNjEgMi4xNiAyLjE2IDAgMDEtLjcxLS4xMTYgMS43MTggMS43MTggMCAwMS0uNTkzLS4zNDZsLjQzLS41MTRjLjI3Ny4yMjMuNTc4LjMzNS45LjMzNWEuNDU3LjQ1NyAwIDAwLjIzNi0uMDUuMTU3LjE1NyAwIDAwLjA4Mi0uMTQydi0uMDA4YS4xNS4xNSAwIDAwLS4wMi0uMDc3LjIwNC4yMDQgMCAwMC0uMDczLS4wNjYuNzUzLjc1MyAwIDAwLS4xNDMtLjA2MiAyLjQ1IDIuNDUgMCAwMC0uMjMzLS4wNjIgNS4wMzYgNS4wMzYgMCAwMS0uNDEzLS4xMTMgMS4yNiAxLjI2IDAgMDEtLjMzMS0uMTYuNzIuNzIgMCAwMS0uMjIyLS4yNDMuNzMuNzMgMCAwMS0uMDgyLS4zNnYtLjAwOGEuODYzLjg2MyAwIDAxLjA3NC0uMzU5Ljc5NC43OTQgMCAwMS4yMTQtLjI4MyAxLjAwNyAxLjAwNyAwIDAxLjM0LS4xODUgMS40MjMgMS40MjMgMCAwMS40NDgtLjA2NiAyLjAwNiAyLjAwNiAwIDAxLjAyNSAwem0tOS4zNTguMDI1aC43NDJsMS4xODMgMi44MWgtLjgyNWwtLjIwMy0uNDk5SDguNjIzbC0uMTk4LjQ5OGgtLjgxem0yLjE5Ny4wMmguODE0bC42NjMgMS4wOC42NjMtMS4wOGguODE0djIuNzloLS43NjZ2LTEuNjAybC0uNzExIDEuMDkxaC0uMDE2bC0uNzA3LTEuMDgzdjEuNTkzaC0uNzU0em0zLjQ2OSAwaDIuMjM1di42NThoLTEuNDczdi40MjJoMS4zMzR2LjYxaC0xLjMzNHYuNDQyaDEuNDkzdi42NThoLTIuMjU1em0tNS4zLjg5N2wtLjMxNS43OTNoLjYyNHptLTEuMTQ1IDUuMTloOC4wMTRsLTQuMDkgMS4zNDh6IiBmaWxsPSIjMWQxZDFkIi8+PC9zdmc+"></h1>
         <p>Магазин игр и Fortnite. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к Epic Games придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

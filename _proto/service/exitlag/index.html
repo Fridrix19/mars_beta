@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/entertainment/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/entertainment/index.html">Развлечения</a></li><li><span aria-current="page">ExitLag</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/entertainment/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8bGluZWFyR3JhZGllbnQgaWQ9InBsYXkiIHgxPSIyMCIgeTE9IjE4IiB4Mj0iNDMiIHkyPSI0MiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPiA8c3RvcCBzdG9wLWNvbG9yPSIjRjQ3MkI2Ii8+IDxzdG9wIG9mZnNldD0iMC41NSIgc3RvcC1jb2xvcj0iIzhCNUNGNiIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2MEE1RkEiLz4gPC9saW5lYXJHcmFkaWVudD4gPGxpbmVhckdyYWRpZW50IGlkPSJub3RlIiB4MT0iNDIiIHkxPSIyOCIgeDI9IjUzIiB5Mj0iNDQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzkzQzVGRCIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGOUE4RDQiLz4gPC9saW5lYXJHcmFkaWVudD4gPC9kZWZzPiA8cGF0aCBkPSJNMTggMTguNXYyN0w0MC41IDMyIDE4IDE4LjVaIiBmaWxsPSJ1cmwoI3BsYXkpIi8+IDxwYXRoIGQ9Ik0xOCAxOC41djI3TDQwLjUgMzIgMTggMTguNVoiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPHBhdGggZD0iTTQ1IDI0LjV2MTcuOGMwIDMuMy0yLjMgNS43LTUuNiA1LjctMyAwLTUuMS0xLjgtNS4xLTQuNCAwLTIuOCAyLjItNC44IDUuMS00LjggMS4yIDAgMi4zLjMgMy4yLjhWMjlsMTEtMi44djE0LjFjMCAzLjMtMi4zIDUuNy01LjYgNS43LTMgMC01LjEtMS44LTUuMS00LjQgMC0yLjggMi4yLTQuOCA1LjEtNC44IDEuMiAwIDIuMy4zIDMuMi44IiBmaWxsPSJ1cmwoI25vdGUpIi8+IDxwYXRoIGQ9Ik00NSAyNC41djE3LjhjMCAzLjMtMi4zIDUuNy01LjYgNS43LTMgMC01LjEtMS44LTUuMS00LjQgMC0yLjggMi4yLTQuOCA1LjEtNC44IDEuMiAwIDIuMy4zIDMuMi44VjI5bDExLTIuOHYxNC4xYzAgMy4zLTIuMyA1LjctNS42IDUuNy0zIDAtNS4xLTEuOC01LjEtNC40IDAtMi44IDIuMi00LjggNS4xLTQuOCAxLjIgMCAyLjMuMyAzLjIuOCIgc3Ryb2tlPSIjRjhGQkZGIiBzdHJva2Utd2lkdGg9IjIuMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+IDwvc3ZnPg==">Развлечения</a><span class="sep">/</span>
-          <span aria-current="page">ExitLag</span>
-        </nav>
         <h1 class="svc-h1">ExitLag<img class="svc-inline " alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMzEzIiBoZWlnaHQ9IjE2MSIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzEzIDE2MSI+IDxpbWFnZSB3aWR0aD0iMzEzIiBoZWlnaHQ9IjE2MSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBVGtBQUFDaENBTUFBQUNMZlRoWkFBQUF2VkJNVkVVVkZ4bkVJU0gvLy84QUFBQUFGeG5KSVNHcEh4L0tJU0hESVNIazVPUVNGeGtQRnhtNnVyc05GeG1oSGg5dkd4d1lGeG0rSVNHSEhSNjRJQ0I4SEIyeklDQ0JIUjFjR2h3c0dCb0FCZ284R1JvM0dCb2VHQm13SUNCSEdSdXpzN1NiSGg5bUd4d2tHQnJLeXNyMjl2WlRHaHVQSFI0TkVCTFYxZFYySEIya3BLVnNiRzA3UEQ1akd4eFdWMWhlWDJDQ2c0TkdSMGhzR3h3dExpOTNkM2hFR1J1VWxaVTZHUnNwS3kwZEh5R0xqSTAyTnpscGFtc3FHQnJyNit4elN6RXZBQUFIQmtsRVFWUjRuTzJkMTFia09CQ0czVmpkQmhzRFRaT2FNS1FCd3d4TVlBazdnWG4veDFvSHljb3FYZlhPVWRWM1IvQTVkSjBTOWF2cWw1eGxCRUVRQkVFUUJFRVFCRUVRQkVFUUJFRVFCRUVRQkVFUUJFRVFCRUVRZnpNbEE2Z0NEeS96TU0zS1BzYnFLVTh2WmtHMmp2eWh5NS92TmtMY2ZVODRkR3kzbUFTWjdqUGZzL256R3NCZHZzclBzbHJZSlJDNVNYSHZDVjJUUVlGYis1Unc1REkybXdLaG0xNjUxMnQrRFFYdVk4cUJ5Nm9qS09tbVc4NmtnOWZxMnUra0k1ZXhBM0M5SGpwQzErUmc0SzdURGx3YnVnVVF1Y204THEybjRMVzYxaVJjV1h2cUQrQjZ2YldTTHY4TUJ1NWI2aW5YSnQwRlZDU0tsOXA0SnY4SUJTNWxSU0lvNjNWb3ZacWlMdDhFVSs0aDliWGF3UjdCSXJHbmhTNy9DZ1l1YVNrbmlSQjE3NnFvZzlmcUh4eUJhMFVkR0xtWmtuVDVPWmh5WDVmLzM2ZFpLV3dQWEsrUFkraVdYOERBYlNKSnVTeEcxSzJQb2k3L0EwWnVpYUU4RE5Rdm9LaTc0RWtYc1ZZUlNEa0p1d1ZGM1lkZTFEVVBZT0F3U0RsSnlVQlJ0K2lUTHQ4QUkvY1Buclhhd1E3QkluSFFoaTUvQlFPSFJNcEoyQmE0WG8vcUxQOEVCUTZMbEpOVVYxR2lEcXlzWDdCSU9RbTdCOWZyRXdQVlhPSlNyalFZdnN2MmxmelNFZCt1U21pM243YVVZK1dPUmpsSXRmcFlKdDJXd1JDN1h0UUZkNjNQU2FjYzJ5NzBqQkt0a0ZIVUZXL213SnBYM3VLbURuWTFFNWR5OWxhck9PNVZic25tL0d1ckNTd3E3NXdGTytuL0pyMVdYZnQ3M3JvVXFUWGRNME5Ybmc2UkszWloxdnp3QmU0MTdaUnpKaDJmUjR2VW1scW1pSGFKRDc5NTBxN1huKzdBcFMvbEhFT2I2V2xmWUVWcWFmMjRBWFkyL09ZWjgyN0JFRWc1ZTM4djV0RmphajJhb2F2ZitFKzJtV2ZiZjU1OHlqbUhObUllTFZKcnZUU0hyR3lYaDd0TlQ5Y21MRzB6aE1BeHRKbXpQbFQxQ1M4UzFwQlZWRjZmcVB1TUluS09vWTBJbFVndDNvOVRuN2tSb3E3ZGhGbmpyK1RORUJ5SEU4Y1VkUXU3U0Z3SVVWZmFvaTV4S1NjSmlEcVJXZ2ZXZXMxNGVuYWl6ckRQL1VTU2NsbFExUEhVNnZweHhqTlB4WmllK1RjMWNCdDRBdWNVZFZlRHFOdmhYNTdaNjNVbTB6Ty9VeUtYc2lYWUlpRHFSR285V2FLT1Y5NHVQWnRmdUtTY0pDanFlRkIzTEZISGpZcWRCMWFLT2h4U1RoSWg2aTVzVWJlUTZUbDIxaFAzdGRvRVJOMkJsRzQ2NHQ5amw1NmlzNDVGeWttcWQ1K29HeXN2VDBJRlRkUU5uZlVNVTNrWThJczZrVnFkZE5NcFM1bWVnODhha1pTVFJJaTZFMHZVWFNxaTdobVhsSk00bkRqODVFaFo4YTlkb200NnBtY3I2bEQ0V20wQ291NVM5dU4weEo2M0cvdzBEK2pNRUp5eW5sdnI5WkFYQ2I1ZjRPMWlCYmJITzhmdlZmdXZidlYvOU4rQmlJTENRaThTaFRYT3FVNTlQVHhNMktjaGhQeGw5NkpHV05PY0ovNlRTNVloVkNRRHJoTTR3K29VRGgxSHMwbnRDT1JJQzRSTGxtenJBOFNGVndzUEE4VDBSNFZPSEZMNFRCOWFkMzRJNHhtbDg5bjFONU1mVDd1bzNxM3lZUFRVWFh0K3BkdmU5OVRSOU5FVkhGditYY09jay9tR2g5MkVaekRuSkc3RGNSRm9NNzFBdlUxMWRwaTI5Y3RCV2RxdFRkNVY0aWJFZ0VsaVVwZmowUWhzamMzUXpvc1hqc0p2ekdtbDNQSzc2QWtuYm5FMWlaQnlYak9ZYWJaRzRNVlJpSkZ5MWpOYllxQllhVWNqVUltNmdKVGpoY1BoanpoVXVpVEs2QXVWcUhPY2FTM2VCaW5IWjJLUWxGUEhyWmlPTE1GU2JyMnlwTnl0SXVXMEVUOGlVZWU0a0VsSU9kRmNzcjJIeDdLNTFEUnJCa2lPWm9hazNFSldUeDF4MHFRN0pPendweWQvczB0UG9DdkhDNGZEWTMwdmt6SC9iUVVPaDZnTFNMa2pieVA0U3BWeXJuTTRHSzQ5Q0VpNUdTVGxla2VKODBRNkFsSG51UDlMU0xuTEdDa250MTA2eVkvQlhLWUlMdVY0NFhEWXE0WHhhVDkweGpYMXpucEF5aW1lRWVNWkllVmU2c0NKOU1USC9mV05WOHJ4bjB5dG9ZM28xL1ZTN3BjdmNLbUx1dXE0TUU5cENpa25wdFl6NjFwaEx1VzZTL3lNYlpkTzJxS09IVy9yZk5CTmMyMXFMWXhyaGVkOHJSNHlhOXVsazdpVnJqWVNhcWlqb2svdXAydDhOc3RRNEJEYU56T2xUKzZQM0pWejI2V0Jyck11RGVsK09tdmRFcnhnRTVkTlBaT1dod0Q3NFpQb0FsUkhJN0tvZTBxN0dYYkU1WE9KaXpvVGg4Z3ovOGtOYWpuaUVqVkVuWFY1ekNHQTJGZkFsMnlpc2t1QWJ6dVFKeU5jclRtRHhFV2RTb1NVaytPY2lDS0I1SGgxRmlQbEp0SXNIUEZpQ0RTaVRsZ2VBbXRWTmFpSDkxODlTRVJkZVFwbW5ING9JcmpuSDhCaGw0aTQ3VkEvaUJQcU0zRVFkTmFsZTlXUGRmZ0x2ak1TZzZnYkxROSs1dmI3SWVEYm1OTzNTNHhYMy9qWHFtV3lqdG1FSlcrWFVDODY5S3hWeTVtVFJXM0NVdmZBUmtnNXkyVGRFYkVKU3p0eWNSZTZPckN2RjdKSTJpNGgzS3VCdFdvN2N3WWkzdWlTc3FpTHU3amFEYnhlVTk3NU16QncxdWgxWkFuZTJwOTA1UFltNnlFbTdsZnpEU3lYcjV2WG00THpuazJGOHg4cFN6cm94YmZobzcrSTMzeExFQVJCRUFSQkVBUkJFQVJCRUFSQkVBUkJFQVJCRUFSQkVBUmg4UithRUlhUlBncmJRd0FBQUFCSlJVNUVya0pnZ2c9PSIvPiA8L3N2Zz4="></h1>
         <p>Оптимизация пинга в играх. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к ExitLag придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();

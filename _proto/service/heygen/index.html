@@ -558,6 +558,28 @@ a:hover{color:var(--accent-hover)}
   .paybar{animation:rise .3s var(--ease) both}
 }
 
+/* ——— хлебные крошки + «Назад»: стеклянная строка под шапкой ——— */
+.crumbbar{padding-block:16px 0; position:relative; z-index:2}
+.cb-row{display:flex; align-items:center; gap:14px; min-width:0}
+.cb-back{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:36px; padding:0 14px 0 10px; border-radius:999px; border:1px solid var(--line-strong); background:var(--panel); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); color:var(--text); font-size:14px; font-weight:600; text-decoration:none; transition:border-color .2s, box-shadow .2s}
+.cb-back span{color:var(--accent); font-size:15px; line-height:1; transition:transform .2s}
+.cb-back:hover{border-color:var(--accent); box-shadow:0 0 0 4px var(--glow)} .cb-back:hover span{transform:translateX(-3px)}
+.cb-back:focus-visible{outline:2px solid var(--focus); outline-offset:2px}
+.cb-list{list-style:none; margin:0; padding:0; display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; font-size:13.5px; color:var(--text-4)}
+.cb-list li{display:inline-flex; align-items:center; min-width:0}
+.cb-list li + li::before{content:"›"; margin-inline:9px; color:var(--text-4); opacity:.7}
+.cb-list a{color:var(--text-3); text-decoration:none} .cb-list a:hover{color:var(--text)}
+.cb-list [aria-current]{color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40ch}
+@media (max-width:640px){
+  .crumbbar{padding-block:6px 0}
+  .cb-row{gap:10px}
+  .cb-back{min-height:34px; font-size:13.5px}
+  .cb-list{font-size:13px; flex-wrap:nowrap; overflow:hidden}
+  .cb-list li:not(:last-child):not(:nth-last-child(2)){display:none}
+  .cb-list li:nth-last-child(2)::before{display:none}
+  .cb-list [aria-current]{max-width:20ch}
+}
+
 /* ——— библиотека компонентов: то, что нужно остальным страницам сайта (формы, навигация, карточки, оверлеи) ——— */
 
 /* --- формы: select, textarea, checkbox, radio, switch, поле с кнопкой --- */
@@ -876,16 +898,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
     <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
   </button>
 </div>
+<nav class="crumbbar" aria-label="Вы здесь"><div class="wrap cb-row"><a class="cb-back" href="../../section/ai/index.html" data-back><span aria-hidden="true">←</span> Назад</a><ol class="cb-list"><li><a href="../../index.html">Главная</a></li><li><a href="../../catalog.html">Каталог</a></li><li><a href="../../section/ai/index.html">Нейросети</a></li><li><span aria-current="page">HeyGen</span></li></ol></div></nav>
 
 <main>
   <section class="hero wrap svc-hero">
     <div class="hero-grid">
       <div class="hero-copy">
-        <nav class="crumbs" aria-label="Хлебные крошки">
-          <a href="../../catalog.html">Каталог</a><span class="sep">/</span>
-          <a href="../../section/ai/index.html"><img alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSI+IDxkZWZzPiA8cmFkaWFsR3JhZGllbnQgaWQ9ImNvcmUiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIGdyYWRpZW50VHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzIgMzIpIHJvdGF0ZSg5MCkgc2NhbGUoMTQpIj4gPHN0b3Agc3RvcC1jb2xvcj0iIzZFRTdGRiIvPiA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3QzVDRkYiLz4gPC9yYWRpYWxHcmFkaWVudD4gPC9kZWZzPiA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSI4LjUiIGZpbGw9InVybCgjY29yZSkiLz4gPGNpcmNsZSBjeD0iMTkiIGN5PSIyMSIgcj0iNC41IiBmaWxsPSIjN0REM0ZDIi8+IDxjaXJjbGUgY3g9IjQ1IiBjeT0iMjEiIHI9IjQuNSIgZmlsbD0iI0E3OEJGQSIvPiA8Y2lyY2xlIGN4PSIxOSIgY3k9IjQzIiByPSI0LjUiIGZpbGw9IiMzOEJERjgiLz4gPGNpcmNsZSBjeD0iNDUiIGN5PSI0MyIgcj0iNC41IiBmaWxsPSIjODE4Q0Y4Ii8+IDxwYXRoIGQ9Ik0yNCAyMy41IDI4IDI3TTQwIDI3bDQtMy41TTI0IDQwLjUgMjggMzdNNDAgMzdsNCAzLjUiIHN0cm9rZT0iI0Y4RkJGRiIgc3Ryb2tlLXdpZHRoPSIyLjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPiA8cGF0aCBkPSJNMzEgMTYuNWgyTTMxIDQ1LjVoMk00Ni41IDMxdjJNMTUuNSAzMXYyIiBzdHJva2U9IiNGOEZCRkYiIHN0cm9rZS1vcGFjaXR5PSIwLjc4IiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+IDwvc3ZnPg==">Нейросети</a><span class="sep">/</span>
-          <span aria-current="page">HeyGen</span>
-        </nav>
         <h1 class="svc-h1">HeyGen<img class="svc-inline on-dark" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjY4IiBoZWlnaHQ9IjE4OCIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMjY4IDE4OCI+IDxpbWFnZSB3aWR0aD0iMjY4IiBoZWlnaHQ9IjE4OCIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9qcGVnO2Jhc2U2NCwvOWovNEFBUVNrWkpSZ0FCQVFBQUFRQUJBQUQvMndDRUFBa0dCdzhRRHc4UER4QVBFQkFQRHhBTkRoQVFFQThORGc4UUZSSVhGaFVaR0JjWUhTZ2dHUm9tSFJVVklURWlKU2tyTGk0dUZ4OHpPRE10TnlndExpc0JDZ29LRGcwT0doQVFHeXNtSGgwdExTMHRMUzB0TFMwdEt5MHRMUzB0TFMwdExTMHRMUzB0TFMwdExTMHJMUzB0TFMwdExTMHRMUzB0TFMwdExTMHRMZi9BQUJFSUFMd0JEQU1CRVFBQ0VRRURFUUgveEFBYkFBRUFBZ01CQVFBQUFBQUFBQUFBQUFBQUFRWURCQVVIQXYvRUFEd1FBQUlCQWdJR0Jna0JCd1VBQUFBQUFBQUJBZ01SQkFVU0lURkJVWEVHRXlJeVlZRWpRbEp5a2FHeHdkR3lNME5UWW5PUzhCUkVncUxDLzhRQUd3RUJBQUlEQVFFQUFBQUFBQUFBQUFBQUFBSURBUVFGQmdmL3hBQXZFUUVBQWdFREF3SUVCUVVCQVFBQUFBQUFBUUlEQkJFeEJSSWhNa0VUSWxGeEl6TmhnYkVVUXBHaDBjRUcvOW9BREFNQkFBSVJBeEVBUHdEM0VBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBRU5yaUdONFNHUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU9ObnZTQ25obG85K3ExZFFUMmVNdUNMY2VLYnVacitwNDlMRzNOdnAvMVI4ZG5lS3JPOHFzMHQwWU4wNHI0YmZNMjR4MHJIRHllbzZscWMwN3piYjdlRnE2RlpwS3JUbFJxU2NwMDljWEozazRQeDhHYTJhc1JPOFBROUUxdHN0SngzbnpYajdQcnBuUWxvVTY2dmFuTFFtcnV5ak5wWDhuYnl1YkdndEhkTko5MjExS2x1Mkx4N05ITHM3cTByS1QwNGNKUFdsNE0yY3VrcGYwK0phbW4xMTZlTGVZV3JCWTZuV2pwUWQrSzlaYzBjdkppdGpuYXp0WXMxY2tiMWJKV3RBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFISDZSWjFIQzA5Vm5Wa21xY2Z1L0JFNlU3cGM3cU91alRVOGVxZUhuRldwS2NwVGszS1VtNVNiMnRtNXZ0RHc5NzJ2YWJXNWxGaUUyUjJidVRZMTBLOU9ydVR0UHhnOXY1OGl1ODd3M3RCbi9wODBYL1o2WlhwUnEwNVFkbkNwRnA4R21pbXRwcGFMUjdQYzJpdVNtM3RNUFBJUWxDVlNqUHYwWnVtL0Zlckx6VmowTVdpMVl2SEV2TTJwTkxUU2ZadFlhdktuSlNnM0ZyZ1ZaTWNYamFWK0RKTlozaGE4cnppTlcwWjJqUC9BS3k1Zmc1V2JUVFR6SER0NGM4WGp5NnByTmdBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFCcFp0bU1NUFNkU2ZLTVZ0bExja1ppTjJycXRWVFQ0NXZaNXJtR0tuWHFTcVZIZVV2Z2x1UzhDN3UyaDRqUG12bnZON2U3QW9rWnVxN1U2Skdic3hWTml2dlQ3Vjk2SDQvcktIVnlmYW92UjhYRDFYOVY1RHUzZXQ2VHFQaVllMmVhdWIwMXduVjFhV0tpdXpMMEZiL3cvcXZnZGZwK1h1ck9LZnZIL3FycWVIYVl5eDlwY3FMTjJYUHBiYVdhRElXamR2NHJ5N3VXWjFLTm8xZTFIWXBlc3VmRkhQemFiZnpWMU1WOTFocHpVa21tbW5yVFd4blBtTnAybGUrZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUJoeFdKaFNoS3BONk1ZcTdmK2J3cnlaYTQ2emUzRVBOODZ6T1dKcXVidW9yVlRqdWpIOHN6M1BHYXpWVzFOKzZlUGFHallqTnZxMDRxbXhHYlFsRlVwRmMyVGlxYkZjM1o3WFg2TDE1UXhNTGJKTFFtdkI3UG5ZbGp2dk96cGRNdk9QTkVSeEs3WnRnWTRpaFVveTJWSXVOK0QzUHladlljczRyeGVQWjZYUGlqTFNhVDd2UE1MT2NKeXc5WmFOYWxxYWV5Y2QwbHhSNkNlMjlZdlRpWG1PMjJPM3c3OHczWXNybHQ0N00wSkVKZFREZHU0RE1KMG4yZGNXOWNYc2Y0WnI1Y0ZiL0FIYnRmS3pZTEd3cXE4WHIzeGUxSE12anRTZHBTbUd5UVlBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUG1ja2syM1pKWGJlcEpCaVoyOHlvSFNUT25pSjZFSDZHRDdQODc5cC9Zak5ubGVwYXljOXV5dnBqL2JqV0twdTVrVlNrUXRkbnRmU1JWT1JMdFRZak4wb3FXSzV1bDJPNTBMb09wV25VUzlIUjdMbHVsVjIyWExWYzJOTkU3ekxzZE0wKzl1K2ZaZVRkZDl4K2tHUVF4U1VrK3Jyd1hvNnFXdGVENHhOdlM2dTJDZHVhenpEVDFXanJuamYzamlWTnFTcVVhaW80bVBWMUgzWmZ1NnZqRi9ZN0ZiVXlSM1kvTWZ3NGZiZkRidHkvd0NmWnR4WkIwOE5vNVpMa2RuUngyWktkYVVXcFJiaTFzYTFFTFk2MmphVzVXSXRIbFljcnptTlMwS2xvejJKK3JMOE01dWZUelNkNjhLN1k1amgxeldWZ0FBQUFBQUFBQUFBQUFBQUFBQUFBS2QwcXpyVHZoNlQ3S2Rxc2w2elc1ZUhFcXlaTzE1L3FldDd2d3FjZTZzV05lYjd1THNteFhOMlloTml1YnBSVkpDYkpiSnNRbXljVlpjcnl5cmpaYU5LOEtLZHF1SXRxdHZWTy9lbDQ3RVc0c1Zzay9vM05ObzdaWi9SNk5sK0NwMEtVS05LT2pDQ3NsOTN4WjFLMWlzYlE5SGp4eFN2YlZza2t3d05mSFlLbFdnNmRXRVp4ZTFOZlRneXpIbHZqdDNWbmFVTW1PdVNPMjhid3EySjZJVllPK0ZyZG4rRldUa2x5a3RmeE9uVHFOYmZteCs4T2JicDFxVHZodCswdE9wbCtPcDkvRDZhNDBaeGw4bVhSbndXNHQvbE90dFRqOVZOL3RMQkxFYU9xcEdwVDkrRWt2amF4UHhQRXhMZHg2MmtSODhUSDdNa0trWHJUVDVOTVRXWTVibVBOUy9wbUpkektNM2NiVTZqdkhaR1crUFB3TkRQcHQvbXFYcDd3c2FaejFDUUFBQUFBQUFBQUFBQUFBQUFBQlhlbEdkZFduUnB2MGtsMm12VWkvdXluTGxpbmozY3JxR3MrSEhaU2ZNLzZVdEkwWnliejVlZTJmVmlFM1ppcFlybTBwUkQ0cVZveGFpMzJuM1lxOHB5NVJXdGtkNW1kazYwbVoyaDBjRmtXTXJkMmtxTWZicnZSZmxCYS9qWXZwcHNsbTdpMEdXL01iUTcyQjZHVVZaNGlwUEVQMlg2T2ovYXRxNXRtM2owZGErYmVYVHhkT3gwOVhsWmFWS01JcU1Fb3hTc294U1NTNUcxRVJIaUcvV3NWamFIMlpaQUFBRG5ZN09hTko2TGVsSmJrWjJhT282aGh3enRQTFdwZEpLRDd5bkh5dXZrWjdXdlRyT25tZHAzaHUwOGZoNm1wVHB5OEcwbjhHTnBqaHVVMWVESkhpME1WZkpNTFUyMFlYOXFLMEpmR0pkWFU1YThXbE9jT0szdEg3TktwMFloKzdxMUllRXJWWS9QWDh5Mk5iYis2SUl4WHI2THovTHM0U2k0UWpCeWN0RlcwbnFiTlM5dTYweXY4KzdNUkFBQUFBQUFBQUFBQUFBQUFCclpsaXVxbzFLbnN4dXVleGZPeEc5dTJzeXF6NVBoNDV0OUhtMVdjcE55azd5azd0dmUyY2kxNXRPOHZKM21iVzdwOTJPVTR4VjVOUlhpN0ZlKzg3RVZtZlp0WUxBWW12OEFzYU0zRi92S25vYWZQdGEzNUlzcGd5WDRiV0xSNWNuRU85Z3VocmV2RTE1UzQwNks2cUhuTFhKK1RSdVUwZGY3cGRQRjAya2V1Vmd3T1Y0ZkR4OUZTaFQ0eXN0Sjg1UFd6YXJpclh4V0cvandVcDRyQlh6U2xIVmZTZkNPdjVtelRUM3MzS2FlOXZaek1SbkZTV3FOb0xqdGtiTmRMRWN0dW1qckhtelQvd0JUVjI5WlV2Nzh2cHNMZmcwK2kzK254L1J0NFRPS3NiS3A2U085Nm96WDJmeUtzbWxpZlNveTZUM3E3MUN0R2NWS0RUVDJNMFppWW5hV2hNVEU3U3lHR0hFNlI1cTZNWTA0ZnRLbDdmeXdXMS9nbldJNWx5ZXA2MmNGZTJ2TnY5S2s1WDI3ZDczc2p5OHJhMDJuZVM1S0lSbVlmTEp4Q083SlJ4VlNHdUU1UjVTYVh3SmJKMTFXV2svTGFZYjFEcEJpWTdaS2Z2eFgyc1orSEV0M0gxblUwNW5mN3U3a21lOWZMcTV4VVoydW1uMlpXMitaWGZIdEc4TzEwN3EwYW0vdzdSdEx0bFR0QUFBQUFBQUFBQUFBQUFBQURXekhDS3RTblNiYVVrdGEzTk82K2FJM3IzUnNxelkvaVVtdjFWaWwwT201ZWt4Q1VPRktGcHYvQUpTYnQ1STBvMGZuekxtMDZWRVQ4MXZEdFpkMGZ3bEI2VUtVWFA4QWlWUFMxUDdwYlBJMmFZS1Y0aHY0dExqeCtLdzJxK1lVb2VzbStFZGJOcU1ONTRiMWRQZTNFT2RYenFUN2tWSHhmYVpzMTBrZTh0dW1paVBWTG5WcTg1OTZUZm5xK0JzMXgxcnhEWnBqclhpSHdUV0lBQmtDTXkzY294UFYxRXZWcU5Sa3QxOXpOZlVZKzZ1L3ZEVTFPT0xWM2ptRmxPYzVyejdNOFE2dUlyVkhzVTNTaDRSZzJ2cmRsMjNqWjRqWDUvaTU3VCszK0dxMklxMGR5NU9LbzdvYkp4VkhkRnlVVlkzQ2NWUW1YVTZOUmJ4VlB3VW0rV2kxOXl2TkcxWFU2TEV6cTYvcHV2S05KN2tBQUFBQUFBQUFBQUFBQUFBQU9YbUdhYUQwSUpPUzJ0N0YrVFl4WUp0NW5odFlkTk4vTThPVFh4ZFNmZWsrV3hHN1hGV3ZFTittQ2xPR0FzV29BQURJR0RjQ080d2pOaUwxcm1ZbmhYYWZDNFgxZVJ5UGR5TGNTODBoSzk3KzFKL05tMXR1K2Q1WitlMzNsTE14Q3ZkQk9Lbzl3U2lxTzZDY1VSM0NYYXhObG82SVlOcFRyTmQ3c1E1YjMvbkExTlZhUFREMWYveittbUt6bXRIUGlGbU5SNlVBQUFBQUFBQUFBQUFBQUFBR0JVOFltcWxTKzNUZjFPcmluNUlkbkYrWERDV0xnTUJrQUJoaVpRRUpzR1VlNGJDdWJJdUo0VnpLNHJ1cmtqamYzT2JmaVhtY05ubS9xYjhWZk9jcy9QUDNsOUU0cXAzUVNpckc0eWNVUjdrRTRxajNOM0s4REt2VVVGZExiT1hzeC9KWGx5UmpydTNlbjZPMnJ6ZGtjZTYvVWFVWVJVWXF5aXJKTGNjbVozOHkraFk2VngwaWxZOFF5R0ZnQUFBQUFBQUFBQUFBQUFBQUFjWE84Rzc5WkZlLytUYzArV0lqdGx2YVhORWZMTGptNjZBQURFeWdJN2x6S0UyUmNJVFliQ0hjZ3lybXdZbmhWYTY1UjdxOTM3SEduMU5XM0V2TTQ3L2VsK3BuVXJHOFBtbWVmeExmZVVzc2lxbnVRUzdXTnk1T0tvYnBoRnRwSlhiZGt1TE16NGplZUVxMXRlWXJYbVY5eVBMbFFwSmV2THRUZmp3NUk0MmZMT1MyL3MraGRMME1hVEQyL3dCMDh1Z1V1aWtNZ0FBQUFBQUFBQUFBQUFBQUFCRFZ3T1JtR1U3WlUrYmgrRGJ4YWpieFp1NGRWTWVMT00xYjZHN0U3dDd1M2pkQmxHWlFaUW1VWENFeWdLNWt1RmN5Z3lxbXlibUo0VnpLNVE3cTkxZlE0MDhvVHc4eWp2OEFlbCtwblp4eDhyNWpxSi9GdDk1L2xOeTJJVUliSnhERXloTWxzak1yUjBVeXYvY1RYOUplRytSek5ibjgvRGg2L29QVGRvL3FNa2VmYi9xMEk1ejFTUUFBQUFBQUFBQUFBQUFBQUFBQUFBQU5MSFpkR29ycnN5M1BqekxjZWFhTGNlVzFGZXhOQ1ZPV2pKVzRjSHlPalRKVzBlRzNHV0w4TUpZVEtES3ViQVZUZERDdWJ5Z0twdklKNFZ6ZVZ6cDkxZTZ2b2NXZVZ2czh6dnJsNzAvMU03MkdQa2g4dTFNL2kzKzgvd0F2bTVkRU5mY3VTMllkTEk4dGVJcXBQdVI3VlIrSER6TmJWNS9oVThjeTZuU2VuVHE4M24weHoveGZvUVNTU1ZrbFpMY2tjR2Q1bmVYMFd0WXJFUkhFSkNRQklBQUFBQUFBQUFBQUFBQUFBQUFBQUFHTEVZZUZTT2pOWFh6VEpVdk5aM2htdHBqekN1WmhsOHFUdjNvYnBjT1owY1dlTCtKNVdmRW1XaWJERnBSY0twc1hNcTVzaHNLcHVpNWllRmM1RjFwZDJQdXI2SEdubHR4NWg1bExiTDM1L3FaNkRESDRjUGwyci9PdDk1L2w4bHpYWktGR1U1UmhGWGxKMlNJM3ZGS3phZlpiZ3czelhqSFNQTXZRc3F3RWFGTlFXM2JKOFpQYWVlelpaeVdtMHZwV2cwZGRMaGpIWDkvdTNMRlRkU0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFJbEZOV2F1bnRUMW9EaDVsbEZyenBjM0Q4ZmczY09wOXJJenU0ck4rSlVUWjhzSzV1Z3lybXdZbFh1dXRIdVI5MWZRNHR2VkxwUjZYbWRUdlQvcVQvQUZzOURnL0xoOHUxZjU5L3ZLQzVyTGgwVnlyUWoxMDEyNXJzSityRDhzNHV0MUhkYnNyeEQzUFFlbS9CcDhhOGZOYmo5SVdGR2c5SWtBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBRG5abGxVYXQ1THN6NDduekw4T2VjZmoyVlpNZmR4eXJlSW9TaEp4a3JOZlBrZE9sNHZHOE5HMFRXZHBZMmlTSWxmVXQrcENaMmpkRmRhVWJSaXVFVXZrY1cwK1psMVk5THp2TXNGT2xWbkNVWHJuSndkbmFTYmJWdmlkM1M1S3pqanp3K2JkUjBtWEhxTFJOWjh6NC9WMXNoeUNVNUtwV2k0d1d0UWFzNXZ4VzVHdnF0WkVSTmFjdXQwam90NzJqTG5qYUk0ajZyaWtjaDdTSTJTR1FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUJoeE9GaFVWcHhUNGNWeVpLbDdVbmVFTDByYmx5Nm1RSy9abTB1RFZ6YWpXVzk0VVRwdnBMTmdzbWhUa3BOdWJXdFhWa2lHVFUydkcwZUVxYWVLenZMcG1zdk5GQW1JbmtBa01nQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBUC85az0iLz4gPC9zdmc+"></h1>
         <p>AI-аватары и перевод видео. Оплатите подписку виртуальной картой через СБП — реквизиты и инструкция по привязке к HeyGen придут на почту.</p>
         <div class="facts">
@@ -1940,8 +1958,19 @@ window.MC = (function(){
     });
   }
 
+
+  /* — «Назад» в хлебных крошках: если пришли с этого же сайта — шаг назад по истории, иначе — на уровень выше по ссылке — */
+  function initBack(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('[data-back]'); if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      var same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch (_) {}
+      if ((same || a.hasAttribute('data-back-hist')) && history.length > 1) { e.preventDefault(); history.back(); }
+    });
+  }
+
   initPaybar();
   initTheme();
+  initBack();
   initSession();
   syncCatalog();
   initSite();
@@ -2077,9 +2106,9 @@ window.MC = (function(){
     document.title = name + ' — Marscap';
     var h1 = document.querySelector('.svc-h1'); if (h1) { h1.firstChild.textContent = name; var img = h1.querySelector('img'); if (img) { if (p.icon) img.src = p.icon; else img.remove(); } }
     var lead = h1 && h1.nextElementSibling; if (lead) lead.textContent = (p.description ? p.description + ' ' : '') + 'Оплатите виртуальной картой через СБП — данные и инструкция придут на почту и в кабинет.';
-    var crumb = document.querySelector('.crumbs [aria-current="page"]'); if (crumb) crumb.textContent = name;
-    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbs a[href*="section/"]');
-    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; }
+    var crumb = document.querySelector('.crumbbar [aria-current="page"]'); if (crumb) crumb.textContent = name;
+    var cat = MC.CATALOG.categories.filter(function(c){ return c.id === p.category; })[0], cl = document.querySelector('.crumbbar a[href*="section/"]');
+    if (cat && cl) { cl.href = (window.MC_BASE || '') + 'section/' + cat.id + '/index.html'; cl.lastChild.textContent = cat.name; var ci = cl.querySelector('img'); if (ci) ci.src = cat.icon; var bk = document.querySelector('.crumbbar .cb-back'); if (bk) bk.href = cl.href; }
     document.querySelectorAll('h2, .step-hint, #emailHint, #calcSub').forEach(function(el){ el.textContent = el.textContent.replace(/Сервис/g, name); });
   }
   if (SVC) start();
