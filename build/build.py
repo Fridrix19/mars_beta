@@ -6,7 +6,11 @@ OUT=os.environ.get('MC_OUT', REPO+'/_proto'); TMP=os.environ.get('TMPDIR','/tmp'
 DOCTYPE='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
 try: NODE_PATH=subprocess.run(['npm','root','-g'],capture_output=True,text=True).stdout.strip()
 except Exception: NODE_PATH=''
+# реквизиты юрлица: подставляются на всех страницах (подвал) и в «Контактах»; пустой ОГРН — строка не выводится
+LEGAL={'LEGAL_NAME':'Марс Капитал «Цифровые Решения»','LEGAL_INN':'9715523083','LEGAL_OGRN':''}
 def emit(rel,out,label=None):
+    if not LEGAL['LEGAL_OGRN']: out=out.replace('<div><dt>ОГРН</dt><dd>{{LEGAL_OGRN}}</dd></div>','')
+    for k,v in LEGAL.items(): out=out.replace('{{'+k+'}}',v)
     path=os.path.join(OUT,rel); os.makedirs(os.path.dirname(path),exist_ok=True)
     open(path,'w',encoding='utf-8').write(DOCTYPE+out+'\n</html>'); print(label or rel, len(out.encode())); return path
 def svg_uri(p):
@@ -312,10 +316,8 @@ def build_faq():
         extra_css=read('pages/index.css')+'\n'+read('pages/faq.css'))
     emit('faq.html',out)
 
-LEGAL={'LEGAL_NAME':'ИП / ООО — уточнить','LEGAL_INN':'—','LEGAL_OGRN':'—'}
 def build_contacts():
     body=read('pages/contacts.html')
-    for k,v in LEGAL.items(): body=body.replace('{{'+k+'}}',v)
     CUR['crumbs']=[('Помощь','support.html'),('Контакты',None)]
     out=assemble('Контакты — Marscap', body, read('pages/contacts.js'), nav='support', m_cy='0.21', m_size='0.9', galaxy={'cx':'0.66','cy':'0.42','dx':'0','dy':'0','size':'2.4'},
         extra_css=read('pages/index.css')+'\n'+read('pages/contacts.css'))
