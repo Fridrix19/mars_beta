@@ -2,7 +2,7 @@
 export default defineEventHandler(async (e) => {
   const qy = getQuery(e)
   const slug = qy.product ? String(qy.product) : null
-  const limit = Math.min(50, Math.max(1, Number(qy.limit) || 20)), offset = Math.max(0, Number(qy.offset) || 0)
+  const limit = Math.min(50, Math.max(1, Number(qy.limit) || 20)), offset = Math.min(100_000, Math.max(0, Math.floor(Number(qy.offset)) || 0))
   const where = `r.status = 'published'` + (slug ? ` and p.slug = $1` : '')
   const args = slug ? [slug] : []
   const rows = await q(`select r.id, r.rating, r.text, r.author, r.reply, r.reply_at, r.created_at, p.slug, p.name product_name, p.icon product_icon, o.plan_label

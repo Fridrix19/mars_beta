@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { api, ok } = useAdm()
+const { api, ok, can } = useAdm()
 const emit = defineEmits(['changed'])
 const route = useRoute()
 const r = ref<any>(null), reason = ref(''), birth = ref(''), busy = ref('')
@@ -35,7 +35,7 @@ watchEffect(() => { const v = s.value ? s.value.email : ''; if (v) crumbLabel.va
       <div class="grid" style="align-content:start">
         <div class="panel"><dl class="kv kv-narrow">
           <dt>Имя</dt><dd>{{ s.name || '—' }}</dd><dt>Аккаунт с</dt><dd>{{ d(s.user_created) }}</dd><dt>Отправлено</dt><dd>{{ dt(s.created_at) }}</dd>
-          <dt>Профиль</dt><dd><NuxtLink :to="'/admin/users/' + s.user_id">открыть</NuxtLink></dd>
+          <template v-if="can('users')"><dt>Профиль</dt><dd><NuxtLink :to="'/admin/users/' + s.user_id">открыть</NuxtLink></dd></template>
           <template v-if="s.status !== 'pending'"><dt>Решение</dt><dd>{{ dt(s.reviewed_at) }}{{ s.reason ? ' · ' + s.reason : '' }}</dd></template>
         </dl></div>
         <div v-if="s.status === 'pending'" class="panel grid">

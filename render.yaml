@@ -18,6 +18,8 @@ services:
         generateValue: true
       - key: NUXT_COOKIE_SECURE
         value: "true"
+      - key: NUXT_STAND                 # тестовый стенд: тестовая оплата, коды на экране, admin/admin. В бою не задавать
+        value: "true"
       - key: NUXT_PAYMENT_PROVIDER
         value: test
       - key: NUXT_MAIL_PROVIDER         # unisender — письма уходят; log — только в журнал сервера (коды тогда видны на экране стенда)

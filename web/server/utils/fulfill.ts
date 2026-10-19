@@ -52,7 +52,10 @@ export async function deliverManual(orderId: string, text: string, adminId: stri
 
 // возврат заказа на баланс. Для виртуальной карты сначала списываем эту сумму с карты — иначе деньги окажутся и на карте, и на балансе.
 export async function refundOrderSafe(orderId: string, adminId: string, reason: string) {
-  const o = await tx(async (c) => {
+  return tx(c => refundOrderTx(c, orderId, adminId, reason))
+}
+export async function refundOrderTx(c: any, orderId: string, adminId: string, reason: string) {
+  {
     const o = (await c.query(`select o.*, p.delivery from orders o left join products p on p.id = o.product_id where o.id = $1 for update of o`, [orderId])).rows[0]
     if (!o) fail(404, 'not_found', 'Заказ не найден.')
     if (o.status === 'refunded') return o
@@ -65,8 +68,7 @@ export async function refundOrderSafe(orderId: string, adminId: string, reason: 
       }
     }
     return (await c.query(`select * from refund_order($1, $2, $3)`, [o.id, adminId, reason])).rows[0]
-  })
-  return o
+  }
 }
 
 // отметить заказ подарком и сообщить другу

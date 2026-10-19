@@ -68,8 +68,9 @@
   function back(){ var prev = history.pop() || 'scrLogin'; stopTimer(); show(prev, false); }
   $('tabLogin').addEventListener('click', function(){ show('scrLogin'); });
   $('tabReg').addEventListener('click', function(){ show('scrReg'); });
-  document.querySelectorAll('[data-tab]').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.tab === 'reg' ? 'scrReg' : 'scrLogin'); }); });
-  document.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', back); });
+  // свои атрибуты: data-tab — у таббара, data-back — у общей кнопки «Назад» по истории
+  document.querySelectorAll('[data-auth]').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.auth === 'reg' ? 'scrReg' : 'scrLogin'); }); });
+  document.querySelectorAll('[data-step-back]').forEach(function(b){ b.addEventListener('click', back); });
   $('toRecover').addEventListener('click', function(){ $('recId').value = $('loginId').value; show('scrRecover'); });
 
   /* — показать/скрыть пароль — */

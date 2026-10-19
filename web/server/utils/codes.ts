@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { timingSafeEqual } from 'node:crypto'
 
 export type CodePurpose = 'register' | 'login' | 'reset' | 'change_email' | 'reveal'
 const TTL_MIN = 10, MAX_ATTEMPTS = 5, RESEND_SEC = 59, PER_EMAIL_HOUR = 6, PER_IP_HOUR = 30
@@ -37,10 +38,12 @@ export async function consumeCode(email: string, purpose: CodePurpose, code: str
       where email = $1 and purpose = $2 and consumed_at is null order by created_at desc limit 1`, [email, purpose])
   if (!row) fail(400, 'code_missing', 'Код не запрашивали или он уже использован. Запросите новый.')
   if (row.expired) fail(400, 'code_expired', 'Срок кода истёк. Запросите новый.')
-  if (row.attempts >= MAX_ATTEMPTS) fail(429, 'code_attempts', 'Попытки закончились. Запросите новый код.')
-  if (row.code_hash !== codeHash(email, purpose, code)) {
-    const r = await one<{ attempts: number }>(`update email_codes set attempts = attempts + 1 where id = $1 returning attempts`, [row.id])
-    const left = MAX_ATTEMPTS - (r?.attempts ?? MAX_ATTEMPTS)
+  // попытка списывается до сравнения и атомарно — параллельные запросы не обойдут лимит
+  const t = await one<{ attempts: number }>(`update email_codes set attempts = attempts + 1 where id = $1 and attempts < ${MAX_ATTEMPTS} and consumed_at is null returning attempts`, [row.id])
+  if (!t) fail(429, 'code_attempts', 'Попытки закончились. Запросите новый код.')
+  const want = Buffer.from(row.code_hash), got = Buffer.from(codeHash(email, purpose, code))
+  if (want.length !== got.length || !timingSafeEqual(want, got)) {
+    const left = MAX_ATTEMPTS - t.attempts
     fail(400, 'code_wrong', left > 0 ? `Код не подошёл. Осталось попыток: ${left}.` : 'Попытки закончились. Запросите новый код.', { attempts_left: left })
   }
   const ok = await one(`update email_codes set consumed_at = now() where id = $1 and consumed_at is null returning id`, [row.id])
@@ -53,5 +56,5 @@ export async function consumeCode(email: string, purpose: CodePurpose, code: str
 export function devCodesVisible() {
   const cfg = useRuntimeConfig()
   const dev = cfg.devCodes === true || String(cfg.devCodes) === 'true'
-  return dev && !(cfg.mailProvider === 'unisender' && cfg.unisenderKey)
+  return dev && isStand() && !(cfg.mailProvider === 'unisender' && cfg.unisenderKey)
 }

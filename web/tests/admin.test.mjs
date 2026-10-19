@@ -124,6 +124,23 @@ test('заказы: ручная выдача, пул ключей, статус
   assert.equal((await a('POST', `/api/admin/refunds/${rq.id}`, { action: 'approve', note: 'Ок' })).status, 200)
   assert.equal((await u('GET', '/api/balance')).body.balance_kop, bal0)
   assert.equal((await u('GET', `/api/orders/${o3.id}`)).body.order.status, 'refunded')
+  // возврат на карту: при одобрении сумма уходит с баланса как выплата; второй заявки и возврата на баланс уже нет
+  const o4 = (await u('POST', '/api/orders', { plan_id: chat, fields: { account_email: 'x@y.ru' }, idem: 'adm-order-4' })).body.order
+  const bal1 = (await u('GET', '/api/balance')).body.balance_kop
+  const rc = (await u('POST', '/api/refunds', { order_id: o4.id, reason: 'На карту', destination: 'card' })).body.refund
+  assert.equal((await a('POST', `/api/admin/refunds/${rc.id}`, { action: 'approve' })).status, 200)
+  assert.equal((await u('GET', '/api/balance')).body.balance_kop, bal1, 'заказ вернулся и сразу ушёл выплатой')
+  assert.equal((await u('POST', '/api/refunds', { order_id: o4.id, reason: 'И на баланс' })).code, 'order_closed')
+  assert.equal((await a('POST', `/api/admin/orders/${o4.id}/refund`, { reason: 'ещё раз' })).status, 200)
+  assert.equal((await u('GET', '/api/balance')).body.balance_kop, bal1, 'повторный возврат не добавил денег')
+  assert.equal((await a('POST', `/api/admin/refunds/${rc.id}`, { action: 'done' })).status, 200)
+  // вывод пополнения: списывается при одобрении, без денег на балансе — понятный отказ, а не 500
+  const pay = (await u('POST', '/api/topups', { amount_kop: 1000_00 })).body.payment
+  await u('POST', `/api/topups/${pay.id}/test`, {})
+  const rp = (await u('POST', '/api/refunds', { payment_id: pay.id, reason: 'Вывод' })).body.refund
+  assert.equal(rp.destination, 'card')
+  await a('POST', `/api/admin/users/${me.id}/adjust`, { amount_kop: -(await u('GET', '/api/balance')).body.balance_kop, comment: 'обнуление', idem: 'adj3-' + me.id.slice(0, 8) })
+  assert.equal((await a('POST', `/api/admin/refunds/${rp.id}`, { action: 'approve' })).code, 'insufficient_funds')
   // блокировка
   assert.equal((await a('POST', `/api/admin/users/${me.id}/block`, { blocked: true })).code, 'reason_required')
   await a('POST', `/api/admin/users/${me.id}/block`, { blocked: true, reason: 'Проверка' })

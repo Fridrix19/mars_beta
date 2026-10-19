@@ -23,9 +23,12 @@ npm run build && npm start   # или npm run dev
 | `NUXT_MAIL_PROVIDER` | `log` | `log` — письма в консоль; `unisender` — Unisender Go |
 | `NUXT_UNISENDER_KEY`, `NUXT_UNISENDER_URL` | —, `go1…/api/v1` | ключ и адрес API из кабинета Unisender Go |
 | `NUXT_MAIL_FROM` | `noreply@marscap.ru` | отправитель (домен с SPF/DKIM) |
-| `NUXT_PAYMENT_PROVIDER` | `test` | пока только тестовый провайдер |
+| `NUXT_STAND` | `false` | `true` — тестовый стенд: тестовая оплата, коды на экране (`NUXT_DEV_CODES`), первый админ admin/admin. **В бою не задавать**: без него пополнение отвечает 501, пока не подключён настоящий провайдер |
+| `NUXT_PAYMENT_PROVIDER` | `test` | пока только тестовый провайдер (работает только с `NUXT_STAND=true`) |
+| `NUXT_TRUST_PROXY` | `1` | сколько своих прокси перед сервером дописывают `X-Forwarded-For`; `0` — сервер смотрит в интернет напрямую, заголовку не верим |
+| `ADMIN_BOOTSTRAP_PASSWORD` | — | в бою обязателен для первого запуска: пароль первого админа (от 12 символов) |
 | `NUXT_COOKIE_SECURE` | `false` | `true` за HTTPS |
-| `NUXT_DEV_CODES` | `false` | `true` только на стенде: код показывается на экране, **но только пока почта в режиме log** — с Unisender коды приходят только письмом |
+| `NUXT_DEV_CODES` | `false` | `true` только на стенде (вместе с `NUXT_STAND=true`): код показывается на экране, **но только пока почта в режиме log** — с Unisender коды приходят только письмом |
 | `NUXT_PUBLIC_SITE_URL` | — | адрес сайта для ссылок в письмах |
 | `NUXT_ADMIN_NOTIFY_EMAIL` | — | куда слать о новых заказах, KYC и возвратах |
 
@@ -34,7 +37,7 @@ npm run build && npm start   # или npm run dev
 ## Тесты
 
 ```bash
-NUXT_SECRET=x NUXT_DATABASE_URL=… NUXT_DEV_CODES=true PORT=3100 node .output/server/index.mjs &
+NUXT_STAND=true NUXT_SECRET=x NUXT_DATABASE_URL=… NUXT_DEV_CODES=true PORT=3100 node .output/server/index.mjs &
 DATABASE_URL=… API_URL=http://localhost:3100 npm test
 ```
 
@@ -77,7 +80,7 @@ DATABASE_URL=… API_URL=http://localhost:3100 npm test
 
 Nuxt-страницы на PrimeVue 4.5 с пресетом Marscap (`app/theme/marscap.ts` — тот же объект, что в дизайн-системе). API — `/api/admin/*`, отдельная кука `mc_adm` (12 часов, SameSite=Strict).
 
-Первый вход: **admin / admin** — `npm run migrate` создаёт владельца, если админов нет (пароль можно задать `ADMIN_BOOTSTRAP_PASSWORD`, отключить — `ADMIN_BOOTSTRAP=off`). После входа админка требует сменить пароль.
+Первый вход на стенде (`NUXT_STAND=true`): **admin / admin**; в бою — пароль из `ADMIN_BOOTSTRAP_PASSWORD`, без него админ не создаётся. `npm run migrate` создаёт владельца, если админов нет (пароль можно задать `ADMIN_BOOTSTRAP_PASSWORD`, отключить — `ADMIN_BOOTSTRAP=off`). После входа админка требует сменить пароль.
 
 | раздел | что делает | роли |
 |---|---|---|

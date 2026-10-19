@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { api, ok, can } = useAdm()
+const { api, ok, can, bad } = useAdm()
 const route = useRoute()
 const r = ref<any>(null), cats = ref<any[]>([])
 const p = ref<any>(null), fieldsJson = ref(''), busy = ref('')
@@ -13,7 +13,7 @@ async function load() {
 onMounted(load)
 const ro = computed(() => !can('products.write'))
 async function saveProduct() {
-  let bf; try { bf = JSON.parse(fieldsJson.value || '[]') } catch { return ok('Проверьте JSON полей покупателя') }
+  let bf; try { bf = JSON.parse(fieldsJson.value || '[]') } catch { return bad('Проверьте JSON полей покупателя') }
   busy.value = 'p'
   try { await api('PATCH', '/products/' + p.value.id, { ...p.value, buyer_fields: bf, commission_pct: p.value.commission_pct === '' ? null : p.value.commission_pct }); ok('Сохранено'); await load() } finally { busy.value = '' }
 }

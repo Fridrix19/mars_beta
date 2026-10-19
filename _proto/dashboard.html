@@ -3025,7 +3025,7 @@ window.MC = (function(){
       [USER.kyc === 'none' ? 'no' : 'ok', 'Базовая верификация', USER.kyc === 'none' ? 'Подтвердите телефон и почту' : 'Телефон и почта подтверждены'],
       [needKyc() ? 'todo' : 'ok', 'Расширенная верификация', u >= 150 ? (needKyc() ? 'Нужна для сумм от $150 — паспорт, 3–5 минут' : USER.kyc === 'pending' ? 'На проверке — оплатить можно, зачислим после подтверждения' : 'Пройдена') : 'Не требуется для сумм до $150']
     ];
-    if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [overLimit(total(u) * 100) ? 'todo' : 'ok', 'Лимит расходов', !USER.limit || USER.limit.limit_kop == null ? 'Без лимита' : overLimit(total(u) * 100) ? 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' — пройдите верификацию или уменьшите сумму' : 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' из ' + MC.kop(USER.limit.limit_kop)], [BAL >= Math.round(payKop(total(u) * 100)) / 100 ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL / 100 < payKop(total(u) * 100) / 100 ? ' — пополним на недостающее при оплате' : '')]];
+    if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [overLimit(total(u) * 100) ? 'todo' : 'ok', 'Лимит расходов', !USER.limit || USER.limit.limit_kop == null ? 'Без лимита' : overLimit(total(u) * 100) ? 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' — пройдите верификацию или уменьшите сумму' : 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' из ' + MC.kop(USER.limit.limit_kop)], [BAL >= payKop(total(u) * 100) ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL / 100 < payKop(total(u) * 100) / 100 ? ' — пополним на недостающее при оплате' : '')]];
     if (LIVE && USER.bonus) reqs.push(['ok', 'Бонус', 'Спишем ' + MC.kop(Math.min(USER.bonus, Math.round(total(u) * 100))) + ' скидкой — к оплате ' + MC.kop(payKop(total(u) * 100)) + (USER.bonus > total(u) * 100 ? ', остаток бонуса сгорит' : '')]);
     else if (W.prod === 'issue') reqs.push(['ok', 'Лимит карт', 'У вас ' + CARDS.length + ' из 5 возможных']);
     $('wqReq').innerHTML = reqs.map(function(r){ return '<div class="req ' + r[0] + '">' + ico(r[0] === 'ok' ? 'check' : r[0] === 'todo' ? 'warn' : 'x') + '<div><b>' + r[1] + '</b><span>' + r[2] + '</span></div></div>'; }).join('');
@@ -3287,7 +3287,7 @@ window.MC = (function(){
     var pend = DOCS.filter(function(d){ return d.pending; });
     $('docPending').innerHTML = pend.length ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Обновились условия</b>' + pend.map(function(d){ return esc(d.name) + ' — редакция ' + esc(d.ver) + ' от ' + fmtD(d.published) + (d.note ? ': ' + esc(d.note) : ''); }).join('<br>') + '<br>Прочитайте и примите — без этого новые покупки недоступны.<div class="alert-actions"><button type="button" class="btn btn-primary" id="docAccept">Принимаю</button></div></div></div>' : '';
     var da = $('docAccept'); if (da) da.addEventListener('click', function(){ acceptDocs(da, function(){ R.docs(); }); });
-    $('docAccepted').innerHTML = DOCS.map(function(d, i){ return '<div class="docr">' + ico('doc') + '<b>' + esc(d.name) + '<span class="ver">ред. ' + esc(d.ver) + '</span>' + badge(d.pending ? ['Нужно принять', 'badge-warn'] : ['Принята', 'badge-ok']) + '</b><span>' + (d.pending ? 'Опубликована ' + fmtD(d.published) + ' · вы её ещё не приняли' : 'Вы приняли ' + fmtD(d.at, true) + (d.published ? ' · опубликована ' + fmtD(d.published) : '')) + (d.hist.length ? ' · <button type="button" class="auth-link" data-h="' + i + '">прошлые редакции</button>' : '') + '</span><div class="r">' + (d.href ? '<a class="icon-btn" href="' + d.href + '" target="_blank" rel="noopener" aria-label="Открыть">' + ico('dl') + '</a>' : '') + '</div><div class="hist" hidden id="dh' + i + '">' + d.hist.map(function(h){ return '<div>' + h + '</div>'; }).join('') + '</div></div>'; }).join('');
+    $('docAccepted').innerHTML = DOCS.map(function(d, i){ return '<div class="docr">' + ico('doc') + '<b>' + esc(d.name) + '<span class="ver">ред. ' + esc(d.ver) + '</span>' + badge(d.pending ? ['Нужно принять', 'badge-warn'] : ['Принята', 'badge-ok']) + '</b><span>' + (d.pending ? 'Опубликована ' + fmtD(d.published) + ' · вы её ещё не приняли' : 'Вы приняли ' + fmtD(d.at, true) + (d.published ? ' · опубликована ' + fmtD(d.published) : '')) + (d.hist.length ? ' · <button type="button" class="auth-link" data-h="' + i + '">прошлые редакции</button>' : '') + '</span><div class="r">' + (d.href ? '<a class="icon-btn" href="' + esc(d.href) + '" target="_blank" rel="noopener" aria-label="Открыть">' + ico('dl') + '</a>' : '') + '</div><div class="hist" hidden id="dh' + i + '">' + d.hist.map(function(h){ return '<div>' + h + '</div>'; }).join('') + '</div></div>'; }).join('');
     $('docAccepted').querySelectorAll('[data-h]').forEach(function(b){ b.addEventListener('click', function(){ var el = $('dh' + b.getAttribute('data-h')); el.hidden = !el.hidden; }); });
     var files = [];
     PAYMENTS.forEach(function(p){ if (p.status === 'ok' || p.status === 'refunded'){ var o = order(p.order); files.push({ t: 'Квитанция ' + p.id, s: (o ? o.title + ' · ' : '') + rub(p.rubv) + ' · ' + fmtD(p.at), pay: p.id, at: p.at }); } });
@@ -3313,7 +3313,7 @@ window.MC = (function(){
   }
   function mapOrder(o, events){
     var st = OST[o.status] || 'paid', slug = o.product_slug, svcN = svc(o.product_name) ? o.product_name : null;
-    var tl = (events || [{ kind: 'created', created_at: o.created_at }]).map(function(e){ return [e.text || EVT[e.kind] || e.kind, e.created_at, e.kind === 'refund' ? 'err' : 'ok']; });
+    var tl = (events || [{ kind: 'created', created_at: o.created_at }]).map(function(e){ return [esc(e.text || EVT[e.kind] || e.kind), e.created_at, e.kind === 'refund' ? 'err' : 'ok']; });
     if (st === 'paid' || st === 'work' || st === 'action') tl.push([slug === 'virtual-card' ? 'Выпуск карты' : 'Оформляем', null, 'cur', 'Обычно до 30 минут в рабочее время (9–22 МСК)'], ['Готово', null, 'todo']);
     var r = { reviewed: o.reviewed, chatUnread: o.chat_unread, bonus: (o.bonus_kop || 0) / 100, id: o.id, kind: slug === 'virtual-card' ? 'issue' : 'svc', svc: svcN, title: o.product_name, sub: o.plan_label || '', usd: o.price_cents / 100, rubv: o.amount_kop / 100, rate: o.rate,
       status: st, created: o.created_at, done: o.delivered_at, tl: tl, slug: slug };
@@ -3345,7 +3345,14 @@ window.MC = (function(){
         }));
         counters(); return true;
       });
-    }).catch(function(e){ fail(e); return false; });
+    }).catch(function(e){ fail(e); return e && e.status === 401 ? false : null; });
+  }
+  function loadFailed(){
+    if ($('loadFail')) return;
+    var d = document.createElement('div'); d.className = 'empty'; d.id = 'loadFail';
+    d.innerHTML = '<b>Не удалось загрузить кабинет</b><p>Проверьте интернет и попробуйте ещё раз.</p><button type="button" class="btn btn-primary">Повторить</button>';
+    d.querySelector('button').addEventListener('click', function(){ location.reload(); });
+    $('cab').prepend(d);
   }
   // карточка заказа — с событиями и выдачей с сервера
   var baseOrder = R.order;
@@ -3377,7 +3384,7 @@ window.MC = (function(){
   function testPay(p, onDone){
     modal({ title: 'Тестовая оплата', sub: 'Стенд: платёжный провайдер ещё не подключён — эта форма заменяет страницу банка.',
       body: '<div class="testpay"><span class="k">К оплате</span><b>' + MC.kop(p.amount_kop) + '</b><span class="hint">Платёж ' + p.id.slice(0, 8).toUpperCase() + '</span></div>',
-      foot: [{ label: 'Отменить платёж', onClick: function(){ MC.api('POST', '/topups/' + p.id + '/test', { action: 'cancel' }).then(function(){ toast('Платёж отменён', ''); load(); }); } },
+      foot: [{ label: 'Отменить платёж', onClick: function(){ MC.api('POST', '/topups/' + p.id + '/test', { action: 'cancel' }).then(function(){ toast('Платёж отменён', ''); load(); }, fail); } },
              { label: 'Оплатить', cls: 'btn-primary', keep: true, onClick: function(btn){
                btn.classList.add('is-loading');
                MC.api('POST', '/topups/' + p.id + '/test', { action: 'succeed' }).then(function(r){
@@ -3491,23 +3498,24 @@ window.MC = (function(){
     var box = el.querySelector('.chat-msgs'), form = el.querySelector('form'), ta = form.querySelector('textarea'), fi = form.querySelector('input[type=file]'), fl = el.querySelector('.chat-file');
     function msgHtml(m){
       var f = m.file ? (/^image\//.test(m.file.mime) ? '<a class="att-img" href="' + esc(m.file.url) + '" target="_blank" rel="noopener"><img src="' + esc(m.file.url) + '" alt=""></a>' : '<span class="att">' + ico('clip') + '<a href="' + esc(m.file.url) + '" target="_blank" rel="noopener">' + esc(m.file.name || 'файл') + '</a></span>') : '';
-      return '<div class="msg ' + (m.author === 'user' ? 'me' : '') + '">' + (m.text ? esc(m.text) : '') + f + '<time>' + (m.author === 'user' ? 'Вы' : (m.admin_name ? m.admin_name + ' · поддержка' : 'Поддержка')) + ' · ' + fmtD(m.created_at, true) + '</time></div>';
+      return '<div class="msg ' + (m.author === 'user' ? 'me' : '') + '">' + (m.text ? esc(m.text) : '') + f + '<time>' + (m.author === 'user' ? 'Вы' : (m.admin_name ? esc(m.admin_name) + ' · поддержка' : 'Поддержка')) + ' · ' + fmtD(m.created_at, true) + '</time></div>';
     }
     function draw(){ box.innerHTML = msgs.length ? msgs.map(msgHtml).join('') : '<div class="msg sys">' + (orderId ? 'Есть вопрос по заказу? Напишите — оператор ответит здесь, мы пришлём уведомление.' : 'Напишите нам — ответим здесь, обычно до 15 минут в рабочее время (9–22 МСК).') + '</div>'; box.scrollTop = box.scrollHeight; }
     function pull(){
       if (!document.body.contains(el)) { clearInterval(timer); return; }
       if (document.visibilityState !== 'visible') return;
       MC.api('GET', '/chats/thread?' + (orderId ? 'order=' + encodeURIComponent(orderId) + '&' : '') + 'after=' + last).then(function(r){
-        if (r.messages.length) { msgs = msgs.concat(r.messages); last = msgs[msgs.length - 1].id; draw(); } else if (!last) draw();
+        var fresh = r.messages.filter(function(m){ return m.id > last; });
+        if (fresh.length) { msgs = msgs.concat(fresh); last = msgs[msgs.length - 1].id; draw(); } else if (!last) draw();
       }).catch(function(){});
     }
     function send(){
       var t = ta.value.trim(), f = fi.files[0]; if (!t && !f) return;
       var btn = form.querySelector('[type=submit]'); btn.disabled = true;
       var req;
-      if (f) { var fd = new FormData(); fd.append('text', t); if (orderId) fd.append('order_id', orderId); fd.append('file', f); req = fetch('/api/chats/send', { method: 'POST', body: fd, credentials: 'same-origin' }).then(function(r){ return r.json().then(function(j){ if (!r.ok) { var e = new Error(j.message || 'Не отправилось'); throw e; } return j; }); }); }
+      if (f) { var fd = new FormData(); fd.append('text', t); if (orderId) fd.append('order_id', orderId); fd.append('file', f); req = fetch((window.MC_API || '/api') + '/chats/send', { method: 'POST', body: fd, credentials: 'same-origin' }).then(function(r){ return r.json().then(function(j){ if (!r.ok) { var e = new Error(j.message || 'Не отправилось'); throw e; } return j; }); }); }
       else req = MC.api('POST', '/chats/send', { text: t, order_id: orderId || undefined });
-      req.then(function(r){ btn.disabled = false; ta.value = ''; fi.value = ''; fl.hidden = true; msgs.push(r.message); last = r.message.id; draw(); }, function(e){ btn.disabled = false; toast('Не отправилось', e.message, 'err'); });
+      req.then(function(r){ btn.disabled = false; ta.value = ''; fi.value = ''; fl.hidden = true; if (r.message.id > last) { msgs.push(r.message); last = r.message.id; } draw(); }, function(e){ btn.disabled = false; toast('Не отправилось', e.message, 'err'); });
     }
     form.addEventListener('submit', function(e){ e.preventDefault(); send(); });
     ta.addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
@@ -3582,9 +3590,11 @@ window.MC = (function(){
 
   // верификация: загрузка файлов на ручную проверку
   function kycUpload(list){
-    var fd = new FormData(), n = 0; [].forEach.call(list, function(f){ fd.append('files', f); n++; }); if (!n) return;
+    list = [].slice.call(list || []);
+    if (list.length === 1) { toast('Нужно 2 фото', 'Выберите сразу оба файла: разворот паспорта и селфи с паспортом.', 'err'); return; }
+    var fd = new FormData(), n = 0; list.forEach(function(f){ fd.append('files', f); n++; }); if (!n) return;
     toast('Отправляем файлы', n + ' ' + MC.plural(n, ['файл', 'файла', 'файлов']));
-    fetch('/api/kyc', { method: 'POST', body: fd, credentials: 'same-origin' }).then(function(r){ return r.json().then(function(j){ if (!r.ok) { var e = new Error(j.message || 'Не удалось загрузить'); e.code = j.data && j.data.code; throw e; } return j; }); })
+    fetch((window.MC_API || '/api') + '/kyc', { method: 'POST', body: fd, credentials: 'same-origin' }).then(function(r){ return r.json().then(function(j){ if (!r.ok) { var e = new Error(j.message || 'Не удалось загрузить'); e.code = j.data && j.data.code; throw e; } return j; }); })
       .then(function(){ [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); return load(); })
       .then(function(){ R.kyc(); toast('Документы на проверке', 'Результат придёт в уведомления и на почту.', 'ok'); }, fail);
   }
@@ -3640,7 +3650,8 @@ window.MC = (function(){
       var pl = r.plans, pp = null, sum = 0;
       if (o.slug === 'virtual-card') {
         var usd = Math.round(+o.usd || 0), fx = pl.filter(function(x){ return x.price_cents === usd * 100 && !x.custom; })[0], cu = pl.filter(function(x){ return x.custom; })[0];
-        pp = fx ? { plan_id: fx.id } : cu ? { plan_id: cu.id, amount_cents: usd * 100 } : null; sum = fx ? fx.charged_kop : Math.round(MC.charged(usd) * 100 * r.rate);
+        pp = fx ? { plan_id: fx.id } : cu ? { plan_id: cu.id, amount_cents: usd * 100 } : null; var pct = r.product.commission_pct, cc = pct == null ? Math.round(MC.charged(usd) * 100) : Math.round(usd * 100 * (1 + pct / 100));
+        sum = fx ? fx.charged_kop : Math.round(cc * r.rate);
       } else {
         var p = pl.filter(function(x){ return x.label === o.plan && x.purchasable; })[0];
         if (p) { pp = { plan_id: p.id }; sum = p.charged_kop; }
@@ -3702,7 +3713,8 @@ window.MC = (function(){
     var wantCheckout = location.hash === '#checkout'; if (wantCheckout) history.replaceState(null, '', '#overview');
     Promise.all([load(), MC.vcPricing().catch(function(){ return null; })]).then(function(x){
       var v = x[1]; if (v && !v.unavailable) { VCP = v; VMIN = v.min; VMAX = v.max; if (v.denoms.length) { DENOMS.length = 0; [].push.apply(DENOMS, v.denoms); if (DENOMS.indexOf(qUsd) < 0) qUsd = DENOMS[0]; } }
-      if (!x[0]) return; route(); if (wantCheckout) runCheckout();
+      if (!x[0]) { if (x[0] === null) loadFailed(); return; }
+      route(); if (wantCheckout) runCheckout();
       // свежие статусы: раз в минуту и при возврате на вкладку — колокольчик загорится, если заказ изменился
       var busy = false;
       function refresh(){

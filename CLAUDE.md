@@ -34,8 +34,9 @@ cd web
 npm ci
 set NUXT_DATABASE_URL=postgres://user:pass@localhost/marscap   # PowerShell: $env:NUXT_DATABASE_URL="..."
 set NUXT_SECRET=любая-длинная-строка
-set NUXT_DEV_CODES=true          # коды из писем показываются на экране (только для разработки)
-npm run migrate                  # миграции + админ admin/admin, если админов нет
+set NUXT_STAND=true              # стенд/разработка: тестовая оплата, коды на экране, admin/admin. В бою НЕ задавать
+set NUXT_DEV_CODES=true          # коды из писем показываются на экране (только со NUXT_STAND)
+npm run migrate                  # миграции + админ admin/admin (на стенде) или ADMIN_BOOTSTRAP_PASSWORD (в бою), если админов нет
 npm run build && npm start       # http://localhost:3000, админка /admin
 
 # тесты (сервер должен быть запущен)

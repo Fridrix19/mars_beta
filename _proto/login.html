@@ -1025,7 +1025,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
           <button type="submit" class="btn btn-primary auth-submit" id="loginBtn">Войти</button>
           <div class="divider">или</div>
           <button type="button" class="btn btn-ghost auth-submit" id="loginOtp">Войти по коду без пароля</button>
-          <p class="auth-foot">Нет аккаунта? <button type="button" class="auth-link" data-tab="reg">Зарегистрироваться</button></p>
+          <p class="auth-foot">Нет аккаунта? <button type="button" class="auth-link" data-auth="reg">Зарегистрироваться</button></p>
         </form>
 
         <!-- регистрация -->
@@ -1052,16 +1052,16 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
           </div>
           <div class="alert alert-err" id="regErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="regErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="regBtn">Создать аккаунт</button>
-          <p class="auth-foot">Уже есть аккаунт? <button type="button" class="auth-link" data-tab="login">Войти</button></p>
+          <p class="auth-foot">Уже есть аккаунт? <button type="button" class="auth-link" data-auth="login">Войти</button></p>
         </form>
 
         <!-- код подтверждения (OTP) -->
         <form class="auth-screen" id="scrOtp" hidden novalidate>
-          <button type="button" class="auth-back" data-back><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Назад</button>
+          <button type="button" class="auth-back" data-step-back><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Назад</button>
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
             <h2 id="otpTitle">Введите код</h2>
-            <p id="otpText">Отправили 6 цифр на <b id="otpTarget"></b>. <button type="button" class="auth-link" data-back>Изменить</button></p>
+            <p id="otpText">Отправили 6 цифр на <b id="otpTarget"></b>. <button type="button" class="auth-link" data-step-back>Изменить</button></p>
           </div>
           <div class="otp" id="otpBoxes" role="group" aria-label="Код подтверждения">
             <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра 1">
@@ -1080,7 +1080,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 
         <!-- второй фактор -->
         <form class="auth-screen" id="scrMfa" hidden novalidate>
-          <button type="button" class="auth-back" data-back><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Назад</button>
+          <button type="button" class="auth-back" data-step-back><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Назад</button>
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="M12 10v4M12 8h.01"/></svg></span>
             <h2>Подтвердите вход</h2>
@@ -1104,7 +1104,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 
         <!-- восстановление: контакт -->
         <form class="auth-screen" id="scrRecover" hidden novalidate>
-          <button type="button" class="auth-back" data-tab="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Ко входу</button>
+          <button type="button" class="auth-back" data-auth="login"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Ко входу</button>
           <div class="auth-head">
             <span class="auth-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
             <h2>Восстановление доступа</h2>
@@ -2175,8 +2175,9 @@ window.MC = (function(){
   function back(){ var prev = history.pop() || 'scrLogin'; stopTimer(); show(prev, false); }
   $('tabLogin').addEventListener('click', function(){ show('scrLogin'); });
   $('tabReg').addEventListener('click', function(){ show('scrReg'); });
-  document.querySelectorAll('[data-tab]').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.tab === 'reg' ? 'scrReg' : 'scrLogin'); }); });
-  document.querySelectorAll('[data-back]').forEach(function(b){ b.addEventListener('click', back); });
+  // свои атрибуты: data-tab — у таббара, data-back — у общей кнопки «Назад» по истории
+  document.querySelectorAll('[data-auth]').forEach(function(b){ b.addEventListener('click', function(){ show(b.dataset.auth === 'reg' ? 'scrReg' : 'scrLogin'); }); });
+  document.querySelectorAll('[data-step-back]').forEach(function(b){ b.addEventListener('click', back); });
   $('toRecover').addEventListener('click', function(){ $('recId').value = $('loginId').value; show('scrRecover'); });
 
   /* — показать/скрыть пароль — */

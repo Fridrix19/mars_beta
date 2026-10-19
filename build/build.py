@@ -1,10 +1,10 @@
-import base64, json, re, subprocess, os, sys
+import base64, json, re, subprocess, os, sys, tempfile
 # пути: build/ лежит в корне репозитория; исходный сайт — source-site/, сборка — _proto/
 HERE=os.path.dirname(os.path.abspath(__file__)); REPO=os.path.dirname(HERE)
 ROOT=os.environ.get('MC_SOURCE', REPO+'/source-site'); A=ROOT+'/assets'; B=os.environ.get('MC_SRC', REPO+'/src')
-OUT=os.environ.get('MC_OUT', REPO+'/_proto'); TMP=os.environ.get('TMPDIR','/tmp')
+OUT=os.environ.get('MC_OUT', REPO+'/_proto'); TMP=os.environ.get('TMPDIR') or tempfile.gettempdir()
 DOCTYPE='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
-try: NODE_PATH=subprocess.run(['npm','root','-g'],capture_output=True,text=True).stdout.strip()
+try: NODE_PATH=os.environ.get('NODE_PATH') or subprocess.run(['npm','root','-g'],capture_output=True,text=True,shell=os.name=='nt').stdout.strip()
 except Exception: NODE_PATH=''
 # реквизиты юрлица: подставляются на всех страницах (подвал) и в «Контактах»; пустой ОГРН — строка не выводится
 LEGAL={'LEGAL_NAME':'Марс Капитал «Цифровые Решения»','LEGAL_INN':'9715523083','LEGAL_OGRN':''}
@@ -18,7 +18,8 @@ def svg_uri(p):
     return 'data:image/svg+xml;base64,'+base64.b64encode(s.encode()).decode()
 def png_uri(p,size=96):
     out=os.path.join(TMP,'_mc_icon.png')
-    subprocess.run(['node','-e',f"const sharp=require('sharp');sharp('{p}',{{density:300}}).resize({size},{size},{{fit:'contain',background:{{r:0,g:0,b:0,alpha:0}}}}).png().toFile('{out}').then(()=>0);"],check=True,capture_output=True,env=dict(os.environ,NODE_PATH=NODE_PATH))
+    # пути — аргументами: в JS-строке обратные слэши путей Windows превращаются в спецсимволы
+    subprocess.run(['node','-e',f"const [p,o]=process.argv.slice(1);require('sharp')(p,{{density:300}}).resize({size},{size},{{fit:'contain',background:{{r:0,g:0,b:0,alpha:0}}}}).png().toFile(o).then(()=>0);",p,out],check=True,capture_output=True,env=dict(os.environ,NODE_PATH=NODE_PATH))
     return 'data:image/png;base64,'+base64.b64encode(open(out,'rb').read()).decode()
 def icon(slug):
     p=f'{A}/services/{slug}.svg'

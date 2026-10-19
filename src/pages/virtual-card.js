@@ -1,7 +1,7 @@
 (function(){
   var MC = window.MC, $ = MC.$, usd = MC.usd, rub = MC.rub, reduce = MC.reduce;
   var RATE = MC.RATE, MIN = 50, MAX = 200;
-  var den = 50, mode = 'fixed';
+  var den = 50, mode = 'fixed', off = false;
   var total = function(d){ return MC.charged(d) * RATE; };  // как на сайте: номинал × 1.3 (≥ $50); на сервере — цены из админки (ниже)
   var pay = $('pay'), status = $('status'), email = $('email'), emailHint = $('emailHint');
   var RCP = MC.recipient(email);
@@ -27,17 +27,36 @@
     $('tabCustom').setAttribute('aria-pressed', next === 'custom' ? 'true':'false');
     $('denoms').hidden = next !== 'fixed';
     $('customRow').hidden = next !== 'custom';
-    if (next === 'custom') { $('customAmount').value = den; }
+    if (next === 'custom') { $('customAmount').value = den; checkCustom(); }
+    else {
+      // назад к списку: номинал — выбранной кнопки, а не введённая сумма
+      var on = document.querySelector('.denom[aria-pressed="true"]:not([hidden])') || document.querySelector('.denom:not([hidden])');
+      if (on) on.click();
+      setBad(false);
+    }
+  }
+  // своя сумма: целые доллары в диапазоне, иначе — ошибка и оплата недоступна (а не тихая подмена суммы)
+  function setBad(bad){
+    var h = $('customHint');
+    h.className = bad ? 'hint err' : 'hint'; h.textContent = '$' + MIN + ' – $' + MAX + (bad ? ': введите целую сумму в этом диапазоне' : '');
+    $('customAmount').setAttribute('aria-invalid', bad ? 'true' : 'false');
+    pay.disabled = off || bad;
+  }
+  function checkCustom(){
+    var raw = $('customAmount').value, n = Number(raw);
+    var ok = raw !== '' && Number.isInteger(n) && n >= MIN && n <= MAX;
+    setBad(!ok);
+    if (ok) { den = n; render(); }
   }
   $('tabFixed').addEventListener('click', function(){ setMode('fixed'); });
   $('tabCustom').addEventListener('click', function(){ setMode('custom'); });
-  $('customAmount').addEventListener('input', function(){ den = Math.min(MAX, Math.max(MIN, +this.value || 0)); render(); });
+  $('customAmount').addEventListener('input', checkCustom);
 
   MC.vcPricing().then(function(v){
     if (!v) return;
-    if (v.unavailable) { pay.disabled = true; pay.textContent = 'Выпуск карт временно недоступен'; return; }
+    if (v.unavailable) { off = true; pay.disabled = true; pay.textContent = 'Выпуск карт временно недоступен'; return; }
     total = v.total; MIN = v.min; MAX = v.max;
-    $('customAmount').min = MIN; $('customAmount').max = MAX;
+    $('customAmount').min = MIN; $('customAmount').max = MAX; $('customHint').textContent = '$' + MIN + ' – $' + MAX;
     document.querySelectorAll('.denom').forEach(function(b){ var d = +b.dataset.den; b.hidden = v.denoms.indexOf(d) < 0; b.querySelector('span').textContent = rub(total(d)); });
     render();
   });

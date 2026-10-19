@@ -15,7 +15,8 @@ async function openThread(tid: string | null, poll = false) {
   if (!tid) { cur.value = null; msgs.value = []; return }
   const after = poll && msgs.value.length ? msgs.value[msgs.value.length - 1].id : 0
   const r: any = await api('GET', `/chats/${tid}?after=${after}`, undefined, { quiet: poll }).catch(() => null)
-  if (!r) return
+  if (!r || tid !== id.value) return
+  if (poll) r.messages = r.messages.filter((m: any) => !msgs.value.some(x => x.id === m.id))
   cur.value = r.thread; other.value = r.other
   const atBottom = !box.value || box.value.scrollHeight - box.value.scrollTop - box.value.clientHeight < 80
   msgs.value = poll ? msgs.value.concat(r.messages) : r.messages

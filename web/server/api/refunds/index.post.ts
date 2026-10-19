@@ -4,7 +4,8 @@ export default defineEventHandler(async (e) => {
   const b = await readBody(e)
   const reason = String(b?.reason ?? '').trim().slice(0, 500)
   if (!reason) fail(422, 'reason_required', 'Опишите причину возврата.')
-  const destination = b?.destination === 'card' ? 'card' : 'balance'
+  // вывод пополнения — только на карту: на баланс эти деньги и так лежат
+  const destination = b?.destination === 'card' || (!b?.order_id && b?.payment_id) ? 'card' : 'balance'
   let amount = 0, orderId: string | null = null, paymentId: string | null = null
   if (b?.order_id) {
     const o = await one(`select id, amount_kop, status from orders where id = $1 and user_id = $2`, [String(b.order_id), u.id])
@@ -17,8 +18,9 @@ export default defineEventHandler(async (e) => {
     paymentId = p.id; amount = Math.min(p.amount_kop, (await one(`select user_balance($1) b`, [u.id])).b)
     if (amount <= 0) fail(422, 'nothing_to_refund', 'На балансе нет средств для возврата.')
   } else fail(422, 'target_required', 'Выберите заказ или платёж.')
-  if (await one(`select 1 from refund_requests where user_id = $1 and status = 'new' and (order_id = $2 or payment_id = $3)`, [u.id, orderId, paymentId]))
+  if (await one(`select 1 from refund_requests where user_id = $1 and status in ('new', 'approved') and (order_id = $2 or payment_id = $3)`, [u.id, orderId, paymentId]))
     fail(409, 'already_requested', 'Заявка уже на рассмотрении.')
+  if (destination === 'card' && orderId && amount <= 0) fail(422, 'nothing_to_refund', 'Заказ оплачен бонусом — вернуть можно только на баланс.')
   const r = await one(`insert into refund_requests (user_id, order_id, payment_id, amount_kop, destination, reason) values ($1, $2, $3, $4, $5, $6) returning *`,
     [u.id, orderId, paymentId, amount, destination, reason])
   notifyAdmins('Заявка на возврат', `${u.email}: ${(amount / 100).toFixed(2)} ₽, ${destination === 'card' ? 'на карту' : 'на баланс'}. Причина: ${reason}`, '/admin/refunds')

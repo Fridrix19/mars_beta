@@ -64,13 +64,15 @@ export async function audit(e: H3Event, a: Admin, action: string, target: string
 
 export function page(e: H3Event, def = 50) {
   const qy = getQuery(e)
-  const limit = Math.min(Math.max(Number(qy.limit) || def, 1), 200)
-  const offset = Math.max(Number(qy.offset) || 0, 0)
+  const limit = Math.min(Math.max(Math.floor(Number(qy.limit)) || def, 1), 200)
+  const offset = Math.min(Math.max(Math.floor(Number(qy.offset)) || 0, 0), 1_000_000)
   return { limit, offset, q: qy.q ? String(qy.q).trim() : '' }
 }
 
 export function csv(e: H3Event, name: string, rows: any[], cols: string[]) {
-  const esc = (v: any) => { if (v == null) return ''; const s = v instanceof Date ? v.toISOString() : typeof v === 'object' ? JSON.stringify(v) : String(v); return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
+  const esc = (v: any) => { if (v == null) return ''; let s = v instanceof Date ? v.toISOString() : typeof v === 'object' ? JSON.stringify(v) : String(v)
+    if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) s = "'" + s   // Excel не выполнит формулу из имени или почты клиента
+    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
   setHeader(e, 'content-type', 'text/csv; charset=utf-8')
   setHeader(e, 'content-disposition', `attachment; filename="${name}"`)
   return '﻿' + [cols.join(';'), ...rows.map(r => cols.map(c => esc(r[c])).join(';'))].join('\n')

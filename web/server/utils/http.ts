@@ -5,11 +5,32 @@ export function fail(status: number, code: string, message: string, extra: Recor
   throw createError({ statusCode: status, statusMessage: code, message, data: { code, ...extra } })
 }
 
-export function clientIp(e: H3Event): string | null {
-  // за одним прокси (Render) настоящий адрес — последний в X-Forwarded-For: левые значения клиент может подделать
-  const xff = getHeader(e, 'x-forwarded-for')
-  const ip = xff ? xff.split(',').map(s => s.trim()).filter(Boolean).pop() : getRequestIP(e)
-  return ip && /^[0-9a-f:.]+$/i.test(ip) ? ip : null
+// тестовый стенд (NUXT_STAND=true): тестовая оплата, коды на экране. В бою выключено
+export function isStand() {
+  const v = useRuntimeConfig().stand
+  return v === true || String(v) === 'true'
+}
+
+export function clientIp(e: H3Event): string {
+  // X-Forwarded-For дописывают наши прокси (NUXT_TRUST_PROXY штук) — адрес клиента стоит на этом месте с конца;
+  // левые значения клиент может подделать. Без прокси — адрес сокета.
+  const sock = String(e.node.req.socket?.remoteAddress || '0.0.0.0')
+  const hops = Math.max(0, Number(useRuntimeConfig().trustProxy ?? 1) || 0)
+  const xff = hops ? String(getHeader(e, 'x-forwarded-for') || '').split(',').map(s => s.trim()).filter(Boolean) : []
+  const ip = xff.length ? xff[Math.max(0, xff.length - hops)] : sock
+  return /^[0-9a-f:.]+$/i.test(ip) ? ip : sock
+}
+
+// счётчик событий в памяти процесса (один экземпляр сервера): «не больше max за sec секунд»
+const hits = new Map<string, number[]>()
+export function tooMany(key: string, max: number, sec: number) {
+  const now = Date.now(), a = (hits.get(key) || []).filter(t => now - t < sec * 1000)
+  if (a.length) hits.set(key, a); else hits.delete(key)
+  return a.length >= max
+}
+export function hit(key: string) {
+  if (hits.size > 100_000) hits.clear()
+  const a = hits.get(key) || []; a.push(Date.now()); hits.set(key, a)
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/

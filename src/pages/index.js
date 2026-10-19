@@ -6,7 +6,7 @@
   /* — категории: иконки и счётчики из каталога, описания из HOME — */
   var cats = $('homeCats');
   var vc = document.createElement('a'); vc.className = 'card card-link cat-card cat-vc'; vc.href = 'virtual-card.html';
-  vc.innerHTML = '<div class="cat-head"><span class="cat-ico cat-ico-vc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg></span><h3>Виртуальная карта</h3><span class="cat-count">от $5</span></div><p>Долларовая карта для любого сервиса. Выпуск за 15 минут.</p><div class="cat-tags"><span class="badge badge-plain">USD</span><span class="badge badge-plain">СБП</span></div><span class="arrow-link">Выпустить' + ARROW + '</span>';
+  vc.innerHTML = '<div class="cat-head"><span class="cat-ico cat-ico-vc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg></span><h3>Виртуальная карта</h3><span class="cat-count">от $50</span></div><p>Долларовая карта для любого сервиса. Выпуск за 15 минут.</p><div class="cat-tags"><span class="badge badge-plain">USD</span><span class="badge badge-plain">СБП</span></div><span class="arrow-link">Выпустить' + ARROW + '</span>';
   cats.appendChild(vc);
   CAT.categories.forEach(function(c){
     var m = HOME.cats[c.id] || { text: '', tags: [] };

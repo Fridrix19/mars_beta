@@ -21,8 +21,9 @@ export function useAdm() {
     }
   }
   function ok(summary: string, detail = '') { toast.add({ severity: 'success', summary, detail, life: 3000 }) }
+  function bad(summary: string, detail = '') { toast.add({ severity: 'error', summary, detail, life: 5000 }) }
   const can = (p: string) => me.value.perms.includes(p)
-  return { api, ok, me, can }
+  return { api, ok, bad, me, can }
 }
 
 const nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })

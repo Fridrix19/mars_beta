@@ -13,10 +13,11 @@ export async function limitSettings() {
   return { unverified_kop: r?.v?.unverified_kop ?? null, verified_kop: r?.v?.verified_kop ?? null, kyc_bonus_kop: Number(b?.v?.kyc_kop ?? 0) }
 }
 // бонус за верификацию — один раз на пользователя
-export async function grantKycBonus(userId: string) {
+export async function grantKycBonus(userId: string, c?: { query: (s: string, p: any[]) => Promise<{ rows: any[] }> }) {
   const { kyc_bonus_kop } = await limitSettings()
   if (!kyc_bonus_kop) return 0
-  const r = await q(`insert into bonus_entries (user_id, kind, reason, amount_kop, note) values ($1, 'grant', 'kyc', $2, 'Бонус за верификацию')
+  const run = c ? async (s: string, p: any[]) => (await c.query(s, p)).rows : q
+  const r = await run(`insert into bonus_entries (user_id, kind, reason, amount_kop, note) values ($1, 'grant', 'kyc', $2, 'Бонус за верификацию')
                      on conflict (user_id) where reason = 'kyc' do nothing returning id`, [userId, kyc_bonus_kop])
   return r.length ? kyc_bonus_kop : 0
 }

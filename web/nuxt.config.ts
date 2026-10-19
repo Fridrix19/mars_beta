@@ -22,7 +22,11 @@ export default defineNuxtConfig({
              { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Onest:wght@600;700&family=JetBrains+Mono:wght@500&display=swap' }],
     },
   },
-  routeRules: { '/admin/**': { ssr: false }, '/admin': { ssr: false } },
+  routeRules: {
+    '/admin/**': { ssr: false }, '/admin': { ssr: false },
+    // заголовки безопасности и для статики сайта (middleware до неё не доходит)
+    '/**': { headers: { 'x-content-type-options': 'nosniff', 'referrer-policy': 'strict-origin-when-cross-origin', 'x-frame-options': 'SAMEORIGIN' } },
+  },
   runtimeConfig: {
     databaseUrl: '',            // NUXT_DATABASE_URL (или DATABASE_URL)
     secret: '',                 // NUXT_SECRET — HMAC кодов и ключ шифрования выдач
@@ -31,7 +35,9 @@ export default defineNuxtConfig({
     unisenderUrl: 'https://goapi.unisender.ru/ru/transactional/api/v1', // NUXT_UNISENDER_URL (или go1/go2 — как в кабинете)
     mailFrom: 'noreply@marscap.ru',
     mailFromName: 'Marscap',
-    paymentProvider: 'test',    // NUXT_PAYMENT_PROVIDER: test | … (боевой — позже)
+    paymentProvider: 'test',    // NUXT_PAYMENT_PROVIDER: test | … (боевой — позже); test работает только при NUXT_STAND=true
+    stand: false,               // NUXT_STAND=true — тестовый стенд: тестовая оплата, коды на экране, admin/admin. В бою не задавать
+    trustProxy: 1,              // NUXT_TRUST_PROXY — сколько своих прокси перед сервером дописывают X-Forwarded-For (0 — заголовку не верить)
     cookieSecure: false,        // NUXT_COOKIE_SECURE=true за HTTPS
     devCodes: false,            // NUXT_DEV_CODES=true — код приходит в ответе API (только стенд)
     adminNotifyEmail: '',       // NUXT_ADMIN_NOTIFY_EMAIL — куда слать о новых заказах, KYC и возвратах

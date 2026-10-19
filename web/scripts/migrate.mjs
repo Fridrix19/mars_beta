@@ -45,10 +45,15 @@ try {
   }
   console.log('миграции применены')
 
-  // первый админ: admin / admin (или ADMIN_BOOTSTRAP_PASSWORD), только если админов нет. Пароль нужно сменить после входа.
+  // первый админ, только если админов нет: пароль из ADMIN_BOOTSTRAP_PASSWORD (от 12 символов);
+  // admin / admin — только на стенде и локально (NUXT_STAND=true). Пароль нужно сменить после входа.
   const n = (await client.query('select count(*)::int n from admins')).rows[0].n
-  if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off') {
-    const pw = process.env.ADMIN_BOOTSTRAP_PASSWORD || 'admin'
+  const stand = process.env.NUXT_STAND === 'true'
+  const boot = process.env.ADMIN_BOOTSTRAP_PASSWORD || (stand ? 'admin' : '')
+  if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off' && !stand && boot.length < 12) {
+    console.log('админов нет: задайте ADMIN_BOOTSTRAP_PASSWORD (от 12 символов) и перезапустите — admin/admin в бою не создаётся')
+  } else if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off') {
+    const pw = boot
     const salt = randomBytes(16)
     const key = scryptSync(pw.normalize('NFKC'), salt, 32, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 })
     const hash = `scrypt$16384$8$1$${salt.toString('base64url')}$${key.toString('base64url')}`

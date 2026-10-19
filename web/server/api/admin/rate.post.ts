@@ -9,7 +9,10 @@ export default defineEventHandler(async (e) => {
     if (!Number.isFinite(markup) || markup < -20 || markup > 50) fail(422, 'bad_markup', 'Наценка к курсу ЦБ — от −20 до 50 %.')
     await q(`insert into settings (key, value) values ('rate_auto', $1) on conflict (key) do update set value = excluded.value`,
       [JSON.stringify({ ...s, on: b.auto === true, markup_pct: markup, updated_at: null })])
-    if (b.auto === true && !(await refreshRate(true))) fail(502, 'cbr_unavailable', 'Не удалось получить курс ЦБ. Попробуйте позже или задайте курс вручную.')
+    if (b.auto === true && !(await refreshRate(true))) {
+      await q(`update settings set value = jsonb_set(value, '{on}', 'false') where key = 'rate_auto'`)
+      fail(502, 'cbr_unavailable', 'Не удалось получить курс ЦБ — автокурс не включён. Попробуйте позже или задайте курс вручную.')
+    }
   } else {
     const r = Number(b?.rate)
     if (!Number.isFinite(r) || r < 10 || r > 1000) fail(422, 'bad_rate', 'Курс — число от 10 до 1000.')

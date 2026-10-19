@@ -7,6 +7,7 @@ export function planInput(b: any) {
   const price_kop = currency === 'rub' ? int(b?.price_kop) : null
   const cmin = int(b?.custom_min_cents), cmax = int(b?.custom_max_cents)
   for (const x of [price_cents, price_kop, cmin, cmax]) if (x != null && (!Number.isFinite(x) || x < 0 || x > 1_000_000_00)) fail(422, 'bad_price', 'Проверьте цену.')
+  if (cmin != null && cmax == null) fail(422, 'bad_price', 'Для произвольной суммы укажите и максимум.')
   if (cmin != null && cmax != null && cmax < cmin) fail(422, 'bad_price', 'Максимум суммы меньше минимума.')
   return {
     label, currency, price_cents, price_kop, custom_min_cents: currency === 'usd' ? cmin : null, custom_max_cents: currency === 'usd' ? cmax : null,
