@@ -27,6 +27,8 @@ npm run build && npm start   # или npm run dev
 | `NUXT_PAYMENT_PROVIDER` | `test` | пока только тестовый провайдер (работает только с `NUXT_STAND=true`) |
 | `NUXT_TRUST_PROXY` | `1` | сколько своих прокси перед сервером дописывают `X-Forwarded-For`; `0` — сервер смотрит в интернет напрямую, заголовку не верим |
 | `ADMIN_BOOTSTRAP_PASSWORD` | — | в бою обязателен для первого запуска: пароль первого админа (от 12 символов) |
+| `TEST_ADMIN_LOGIN`, `TEST_ADMIN_PASSWORD` | — | только стенд: тестовый админ (роль «владелец», без смены пароля). `npm run migrate` создаёт его и при каждом старте возвращает пароль из переменной |
+| `TEST_USER_LOGIN`, `TEST_USER_PASSWORD`, `TEST_USER_EMAIL` | —, —, `<логин>@example.ru` | только стенд: тестовый пользователь, документы приняты, блокировка входа снимается при старте |
 | `NUXT_COOKIE_SECURE` | `false` | `true` за HTTPS |
 | `NUXT_DEV_CODES` | `false` | `true` только на стенде (вместе с `NUXT_STAND=true`): код показывается на экране, **но только пока почта в режиме log** — с Unisender коды приходят только письмом |
 | `NUXT_PUBLIC_SITE_URL` | — | адрес сайта для ссылок в письмах |

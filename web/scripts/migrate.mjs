@@ -53,11 +53,33 @@ try {
   if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off' && !stand && boot.length < 12) {
     console.log('админов нет: задайте ADMIN_BOOTSTRAP_PASSWORD (от 12 символов) и перезапустите — admin/admin в бою не создаётся')
   } else if (n === 0 && process.env.ADMIN_BOOTSTRAP !== 'off') {
-    const pw = boot
-    const salt = randomBytes(16)
-    const key = scryptSync(pw.normalize('NFKC'), salt, 32, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 })
-    const hash = `scrypt$16384$8$1$${salt.toString('base64url')}$${key.toString('base64url')}`
-    await client.query(`insert into admins (login, password_hash, name, role, must_change) values ('admin', $1, 'Владелец', 'owner', true)`, [hash])
+    await client.query(`insert into admins (login, password_hash, name, role, must_change) values ('admin', $1, 'Владелец', 'owner', true)`, [hashPw(boot)])
     console.log('создан админ: admin (смените пароль после входа)')
   }
+
+  // тестовые аккаунты стенда — только при NUXT_STAND=true. Логины и пароли — из переменных окружения, в репозиторий не попадают.
+  // При каждом старте пароль приводится к значению из переменной, блокировка снимается — вход всегда работает.
+  const env = process.env
+  if (stand && env.TEST_ADMIN_LOGIN && env.TEST_ADMIN_PASSWORD) {
+    await client.query(`insert into admins (login, password_hash, name, role, must_change) values ($1, $2, 'Тестовый админ', 'owner', false)
+                         on conflict (login) do update set password_hash = excluded.password_hash, must_change = false, active = true`,
+      [env.TEST_ADMIN_LOGIN, hashPw(env.TEST_ADMIN_PASSWORD)])
+    console.log('тестовый админ:', env.TEST_ADMIN_LOGIN)
+  }
+  if (stand && env.TEST_USER_LOGIN && env.TEST_USER_PASSWORD) {
+    const login = env.TEST_USER_LOGIN.toLowerCase(), email = (env.TEST_USER_EMAIL || login + '@example.ru').toLowerCase()
+    const u = (await client.query(
+      `insert into users (email, username, password_hash, consent_offer) values ($1, $2, $3, (select value #>> '{}' from settings where key = 'offer_version'))
+       on conflict (username) do update set password_hash = excluded.password_hash, status = 'active', failed_logins = 0, locked_until = null
+       returning id`, [email, login, hashPw(env.TEST_USER_PASSWORD)])).rows[0]
+    // действующие документы приняты — покупки не упрутся в «примите новую редакцию»
+    await client.query(`insert into user_consents (user_id, document_id) select $1, d.id from (select distinct on (kind) id from documents where published_at <= now() order by kind, published_at desc) d on conflict do nothing`, [u.id])
+    console.log('тестовый пользователь:', login)
+  }
 } finally { await client.end() }
+
+function hashPw(pw) {
+  const salt = randomBytes(16)
+  const key = scryptSync(String(pw).normalize('NFKC'), salt, 32, { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 })
+  return `scrypt$16384$8$1$${salt.toString('base64url')}$${key.toString('base64url')}`
+}

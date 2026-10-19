@@ -20,6 +20,14 @@ services:
         value: "true"
       - key: NUXT_STAND                 # тестовый стенд: тестовая оплата, коды на экране, admin/admin. В бою не задавать
         value: "true"
+      - key: TEST_ADMIN_LOGIN           # тестовые аккаунты стенда: создаются и обновляются при каждом старте
+        sync: false
+      - key: TEST_ADMIN_PASSWORD
+        sync: false
+      - key: TEST_USER_LOGIN
+        sync: false
+      - key: TEST_USER_PASSWORD
+        sync: false
       - key: NUXT_PAYMENT_PROVIDER
         value: test
       - key: NUXT_MAIL_PROVIDER         # unisender — письма уходят; log — только в журнал сервера (коды тогда видны на экране стенда)

@@ -36,7 +36,8 @@ set NUXT_DATABASE_URL=postgres://user:pass@localhost/marscap   # PowerShell: $en
 set NUXT_SECRET=любая-длинная-строка
 set NUXT_STAND=true              # стенд/разработка: тестовая оплата, коды на экране, admin/admin. В бою НЕ задавать
 set NUXT_DEV_CODES=true          # коды из писем показываются на экране (только со NUXT_STAND)
-npm run migrate                  # миграции + админ admin/admin (на стенде) или ADMIN_BOOTSTRAP_PASSWORD (в бою), если админов нет
+npm run migrate                  # миграции + админ admin/admin (на стенде) или ADMIN_BOOTSTRAP_PASSWORD (в бою), если админов нет;
+                                 # на стенде ещё тестовые аккаунты из TEST_ADMIN_LOGIN/PASSWORD и TEST_USER_LOGIN/PASSWORD
 npm run build && npm start       # http://localhost:3000, админка /admin
 
 # тесты (сервер должен быть запущен)
