@@ -7,7 +7,7 @@ DOCTYPE='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewpo
 try: NODE_PATH=os.environ.get('NODE_PATH') or subprocess.run(['npm','root','-g'],capture_output=True,text=True,shell=os.name=='nt').stdout.strip()
 except Exception: NODE_PATH=''
 # реквизиты юрлица: подставляются на всех страницах (подвал) и в «Контактах»; пустой ОГРН — строка не выводится
-LEGAL={'LEGAL_NAME':'Марс Капитал «Цифровые Решения»','LEGAL_INN':'9715523083','LEGAL_OGRN':''}
+LEGAL={'LEGAL_NAME':'ООО Марс Капитал «Цифровые Решение»','LEGAL_INN':'9715523083','LEGAL_OGRN':''}
 def emit(rel,out,label=None):
     if not LEGAL['LEGAL_OGRN']: out=out.replace('<div><dt>ОГРН</dt><dd>{{LEGAL_OGRN}}</dd></div>','')
     for k,v in LEGAL.items(): out=out.replace('{{'+k+'}}',v)
