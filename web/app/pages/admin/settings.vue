@@ -1,14 +1,14 @@
 <script setup lang="ts">
 const { api, ok } = useAdm()
 const s = ref<any>(null), domains = ref(''), busy = ref(''), to = ref('')
-const contacts = ref({ email: '', telegram: '', max: '' })
+const contacts = ref({ email: '', telegram: '' })
 const KIND: Record<string, string> = { offer: 'Публичная оферта', privacy: 'Политика конфиденциальности', tariffs: 'Тарифы' }
 const doc = ref<{ kind: string; version: string; title: string; note: string; url: string; file: File | null }>({ kind: 'offer', version: '', title: '', note: '', url: '', file: null })
 const fileInput = ref<HTMLInputElement | null>(null)
 const lim = ref({ unverified_rub: '' as any, verified_rub: '' as any, kyc_bonus_rub: '' as any })
 const toRub = (k: any) => k == null ? '' : String(k / 100)
 async function saveLimits() { busy.value = 'l'; try { await api('POST', '/settings/limits', lim.value); ok('Сохранено', 'Лимиты действуют для следующих покупок'); await load() } finally { busy.value = '' } }
-async function load() { s.value = await api('GET', '/settings'); lim.value = { unverified_rub: toRub(s.value.limits.unverified_kop), verified_rub: toRub(s.value.limits.verified_kop), kyc_bonus_rub: toRub(s.value.limits.kyc_bonus_kop) }; domains.value = s.value.email_domains.join('\n'); contacts.value = { email: '', telegram: '', max: '', ...s.value.contacts } }
+async function load() { s.value = await api('GET', '/settings'); lim.value = { unverified_rub: toRub(s.value.limits.unverified_kop), verified_rub: toRub(s.value.limits.verified_kop), kyc_bonus_rub: toRub(s.value.limits.kyc_bonus_kop) }; domains.value = s.value.email_domains.join('\n'); contacts.value = { email: s.value.contacts?.email || '', telegram: s.value.contacts?.telegram || '' } }
 async function saveContacts() { busy.value = 'c'; try { await api('POST', '/settings/contacts', contacts.value); ok('Контакты обновлены', 'Сайт покажет их при следующем открытии страницы'); await load() } finally { busy.value = '' } }
 async function publish() {
   busy.value = 'p'
@@ -63,10 +63,9 @@ async function test() { busy.value = 't'; try { await api('POST', '/settings/mai
   <div v-if="s" class="grid g2" style="align-items:start;margin-top:16px">
     <div class="panel grid">
       <h2>Контакты на сайте</h2>
-      <p class="muted" style="margin:0">Показываются в шапке, подвале, на странице поддержки и в кабинете. Для Telegram и Max — имя аккаунта без @.</p>
+      <p class="muted" style="margin:0">Показываются в шапке, подвале, на странице поддержки и в кабинете. Для Telegram — имя аккаунта без @.</p>
       <div class="field"><label>Почта поддержки</label><InputText v-model="contacts.email" placeholder="help@marscap.ru" fluid /></div>
       <div class="field"><label>Telegram</label><InputGroup><InputGroupAddon>t.me/</InputGroupAddon><InputText v-model="contacts.telegram" placeholder="marscapcard" /></InputGroup></div>
-      <div class="field"><label>Max</label><InputGroup><InputGroupAddon>max.ru/</InputGroupAddon><InputText v-model="contacts.max" placeholder="marscap_support" /></InputGroup></div>
       <div><Button label="Сохранить контакты" :loading="busy === 'c'" @click="saveContacts" /></div>
     </div>
     <div class="panel grid">

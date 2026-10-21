@@ -44,7 +44,7 @@
 }
 
 /* — каналы — */
-.sup-channels{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sup-channels{grid-template-columns:repeat(2,minmax(0,1fr))}
 .sup-ch{gap:12px; padding:22px}
 .sup-ch-ico{width:46px; height:46px; border-radius:14px; display:grid; place-items:center; color:var(--text); background:var(--panel-solid); border:1px solid var(--line-strong)}
 .sup-ch-ico svg{width:22px; height:22px}

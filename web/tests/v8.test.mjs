@@ -69,11 +69,11 @@ test('старший админ: журнал только младших и с�
 test('контакты сайта и Telegram пользователя', async () => {
   const a = await owner()
   const before = (await client()('GET', '/api/site')).body.contacts
-  assert.equal((await a('POST', '/api/admin/settings/contacts', { email: 'help@marscap.ru', telegram: '@mc_help', max: 'https://max.ru/mc_help' })).status, 200)
+  assert.equal((await a('POST', '/api/admin/settings/contacts', { email: 'help@marscap.ru', telegram: 'https://t.me/mc_help' })).status, 200)
   const site = (await client()('GET', '/api/site')).body
-  assert.deepEqual(site.contacts, { email: 'help@marscap.ru', telegram: 'mc_help', max: 'mc_help' })
+  assert.deepEqual(site.contacts, { email: 'help@marscap.ru', telegram: 'mc_help' })
   assert.ok(site.documents.some(d => d.kind === 'tariffs'))
-  assert.equal((await a('POST', '/api/admin/settings/contacts', { email: 'help@marscap.ru', telegram: 'a b', max: 'x' })).code, 'bad_contact')
+  assert.equal((await a('POST', '/api/admin/settings/contacts', { email: 'help@marscap.ru', telegram: 'a b' })).code, 'bad_contact')
   await a('POST', '/api/admin/settings/contacts', before)
   const u = client(); await register(u)
   assert.equal((await u('PATCH', '/api/profile', { telegram: 'https://t.me/ivan_petrov' })).body.user.telegram, 'ivan_petrov')

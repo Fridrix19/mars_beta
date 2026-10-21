@@ -91,6 +91,12 @@ set DATABASE_URL=... & set API_URL=http://localhost:3000 & npm test   # 25 те�
 - Лиды и группировка тарифов для остальных сервисов, подкатегории разделов (`src/pages/section-<cid>.json`).
 - 2FA для админов.
 
+## Боевой сервер
+
+- Сайт: **https://marscap.store** (Timeweb Cloud, Ubuntu 24.04, IP `5.129.240.63`). `marscap.ru` смотрит на старый хостинг; почта остаётся на `@marscap.ru` (письма уходят через ящик `mc@marscap.ru` по SMTP).
+- Доступ: `ssh -i ~/.ssh/marscap_timeweb root@5.129.240.63`. Приложение — `/opt/marscap` (systemd `marscap`, пользователь `marscap`), настройки — `/opt/marscap/.env` (секреты не выводить в чат), nginx — `/etc/nginx/sites-available/marscap`, сертификат Let's Encrypt продлевается сам.
+- Выкладка: собрать сайт и сервер → собрать `release/marscap.tar.gz` (как в README архива) → распаковать на сервере поверх `app/ scripts/ server/ node_modules/`, сохранив `.env` → `systemctl restart marscap` (миграции применяются при старте).
+
 ## Связанные проекты (на той же «внутрянке»)
 
 Три ребрендинга Marscap с собственным дизайном, отдельные репозитории: `Fridrix19/tugrik` (светлый финтех), `Fridrix19/polka` (журнальный стиль), `Fridrix19/vexel` (ретро-терминал). На Windows лежат в `C:\Users\fedor\OneDrive\Documents\GitHub\`.

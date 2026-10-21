@@ -741,6 +741,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .card-link:hover{border-color:var(--ink-600); background:var(--surface-2); color:var(--text-2)}
 .card-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px}
 .card-grid.wide{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card-grid.duo{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}   /* две карточки на всю ширину */
 .arrow-link{display:inline-flex; align-items:center; gap:6px; color:var(--accent); text-decoration:none; font-size:14px; font-weight:500}
 .arrow-link svg{width:16px; height:16px}
 .arrow-link:hover svg{translate:2px 0}
@@ -903,7 +904,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .ct-topics{margin-block-end:16px}
 .ct-topics .cat{padding-inline-start:12px}
 
-.ct-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ct-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .ct-ch{gap:12px; padding:22px}
 .ct-head{display:flex; align-items:center; gap:12px}
 .ct-head > div{display:flex; flex-direction:column; gap:2px; min-width:0}
@@ -1022,12 +1023,6 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
           <p class="ct-desc">Оплата, привязка карты, статус письма, выбор сервиса.</p>
           <div class="ct-val"><b data-contact-text="tg">@marscapcard</b><button type="button" class="icon-btn" data-contact-copy="tg" data-copy="@marscapcard" aria-label="Скопировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
           <div class="card-foot"><a class="btn btn-primary" href="https://t.me/marscapcard" data-contact="tg" target="_blank" rel="noopener">Открыть чат</a></div>
-        </article>
-        <article class="card ct-ch" data-ch="max">
-          <div class="ct-head"><span class="ct-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></span><div><h3>Max</h3><span class="ct-sla"><i class="ct-dot"></i>до 1 часа</span></div><span class="badge badge-info ct-rec">Лучше сюда</span></div>
-          <p class="ct-desc">Те же вопросы, если Telegram недоступен.</p>
-          <div class="ct-val"><b data-contact-text="max">marscap_support</b><button type="button" class="icon-btn" data-contact-copy="max" data-copy="marscap_support" aria-label="Скопировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
-          <div class="card-foot"><a class="btn btn-ghost" href="https://max.ru/marscap_support" data-contact="max" target="_blank" rel="noopener">Открыть Max</a></div>
         </article>
         <article class="card ct-ch" data-ch="mail">
           <div class="ct-head"><span class="ct-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span><div><h3>Почта</h3><span class="ct-sla"><i class="ct-dot"></i>до 24 часов</span></div><span class="badge badge-info ct-rec">Лучше сюда</span></div>
@@ -1823,10 +1818,10 @@ window.MC = (function(){
   function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   /* — контакты и действующие документы (правятся в админке → Настройки) — */
-  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard', max: 'marscap_support' }, siteP = null;
+  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard' }, siteP = null;
   function site(){ if (!siteP) siteP = isLive().then(function(on){ return on ? api('GET', '/site').catch(function(){ return null; }) : null; }); return siteP; }
   function applyContacts(){
-    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, max: 'https://max.ru/' + c.max, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, max: c.max, mail: c.email };
+    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, mail: c.email };
     document.querySelectorAll('[data-contact]').forEach(function(a){ var k = a.getAttribute('data-contact'), h = a.getAttribute('href') || '', q = h.indexOf('?'); if (L[k]) a.href = L[k] + (k === 'mail' && q > 0 ? h.slice(q) : ''); });
     document.querySelectorAll('[data-contact-text]').forEach(function(el){ var k = el.getAttribute('data-contact-text'); if (T[k]) el.textContent = T[k]; });
     document.querySelectorAll('[data-contact-copy]').forEach(function(el){ var k = el.getAttribute('data-contact-copy'); if (T[k]) el.setAttribute('data-copy', T[k]); });
@@ -2029,10 +2024,10 @@ window.MC = (function(){
   var TOPICS = [
     { id:'pay', n:'Оплата и СБП', rec:['tg'] },
     { id:'card', n:'Привязка карты', rec:['tg'] },
-    { id:'mail', n:'Письмо не пришло', rec:['tg','max'] },
+    { id:'mail', n:'Письмо не пришло', rec:['tg'] },
     { id:'refund', n:'Возврат', rec:['mail'] },
     { id:'docs', n:'Документы и юрлица', rec:['mail'] },
-    { id:'choose', n:'Выбор сервиса', rec:['tg','max'] }
+    { id:'choose', n:'Выбор сервиса', rec:['tg'] }
   ];
   var wrap = $('ctTopics'), cards = document.querySelectorAll('.ct-ch'), cur = null;
   TOPICS.forEach(function(t){

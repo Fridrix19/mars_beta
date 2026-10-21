@@ -6,10 +6,10 @@
   var TOPICS = [
     { id:'pay', n:'Оплата и СБП', rec:['tg'] },
     { id:'card', n:'Привязка карты', rec:['tg'] },
-    { id:'mail', n:'Письмо не пришло', rec:['tg','max'] },
+    { id:'mail', n:'Письмо не пришло', rec:['tg'] },
     { id:'refund', n:'Возврат', rec:['mail'] },
     { id:'docs', n:'Документы и юрлица', rec:['mail'] },
-    { id:'choose', n:'Выбор сервиса', rec:['tg','max'] }
+    { id:'choose', n:'Выбор сервиса', rec:['tg'] }
   ];
   var wrap = $('ctTopics'), cards = document.querySelectorAll('.ct-ch'), cur = null;
   TOPICS.forEach(function(t){

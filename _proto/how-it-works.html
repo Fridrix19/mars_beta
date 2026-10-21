@@ -741,6 +741,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .card-link:hover{border-color:var(--ink-600); background:var(--surface-2); color:var(--text-2)}
 .card-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px}
 .card-grid.wide{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card-grid.duo{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}   /* две карточки на всю ширину */
 .arrow-link{display:inline-flex; align-items:center; gap:6px; color:var(--accent); text-decoration:none; font-size:14px; font-weight:500}
 .arrow-link svg{width:16px; height:16px}
 .arrow-link:hover svg{translate:2px 0}
@@ -1230,7 +1231,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
         </ol>
 
         <div class="hiw-screen" id="hiwScreen">
-          <div class="scr-top" aria-hidden="true"><i></i><i></i><i></i><span>marscap.ru</span></div>
+          <div class="scr-top" aria-hidden="true"><i></i><i></i><i></i><span>marscap.store</span></div>
           <div class="scr-body">
             <!-- 1: выбор сервиса -->
             <div class="scene" id="scene1" role="img" aria-label="Выбор сервиса в каталоге">
@@ -1315,14 +1316,14 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
             <div class="lt-kv"><span>Страна <b>US</b></span><span>Индекс <b>10001</b></span><span>Город <b>New York</b></span></div>
           </div>
           <div class="lt-part lt-foot" data-part="4"><span class="lp-mark">4</span>
-            <span class="btn btn-primary btn-sm">Открыть кабинет</span><span class="lt-sup">Поддержка: Telegram · Max · <span data-contact-text="mail">help@marscap.ru</span></span>
+            <span class="btn btn-primary btn-sm">Открыть кабинет</span><span class="lt-sup">Поддержка: Telegram · <span data-contact-text="mail">help@marscap.ru</span></span>
           </div>
         </div>
         <ol class="letter-notes" id="letterNotes">
           <li data-part="1"><span class="ln-num">1</span><div><b>Реквизиты карты</b><p>Номер, срок и CVC. Те же — в кабинете.</p></div></li>
           <li data-part="2"><span class="ln-num">2</span><div><b>Инструкция для сервиса</b><p>Где ввести карту именно в вашем сервисе, по шагам.</p></div></li>
           <li data-part="3"><span class="ln-num">3</span><div><b>Платёжный адрес</b><p>Страна, индекс и город для формы оплаты — частая причина отказа, если пропустить.</p></div></li>
-          <li data-part="4"><span class="ln-num">4</span><div><b>Кабинет и поддержка</b><p>Баланс, пополнение и история — в кабинете. Вопросы — в Telegram, Max или на почту.</p></div></li>
+          <li data-part="4"><span class="ln-num">4</span><div><b>Кабинет и поддержка</b><p>Баланс, пополнение и история — в кабинете. Вопросы — в Telegram или на почту.</p></div></li>
         </ol>
       </div>
       <div class="letter-side">
@@ -2136,10 +2137,10 @@ window.MC = (function(){
   function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   /* — контакты и действующие документы (правятся в админке → Настройки) — */
-  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard', max: 'marscap_support' }, siteP = null;
+  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard' }, siteP = null;
   function site(){ if (!siteP) siteP = isLive().then(function(on){ return on ? api('GET', '/site').catch(function(){ return null; }) : null; }); return siteP; }
   function applyContacts(){
-    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, max: 'https://max.ru/' + c.max, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, max: c.max, mail: c.email };
+    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, mail: c.email };
     document.querySelectorAll('[data-contact]').forEach(function(a){ var k = a.getAttribute('data-contact'), h = a.getAttribute('href') || '', q = h.indexOf('?'); if (L[k]) a.href = L[k] + (k === 'mail' && q > 0 ? h.slice(q) : ''); });
     document.querySelectorAll('[data-contact-text]').forEach(function(el){ var k = el.getAttribute('data-contact-text'); if (T[k]) el.textContent = T[k]; });
     document.querySelectorAll('[data-contact-copy]').forEach(function(el){ var k = el.getAttribute('data-contact-copy'); if (T[k]) el.setAttribute('data-copy', T[k]); });

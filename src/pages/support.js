@@ -1,7 +1,7 @@
 (function(){
   var MC = window.MC, $ = MC.$, reduce = MC.reduce;
-  var C = MC.contacts, TG = 'https://t.me/' + C.telegram, MAX = 'https://max.ru/' + C.max, MAIL = C.email;
-  document.addEventListener('mc:contacts', function(e){ C = e.detail; TG = 'https://t.me/' + C.telegram; MAX = 'https://max.ru/' + C.max; MAIL = C.email; links(); });
+  var C = MC.contacts, TG = 'https://t.me/' + C.telegram, MAIL = C.email;
+  document.addEventListener('mc:contacts', function(e){ C = e.detail; TG = 'https://t.me/' + C.telegram; MAIL = C.email; links(); });
   var I = {
     grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></svg>',
     card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg>',
@@ -69,7 +69,7 @@
   }
   function links(){
     var body = encodeURIComponent(text.value);
-    $('supTg').href = TG; $('supMax').href = MAX;
+    $('supTg').href = TG;
     $('supMailto').href = 'mailto:' + MAIL + '?subject=' + encodeURIComponent('Поддержка: ' + (cur ? cur.t : 'вопрос')) + '&body=' + body;
   }
   mail.addEventListener('input', function(){ if (cur) { var before = text.value; fill(cur); if (before !== text.value) links(); } });

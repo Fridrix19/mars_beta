@@ -741,6 +741,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .card-link:hover{border-color:var(--ink-600); background:var(--surface-2); color:var(--text-2)}
 .card-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px}
 .card-grid.wide{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card-grid.duo{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}   /* две карточки на всю ширину */
 .arrow-link{display:inline-flex; align-items:center; gap:6px; color:var(--accent); text-decoration:none; font-size:14px; font-weight:500}
 .arrow-link svg{width:16px; height:16px}
 .arrow-link:hover svg{translate:2px 0}
@@ -1016,7 +1017,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
       <div class="home-why">
         <article class="card info-card"><span class="eyebrow">Прозрачно</span><h3>Итог в рублях — до оплаты</h3><p>Курс ЦБ и комиссия видны сразу, без скрытых списаний.</p></article>
         <article class="card info-card accent"><span class="eyebrow">Важно</span><h3>Сначала карта, потом сервис</h3><p>Платёж на сайте — за выпуск карты. Подписку вы оплачиваете ею на сайте сервиса.</p></article>
-        <article class="card info-card"><span class="eyebrow">Поддержка</span><h3>Telegram, Max, почта</h3><p>Найдём заказ по почте и поможем с привязкой.</p></article>
+        <article class="card info-card"><span class="eyebrow">Поддержка</span><h3>Telegram и почта</h3><p>Найдём заказ по почте и поможем с привязкой.</p></article>
       </div>
     </section>
 
@@ -1042,9 +1043,8 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
         <span class="eyebrow">Поддержка</span>
         <h2>Если нужна помощь</h2>
       </div>
-      <div class="card-grid">
+      <div class="card-grid duo">
         <article class="card info-card"><span class="eyebrow">Telegram</span><h3>Быстрые ответы</h3><p>Выбор сервиса, оплата, привязка карты.</p><div class="card-foot"><a class="btn btn-ghost btn-sm" href="https://t.me/marscapcard" data-contact="tg" target="_blank" rel="noopener">Написать в Telegram</a></div></article>
-        <article class="card info-card"><span class="eyebrow">Max</span><h3>Второй канал</h3><p>Если Telegram недоступен.</p><div class="card-foot"><a class="btn btn-ghost btn-sm" href="https://max.ru/marscap_support" data-contact="max" target="_blank" rel="noopener">Открыть Max</a></div></article>
         <article class="card info-card"><span class="eyebrow">Почта</span><h3 data-contact-text="mail">help@marscap.ru</h3><p>Заказы, документы, возвраты.</p><div class="card-foot"><a class="btn btn-ghost btn-sm" href="mailto:help@marscap.ru" data-contact="mail">Написать письмо</a></div></article>
       </div>
       <div class="home-cta">
@@ -1824,10 +1824,10 @@ window.MC = (function(){
   function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   /* — контакты и действующие документы (правятся в админке → Настройки) — */
-  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard', max: 'marscap_support' }, siteP = null;
+  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard' }, siteP = null;
   function site(){ if (!siteP) siteP = isLive().then(function(on){ return on ? api('GET', '/site').catch(function(){ return null; }) : null; }); return siteP; }
   function applyContacts(){
-    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, max: 'https://max.ru/' + c.max, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, max: c.max, mail: c.email };
+    var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, mail: c.email };
     document.querySelectorAll('[data-contact]').forEach(function(a){ var k = a.getAttribute('data-contact'), h = a.getAttribute('href') || '', q = h.indexOf('?'); if (L[k]) a.href = L[k] + (k === 'mail' && q > 0 ? h.slice(q) : ''); });
     document.querySelectorAll('[data-contact-text]').forEach(function(el){ var k = el.getAttribute('data-contact-text'); if (T[k]) el.textContent = T[k]; });
     document.querySelectorAll('[data-contact-copy]').forEach(function(el){ var k = el.getAttribute('data-contact-copy'); if (T[k]) el.setAttribute('data-copy', T[k]); });
