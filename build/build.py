@@ -30,8 +30,9 @@ def png_uri(p,size=96):
     subprocess.run(['node','-e',f"const [p,o]=process.argv.slice(1);require('sharp')(p,{{density:300}}).resize({size},{size},{{fit:'contain',background:{{r:0,g:0,b:0,alpha:0}}}}).png().toFile(o).then(()=>0);",p,out],check=True,capture_output=True,env=dict(os.environ,NODE_PATH=NODE_PATH))
     return 'data:image/png;base64,'+base64.b64encode(open(out,'rb').read()).decode()
 def icon(slug):
+    # мелкие SVG встраиваются в страницу; крупные (>20 КБ) — ссылкой на файл, браузер их кеширует (раньше — PNG 96 px)
     p=f'{A}/services/{slug}.svg'
-    return png_uri(p) if os.path.getsize(p)>20000 else svg_uri(p)
+    return f'/assets/services/{slug}.svg' if os.path.getsize(p)>20000 else svg_uri(p)
 
 # --- каталог ---
 _src=open(ROOT+'/search.js',encoding='utf-8').read()
