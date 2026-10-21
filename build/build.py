@@ -3,7 +3,9 @@ import base64, json, re, subprocess, os, sys, tempfile
 HERE=os.path.dirname(os.path.abspath(__file__)); REPO=os.path.dirname(HERE)
 ROOT=os.environ.get('MC_SOURCE', REPO+'/source-site'); A=ROOT+'/assets'; B=os.environ.get('MC_SRC', REPO+'/src')
 OUT=os.environ.get('MC_OUT', REPO+'/_proto'); TMP=os.environ.get('TMPDIR') or tempfile.gettempdir()
-DOCTYPE='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+# фавиконы — из src/favicon/ (логотип Marscap), копируются в корень сайта при каждой сборке
+FAVICON='<link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#090D18">'
+DOCTYPE='<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'+FAVICON+'\n'
 try: NODE_PATH=os.environ.get('NODE_PATH') or subprocess.run(['npm','root','-g'],capture_output=True,text=True,shell=os.name=='nt').stdout.strip()
 except Exception: NODE_PATH=''
 # реквизиты юрлица: подставляются на всех страницах (подвал) и в «Контактах»; пустой ОГРН — строка не выводится
@@ -60,6 +62,9 @@ def read(p): return open(f'{B}/{p}',encoding='utf-8').read()
 GALAXY=open(f'{HERE}/galaxy-bg.v58.js',encoding='utf-8').read()
 COMMON=read('base/pricefmt.js')+'\n'+read('base/common.js').replace('/*__CATALOG__*/',CAT_JSON)
 LOGO=svg_uri(ROOT+'/main_logotype.svg')
+import shutil
+os.makedirs(OUT,exist_ok=True)
+for f in os.listdir(B+'/favicon'): shutil.copyfile(os.path.join(B,'favicon',f),os.path.join(OUT,f))
 
 # --- хлебные крошки: [(подпись, ссылка или None для текущей)], «Главная» добавляется сама ---
 CUR={}

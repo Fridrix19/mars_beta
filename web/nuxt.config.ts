@@ -18,7 +18,8 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'ru', class: 'mc-dark' },
       meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-      link: [{ rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      link: [{ rel: 'icon', href: '/favicon.ico', sizes: '32x32' }, { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
+             { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
              { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Onest:wght@600;700&family=JetBrains+Mono:wght@500&display=swap' }],
     },
   },
