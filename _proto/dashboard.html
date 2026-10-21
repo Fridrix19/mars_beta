@@ -1688,7 +1688,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
             <label class="toggle"><input type="checkbox" role="switch" id="mfaTgl"><span class="knob"></span><span>2FA <span class="sub" id="mfaSub">выключена</span></span></label>
             <div class="mfa-setup" id="mfaSetup" hidden>
               <div class="mfa-qr" aria-hidden="true"><svg><use href="#i-qr"/></svg></div>
-              <div><p>Отсканируйте в Google Authenticator или 1Password и введите код.</p><div class="otp otp-sm" id="mfaBoxes"><input inputmode="numeric" maxlength="1" aria-label="Цифра 1"><input inputmode="numeric" maxlength="1" aria-label="Цифра 2"><input inputmode="numeric" maxlength="1" aria-label="Цифра 3"><input inputmode="numeric" maxlength="1" aria-label="Цифра 4"><input inputmode="numeric" maxlength="1" aria-label="Цифра 5"><input inputmode="numeric" maxlength="1" aria-label="Цифра 6"></div></div>
+              <div><p>Отсканируйте в Google Authenticator или 1Password и введите код.</p><div class="otp otp-sm" id="mfaBoxes"><input inputmode="numeric" aria-label="Цифра 1"><input inputmode="numeric" aria-label="Цифра 2"><input inputmode="numeric" aria-label="Цифра 3"><input inputmode="numeric" aria-label="Цифра 4"><input inputmode="numeric" aria-label="Цифра 5"><input inputmode="numeric" aria-label="Цифра 6"></div></div>
             </div>
             <div class="sec-row"><span>Резервные коды</span><button type="button" class="auth-link" id="backupCodes">Показать</button></div>
             <div class="sec-row"><span>Вход по коду без пароля</span><label class="toggle"><input type="checkbox" role="switch" checked><span class="knob"></span></label></div>
@@ -2860,7 +2860,7 @@ window.MC = (function(){
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
 
   /* 6 полей кода: возвращает разметку, wireOtp вешает поведение */
-  function otpHtml(id){ var s = '<div class="otp" id="' + id + '">'; for (var i = 1; i <= 6; i++) s += '<input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра ' + i + '">'; return s + '</div>'; }
+  function otpHtml(id){ var s = '<div class="otp" id="' + id + '">'; for (var i = 1; i <= 6; i++) s += '<input inputmode="numeric"' + (i === 1 ? ' autocomplete="one-time-code"' : '') + ' aria-label="Цифра ' + i + '">'; return s + '</div>'; }
   function wireOtp(box, done){
     var ins = [].slice.call(box.querySelectorAll('input'));
     ins.forEach(function(inp, i){
@@ -2870,6 +2870,15 @@ window.MC = (function(){
         var code = ins.map(function(x){ return x.value; }).join(''); if (code.length === 6) done(code, box, ins);
       });
       inp.addEventListener('keydown', function(e){ if (e.key === 'Backspace' && !inp.value && i > 0){ ins[i - 1].value = ''; ins[i - 1].classList.remove('is-filled'); ins[i - 1].focus(); } });
+      // вставка из буфера: весь код раскладывается по полям (6 цифр — всегда с первого поля)
+      inp.addEventListener('paste', function(e){
+        var v = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, ''); if (!v) return;
+        e.preventDefault();
+        var from = v.length >= 6 ? 0 : i;
+        v.slice(0, 6 - from).split('').forEach(function(ch, k){ ins[from + k].value = ch; ins[from + k].classList.add('is-filled'); });
+        ins[Math.min(5, from + v.length)].focus();
+        var code = ins.map(function(x){ return x.value; }).join(''); if (code.length === 6) done(code, box, ins);
+      });
     });
     ins[0].focus();
   }

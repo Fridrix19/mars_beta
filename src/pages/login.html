@@ -76,12 +76,12 @@
             <p id="otpText">Отправили 6 цифр на <b id="otpTarget"></b>. <button type="button" class="auth-link" data-step-back>Изменить</button></p>
           </div>
           <div class="otp" id="otpBoxes" role="group" aria-label="Код подтверждения">
-            <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 6">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" aria-label="Цифра 1">
+            <input type="text" inputmode="numeric" aria-label="Цифра 2">
+            <input type="text" inputmode="numeric" aria-label="Цифра 3">
+            <input type="text" inputmode="numeric" aria-label="Цифра 4">
+            <input type="text" inputmode="numeric" aria-label="Цифра 5">
+            <input type="text" inputmode="numeric" aria-label="Цифра 6">
           </div>
           <p class="hint auth-center" id="otpHint">Код действует 10 минут.</p>
           <div class="alert alert-err" id="otpErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="otpErrText"></div></div>
@@ -99,12 +99,12 @@
             <p>Для этого аккаунта включена двухфакторная защита. Введите код из приложения-аутентификатора.</p>
           </div>
           <div class="otp" id="mfaBoxes" role="group" aria-label="Код из приложения">
-            <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 6">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" aria-label="Цифра 1">
+            <input type="text" inputmode="numeric" aria-label="Цифра 2">
+            <input type="text" inputmode="numeric" aria-label="Цифра 3">
+            <input type="text" inputmode="numeric" aria-label="Цифра 4">
+            <input type="text" inputmode="numeric" aria-label="Цифра 5">
+            <input type="text" inputmode="numeric" aria-label="Цифра 6">
           </div>
           <div class="alert alert-err" id="mfaErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="mfaErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="mfaBtn" disabled>Подтвердить</button>

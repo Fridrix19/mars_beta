@@ -111,7 +111,7 @@
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
 
   /* 6 полей кода: возвращает разметку, wireOtp вешает поведение */
-  function otpHtml(id){ var s = '<div class="otp" id="' + id + '">'; for (var i = 1; i <= 6; i++) s += '<input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра ' + i + '">'; return s + '</div>'; }
+  function otpHtml(id){ var s = '<div class="otp" id="' + id + '">'; for (var i = 1; i <= 6; i++) s += '<input inputmode="numeric"' + (i === 1 ? ' autocomplete="one-time-code"' : '') + ' aria-label="Цифра ' + i + '">'; return s + '</div>'; }
   function wireOtp(box, done){
     var ins = [].slice.call(box.querySelectorAll('input'));
     ins.forEach(function(inp, i){
@@ -121,6 +121,15 @@
         var code = ins.map(function(x){ return x.value; }).join(''); if (code.length === 6) done(code, box, ins);
       });
       inp.addEventListener('keydown', function(e){ if (e.key === 'Backspace' && !inp.value && i > 0){ ins[i - 1].value = ''; ins[i - 1].classList.remove('is-filled'); ins[i - 1].focus(); } });
+      // вставка из буфера: весь код раскладывается по полям (6 цифр — всегда с первого поля)
+      inp.addEventListener('paste', function(e){
+        var v = ((e.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, ''); if (!v) return;
+        e.preventDefault();
+        var from = v.length >= 6 ? 0 : i;
+        v.slice(0, 6 - from).split('').forEach(function(ch, k){ ins[from + k].value = ch; ins[from + k].classList.add('is-filled'); });
+        ins[Math.min(5, from + v.length)].focus();
+        var code = ins.map(function(x){ return x.value; }).join(''); if (code.length === 6) done(code, box, ins);
+      });
     });
     ins[0].focus();
   }

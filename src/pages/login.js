@@ -208,6 +208,15 @@
         if (e.key === 'ArrowLeft' && i > 0) bs[i - 1].focus(); if (e.key === 'ArrowRight' && i < 5) bs[i + 1].focus();
       });
       b.addEventListener('focus', function(){ b.select(); });
+      // вставка из буфера: весь код раскладывается по полям (6 цифр — всегда с первого поля)
+      b.addEventListener('paste', function(e){
+        var v = digits((e.clipboardData || window.clipboardData).getData('text')); if (!v) return;
+        e.preventDefault();
+        var from = v.length >= 6 ? 0 : i;
+        v.slice(0, 6 - from).split('').forEach(function(ch, k){ bs[from + k].value = ch; });
+        bs[Math.min(5, from + v.length)].focus();
+        sync(); if (code().length === 6) onFull(code());
+      });
     });
     return { code: code, sync: sync };
   }

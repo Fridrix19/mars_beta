@@ -1070,12 +1070,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
             <p id="otpText">Отправили 6 цифр на <b id="otpTarget"></b>. <button type="button" class="auth-link" data-step-back>Изменить</button></p>
           </div>
           <div class="otp" id="otpBoxes" role="group" aria-label="Код подтверждения">
-            <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 6">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" aria-label="Цифра 1">
+            <input type="text" inputmode="numeric" aria-label="Цифра 2">
+            <input type="text" inputmode="numeric" aria-label="Цифра 3">
+            <input type="text" inputmode="numeric" aria-label="Цифра 4">
+            <input type="text" inputmode="numeric" aria-label="Цифра 5">
+            <input type="text" inputmode="numeric" aria-label="Цифра 6">
           </div>
           <p class="hint auth-center" id="otpHint">Код действует 10 минут.</p>
           <div class="alert alert-err" id="otpErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="otpErrText"></div></div>
@@ -1093,12 +1093,12 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
             <p>Для этого аккаунта включена двухфакторная защита. Введите код из приложения-аутентификатора.</p>
           </div>
           <div class="otp" id="mfaBoxes" role="group" aria-label="Код из приложения">
-            <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Цифра 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Цифра 6">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" aria-label="Цифра 1">
+            <input type="text" inputmode="numeric" aria-label="Цифра 2">
+            <input type="text" inputmode="numeric" aria-label="Цифра 3">
+            <input type="text" inputmode="numeric" aria-label="Цифра 4">
+            <input type="text" inputmode="numeric" aria-label="Цифра 5">
+            <input type="text" inputmode="numeric" aria-label="Цифра 6">
           </div>
           <div class="alert alert-err" id="mfaErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="mfaErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="mfaBtn" disabled>Подтвердить</button>
@@ -2325,6 +2325,15 @@ window.MC = (function(){
         if (e.key === 'ArrowLeft' && i > 0) bs[i - 1].focus(); if (e.key === 'ArrowRight' && i < 5) bs[i + 1].focus();
       });
       b.addEventListener('focus', function(){ b.select(); });
+      // вставка из буфера: весь код раскладывается по полям (6 цифр — всегда с первого поля)
+      b.addEventListener('paste', function(e){
+        var v = digits((e.clipboardData || window.clipboardData).getData('text')); if (!v) return;
+        e.preventDefault();
+        var from = v.length >= 6 ? 0 : i;
+        v.slice(0, 6 - from).split('').forEach(function(ch, k){ bs[from + k].value = ch; });
+        bs[Math.min(5, from + v.length)].focus();
+        sync(); if (code().length === 6) onFull(code());
+      });
     });
     return { code: code, sync: sync };
   }
