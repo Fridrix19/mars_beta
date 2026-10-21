@@ -31,7 +31,7 @@ export async function fulfillKeyOrder(orderId: string, adminId: string | null = 
     return { key: k.id, user: o.user_id, id: o.id, name: o.product_name }
   })
   if (!res) return null
-  await notifyUser(res.user, `Заказ ${res.id} выполнен`, `${res.name}: данные для доступа — в карточке заказа.`, '/dashboard.html#order:' + res.id)
+  await notifyUser(res.user, `Заказ ${res.id} выполнен`, `${res.name}: данные для доступа — в карточке заказа.`, '/dashboard#order:' + res.id)
   return res.key
 }
 
@@ -46,7 +46,7 @@ export async function deliverManual(orderId: string, text: string, adminId: stri
     await c.query(`insert into order_events (order_id, kind, status, text, by_admin) values ($1, 'delivered', 'done', 'Данные выданы', $2)`, [o.id, adminId])
     return o
   })
-  await notifyUser(o.user_id, `Заказ ${o.id} выполнен`, `${o.product_name}: данные для доступа — в карточке заказа.`, '/dashboard.html#order:' + o.id)
+  await notifyUser(o.user_id, `Заказ ${o.id} выполнен`, `${o.product_name}: данные для доступа — в карточке заказа.`, '/dashboard#order:' + o.id)
   return o.id
 }
 

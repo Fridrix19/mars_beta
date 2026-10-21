@@ -45,12 +45,12 @@
   };
   function srv(){ return LIVE ? live : demo; }
   // куда вернуть после входа: ?next=dashboard.html#checkout (только относительные адреса)
-  var NEXT = (function(){ var m = location.search.match(/[?&]next=([^&]+)/); var v = m ? decodeURIComponent(m[1]) : ''; return /^[\w\-.\/]+(#[\w:\-]*)?$/.test(v) && v.indexOf('//') < 0 ? v : 'dashboard.html'; })();
+  var NEXT = (function(){ var m = location.search.match(/[?&]next=([^&]+)/); var v = m ? decodeURIComponent(m[1]) : ''; return /^[\w\-.\/]+(#[\w:\-]*)?$/.test(v) && v.indexOf('//') < 0 ? v : 'dashboard'; })();
   function goNext(){ location.href = (window.MC_BASE || '') + NEXT; }
   MC.isLive().then(function(on){
     LIVE = on;
     document.documentElement.classList.toggle('mc-live', on);
-    if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard.html') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.username || r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
+    if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.username || r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard">открыть кабинет</a>'); }).catch(function(){});
   });
 
   /* — экраны — */
@@ -294,8 +294,8 @@
     $('mfaOffer').hidden = LIVE || flow !== 'register';
     // демо-сессия для прототипа; на сервере сессия — httpOnly-кука
     if (!LIVE) { try { localStorage.setItem('mc-session', JSON.stringify({ id: target, at: Date.now() })); } catch (e) {} }
-    if (LIVE && (flow !== 'register' || NEXT !== 'dashboard.html')) setTimeout(goNext, reduce ? 300 : 1400);
-    if (LIVE && user) document.querySelectorAll('.head-login').forEach(function(h){ h.href = (window.MC_BASE || '') + 'dashboard.html'; h.lastChild.textContent = user.name || user.username || user.email.split('@')[0]; h.classList.add('is-auth'); });
+    if (LIVE && (flow !== 'register' || NEXT !== 'dashboard')) setTimeout(goNext, reduce ? 300 : 1400);
+    if (LIVE && user) document.querySelectorAll('.head-login').forEach(function(h){ h.href = (window.MC_BASE || '') + 'dashboard'; h.lastChild.textContent = user.name || user.username || user.email.split('@')[0]; h.classList.add('is-auth'); });
     stopTimer(); show('scrDone');
   }
   $('mfaOn').addEventListener('change', function(){ toast(this.checked ? '2FA будет включена' : '2FA выключена', this.checked ? 'В кабинете покажем QR для приложения-аутентификатора.' : 'Вход только по паролю или коду.'); });

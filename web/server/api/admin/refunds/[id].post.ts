@@ -43,9 +43,9 @@ export default defineEventHandler(async (e) => {
     }
     return r
   })
-  if (action === 'reject') await notifyUser(r.user_id, 'Возврат отклонён', note, '/dashboard.html#payments:refunds')
+  if (action === 'reject') await notifyUser(r.user_id, 'Возврат отклонён', note, '/dashboard#payments:refunds')
   if (action === 'approve' && r.destination === 'card')
-    await notifyUser(r.user_id, 'Возврат одобрен', 'Деньги вернутся на карту, с которой вы платили, обычно за 1–5 рабочих дней.', '/dashboard.html#payments:refunds')
+    await notifyUser(r.user_id, 'Возврат одобрен', 'Деньги вернутся на карту, с которой вы платили, обычно за 1–5 рабочих дней.', '/dashboard#payments:refunds')
   await audit(e, a, 'refund.' + action, r.id, { note, order_id: r.order_id, amount_kop: r.amount_kop })
   return { ok: true }
 })

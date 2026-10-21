@@ -10,7 +10,7 @@ export default defineEventHandler(async (e) => {
   if (!u) fail(404, 'not_registered', 'Аккаунт не найден.')
   await q(`delete from sessions where user_id = $1`, [u.id])
   await q(`delete from signup_tickets where email = $1 and purpose = 'reset'`, [t.email])
-  await notifyUser(u.id, 'Пароль изменён', 'Пароль к аккаунту Marscap только что изменён, все прежние сессии завершены. Если это были не вы — сразу напишите в поддержку.', '/dashboard.html#profile:security')
+  await notifyUser(u.id, 'Пароль изменён', 'Пароль к аккаунту Marscap только что изменён, все прежние сессии завершены. Если это были не вы — сразу напишите в поддержку.', '/dashboard#profile:security')
   await startSession(e, u.id)
   return { ok: true, user: await me(e, u.id) }
 })

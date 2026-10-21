@@ -176,8 +176,8 @@ window.MC = (function(){
     me().then(function(u){
       if (!u) return;
       var base = window.MC_BASE || '', name = u.name || u.username || u.email.split('@')[0];
-      document.querySelectorAll('.head-login').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'dashboard.html'; a.lastChild.textContent = name; a.title = u.email; a.classList.add('is-auth'); });
-      document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard.html'; a.lastChild.textContent = 'Личный кабинет'; });
+      document.querySelectorAll('.head-login').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'dashboard'; a.lastChild.textContent = name; a.title = u.email; a.classList.add('is-auth'); });
+      document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard'; a.lastChild.textContent = 'Личный кабинет'; });
     });
   }
   /* — живой каталог: цены, скрытые и новые товары из админки (только когда рядом есть сервер) — */
@@ -247,8 +247,8 @@ window.MC = (function(){
   /* — покупка со страницы сервиса/карты: запоминаем выбор и ведём в кабинет (без входа — через вход) — */
   function checkout(o){
     try { sessionStorage.setItem('mc-checkout', JSON.stringify(o)); } catch (e) {}
-    var base = window.MC_BASE || '', dest = 'dashboard.html#checkout';
-    return me().then(function(u){ location.href = base + (u ? dest : 'login.html?next=' + encodeURIComponent(dest)); });
+    var base = window.MC_BASE || '', dest = 'dashboard#checkout';
+    return me().then(function(u){ location.href = base + (u ? dest : 'login?next=' + encodeURIComponent(dest)); });
   }
   function kop(v){ return new Intl.NumberFormat('ru-RU', { minimumFractionDigits: v % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(v / 100) + ' ₽'; }
   function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -389,7 +389,7 @@ window.MC = (function(){
     function star(n){ return '<span class="rv-stars" aria-label="' + n + ' из 5">' + '★★★★★'.slice(0, n) + '<i>' + '★★★★★'.slice(0, 5 - n) + '</i></span>'; }
     function item(r){
       var d = new Date(r.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-      var prod = all ? '<a class="rv-prod" href="' + (window.MC_BASE || '') + (r.slug === 'virtual-card' ? 'virtual-card.html' : 'service/' + esc(r.slug) + '/') + '">' + (r.product_icon ? '<img src="' + esc(r.product_icon) + '" alt="">' : '') + esc(r.product_name) + '</a>' : (r.plan_label ? '<span class="rv-plan">' + esc(r.plan_label) + '</span>' : '');
+      var prod = all ? '<a class="rv-prod" href="' + (window.MC_BASE || '') + (r.slug === 'virtual-card' ? 'virtual-card' : 'service/' + esc(r.slug) + '/') + '">' + (r.product_icon ? '<img src="' + esc(r.product_icon) + '" alt="">' : '') + esc(r.product_name) + '</a>' : (r.plan_label ? '<span class="rv-plan">' + esc(r.plan_label) + '</span>' : '');
       return '<article class="rv-item"><header><span class="rv-av">' + esc(String(r.author || 'П').charAt(0).toUpperCase()) + '</span><div><b>' + esc(r.author) + '</b><span>' + d + '</span></div>' + star(r.rating) + '</header>' + prod +
         '<p>' + esc(r.text) + '</p>' + (r.reply ? '<div class="rv-reply"><b>Ответ Marscap</b>' + esc(r.reply) + '</div>' : '') + '</article>';
     }
@@ -414,7 +414,7 @@ window.MC = (function(){
     isLive().then(function(live){
       if (!live) { btn.hidden = true; return; }
       me().then(function(u){
-        if (!u) { btn.addEventListener('click', function(){ try { sessionStorage.setItem('mc-fav', slug); } catch (e) {} location.href = (window.MC_BASE || '') + 'login.html?next=' + encodeURIComponent(location.pathname.replace(/^\//, '').replace(/index\.html$/, '')); }); return; }
+        if (!u) { btn.addEventListener('click', function(){ try { sessionStorage.setItem('mc-fav', slug); } catch (e) {} location.href = (window.MC_BASE || '') + 'login?next=' + encodeURIComponent(location.pathname.replace(/^\//, '').replace(/index\.html$/, '')); }); return; }
         api('GET', '/favorites').then(function(r){
           set(r.favorites.some(function(f){ return f.slug === slug; }));
           var pend = null; try { pend = sessionStorage.getItem('mc-fav'); sessionStorage.removeItem('mc-fav'); } catch (e) {}

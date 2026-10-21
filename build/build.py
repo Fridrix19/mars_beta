@@ -10,9 +10,15 @@ try: NODE_PATH=os.environ.get('NODE_PATH') or subprocess.run(['npm','root','-g']
 except Exception: NODE_PATH=''
 # реквизиты юрлица: подставляются на всех страницах (подвал) и в «Контактах»; пустой ОГРН — строка не выводится
 LEGAL={'LEGAL_NAME':'ООО Марс Капитал «Цифровые Решение»','LEGAL_INN':'9715523083','LEGAL_OGRN':''}
+# чистые адреса: href="../../catalog.html" → "../../catalog", ".../index.html" → ".../" (главная — "./");
+# сервер отдаёт /catalog как catalog.html, а старые адреса с .html переадресует на чистые
+def clean_hrefs(out):
+    out=re.sub(r'href="((?:\.\./)*(?:[a-z0-9-]+/)*)index\.html',lambda m:'href="'+(m.group(1) or './'),out)
+    return re.sub(r'href="((?:\.\./)*(?:[a-z0-9-]+/)*[a-z0-9-]+)\.html',r'href="\1',out)
 def emit(rel,out,label=None):
     if not LEGAL['LEGAL_OGRN']: out=out.replace('<div><dt>ОГРН</dt><dd>{{LEGAL_OGRN}}</dd></div>','')
     for k,v in LEGAL.items(): out=out.replace('{{'+k+'}}',v)
+    out=clean_hrefs(out)
     path=os.path.join(OUT,rel); os.makedirs(os.path.dirname(path),exist_ok=True)
     open(path,'w',encoding='utf-8').write(DOCTYPE+out+'\n</html>'); print(label or rel, len(out.encode())); return path
 def svg_uri(p):
@@ -40,7 +46,7 @@ services=[]
 for x in DATA:
     if x['n']=='Виртуальная карта': continue
     slug=x['l'].split('/')[-1][:-4]
-    services.append({'n':x['n'],'l':cached_icon(slug),'h':x['h'],'c':CATMAP[x['c']][0],'d':1 if LUM.get(slug,0.5)>0.62 else 0,'slug':slug})
+    services.append({'n':x['n'],'l':cached_icon(slug),'h':re.sub(r'index\.html$','',x['h']),'c':CATMAP[x['c']][0],'d':1 if LUM.get(slug,0.5)>0.62 else 0,'slug':slug})
 categories=[{'id':cid,'name':name,'icon':svg_uri(f'{A}/category-icons/{ic}.svg'),'count':sum(1 for s in services if s['c']==cid)} for name,(cid,ic) in CATMAP.items()]
 CATALOG={'categories':categories,'services':[{k:v for k,v in s.items() if k!='slug'} for s in services],'allIcon':svg_uri(f'{A}/category-icons/all.svg'),'catName':{c['id']:c['name'] for c in categories}}
 CAT_JSON=json.dumps(CATALOG,ensure_ascii=False)
@@ -166,7 +172,7 @@ def build_service(slug, base='../../'):
     else:
         groups=[{'name':name,'plans':plans['plans']}]
     paid=[p['usd'] for p in plans['plans'] if isinstance(p.get('usd'),(int,float)) and p['usd']>0]
-    svc={'name':name,'short':short,'cat':cid,'href':entry['h'],'groups':groups}
+    svc={'name':name,'short':short,'cat':cid,'href':re.sub(r'index\.html$','',entry['h']),'groups':groups}
     body=read('pages/service.html')
     for k,v in {'SVC_NAME':name,'SVC_SHORT':short,'SVC_LEAD':meta.get('lead',''),'CAT_ICON':cat['icon'],'CAT_NAME':cat['name'],'CAT_ID':cid,
                 'ORDER_TITLE':(f'Выберите сумму для {short}' if amount_mode else (f'Оплата {short}' if model['source']=='default' else f'Выберите план {short}')),

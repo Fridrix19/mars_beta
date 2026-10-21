@@ -21,7 +21,7 @@ export default defineEventHandler(async (e) => {
     fail(401, 'bad_credentials', `Неверный логин, почта или пароль. Осталось попыток: ${5 - n}.`, { attempts_left: 5 - n })
   }
   if (u.status === 'blocked') fail(403, 'user_blocked', 'Аккаунт заблокирован. Напишите в поддержку.')
-  trackAction(u.id, 'login', { label: 'пароль' }, '/login.html')
+  trackAction(u.id, 'login', { label: 'пароль' }, '/login')
   await startSession(e, u.id)
   return { ok: true, user: await me(e, u.id) }
 })

@@ -87,7 +87,7 @@ test('новая редакция документа: уведомление, п
   const fd = new FormData(); fd.append('kind', 'tariffs'); fd.append('version', 't' + Date.now().toString(36)); fd.append('note', 'Тест: новая комиссия'); fd.append('url', '/tariffs.html')
   const pub = await a('POST', '/api/admin/settings/documents', fd); assert.equal(pub.status, 200, JSON.stringify(pub.body))
   const me = (await u('GET', '/api/auth/me')).body.user; assert.equal(me.docs_pending.length, 1); assert.equal(me.docs_pending[0].kind, 'tariffs')
-  assert.ok((await u('GET', '/api/notifications')).body.notifications.some(n => n.link === '/dashboard.html#docs'))
+  assert.ok((await u('GET', '/api/notifications')).body.notifications.some(n => n.link === '/dashboard#docs'))
   const docs = (await u('GET', '/api/me/documents')).body
   const cur = docs.current.find(d => d.kind === 'tariffs'); assert.equal(cur.accepted_at, null); assert.equal(cur.note, 'Тест: новая комиссия')
   const plan = (await u('GET', '/api/catalog/virtual-card')).body.plans.find(p => !p.custom && p.purchasable)

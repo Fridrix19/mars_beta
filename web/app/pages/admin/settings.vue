@@ -85,7 +85,7 @@ async function test() { busy.value = 't'; try { await api('POST', '/settings/mai
           <Button v-if="doc.file" icon="pi pi-times" text severity="secondary" size="small" aria-label="Убрать файл" @click="doc.file = null; fileInput && (fileInput.value = '')" />
         </div>
         <input ref="fileInput" type="file" accept="application/pdf" hidden @change="(ev: any) => doc.file = ev.target.files?.[0] || null" /></div>
-      <div v-if="!doc.file" class="field"><label>…или ссылка</label><InputText v-model="doc.url" placeholder="/tariffs.html или https://…" fluid /></div>
+      <div v-if="!doc.file" class="field"><label>…или ссылка</label><InputText v-model="doc.url" placeholder="/tariffs или https://…" fluid /></div>
       <div><Button label="Опубликовать" :loading="busy === 'p'" :disabled="!doc.version || (!doc.file && !doc.url)" @click="publish" /></div>
     </div>
   </div>

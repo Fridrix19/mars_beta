@@ -171,7 +171,7 @@ test('чат: по заказу и общий, очередь в админке,
   assert.equal((await a('POST', `/api/admin/chats/${t.id}/send`, { text: 'Реквизиты в разделе «Мои карты»' })).status, 200)
   assert.ok(!(await a('GET', '/api/admin/chats?filter=waiting&q=' + me.username)).body.threads.some(x => x.id === t.id), 'ответили — ушёл из очереди')
   const list = (await u('GET', '/api/chats')).body; assert.equal(list.unread, 1)
-  const n = (await u('GET', '/api/notifications')).body.notifications[0]; assert.equal(n.link, '/dashboard.html#order:' + o.id)
+  const n = (await u('GET', '/api/notifications')).body.notifications[0]; assert.equal(n.link, '/dashboard#order:' + o.id)
   const th = (await u('GET', '/api/chats/thread?order=' + o.id)).body
   assert.equal(th.messages.length, 3); assert.equal(th.messages[2].author, 'admin'); assert.ok(th.messages[2].admin_name)
   assert.equal((await u('GET', '/api/chats')).body.unread, 0)

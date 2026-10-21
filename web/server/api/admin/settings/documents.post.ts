@@ -24,7 +24,7 @@ export default defineEventHandler(async (e) => {
   const d = await one(`insert into documents (kind, version, title, url, file_id, note, published_by) values ($1,$2,$3,$4,$5,$6,$7) returning *`,
     [kind, version, title, url, fileId, note, a.id])
   // уведомление всем пользователям в кабинете
-  await q(`insert into notifications (user_id, title, body, link) select id, $1, $2, '/dashboard.html#docs' from users where status = 'active'`,
+  await q(`insert into notifications (user_id, title, body, link) select id, $1, $2, '/dashboard#docs' from users where status = 'active'`,
     [`Обновлено: ${title}`, `Редакция ${version}${note ? ' — ' + note : ''}. Ознакомьтесь и примите в разделе «Документы».`])
   await audit(e, a, 'document.publish', d.id, { kind, version, title })
   return { document: { ...d, url: docUrl(d) } }

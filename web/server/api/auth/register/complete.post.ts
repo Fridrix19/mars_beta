@@ -18,9 +18,9 @@ export default defineEventHandler(async (e) => {
     `insert into users (email, username, password_hash, consent_offer, consent_news) values ($1, $2, $3, $4, $5)
      on conflict do nothing returning id`, [email, username, hash, offer, b?.news === true])
   if (!user) fail(409, 'email_taken', 'Аккаунт уже зарегистрирован. Войдите или восстановите пароль.')
-  await q(`insert into notifications (user_id, title, body, link) values ($1, 'Добро пожаловать в Marscap', 'Пройдите верификацию, чтобы открыть покупки.', '/dashboard.html#kyc')`, [user.id])
+  await q(`insert into notifications (user_id, title, body, link) values ($1, 'Добро пожаловать в Marscap', 'Пройдите верификацию, чтобы открыть покупки.', '/dashboard#kyc')`, [user.id])
   await acceptDocuments(user.id, (await currentDocuments()).map(d => d.id), clientIp(e))
-  trackAction(user.id, 'register', { label: username }, '/login.html')
+  trackAction(user.id, 'register', { label: username }, '/login')
   await startSession(e, user.id)
   return { ok: true, user: await me(e, user.id) }
 })

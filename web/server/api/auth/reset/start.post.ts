@@ -13,7 +13,7 @@ export default defineEventHandler(async (e) => {
   await q(`insert into signup_tickets (token_hash, email, purpose, expires_at) values ($1, $2, 'reset', now() + interval '30 minutes')`, [sha256(token), u.email])
   const site = String(useRuntimeConfig().public.siteUrl || (isStand() ? getRequestURL(e).origin : '')).replace(/\/$/, '')
   if (!site) fail(503, 'site_url_missing', 'Восстановление пароля временно недоступно. Напишите в поддержку.')
-  const link = `${site}/login.html#reset:${token}`
+  const link = `${site}/login#reset:${token}`
   const sent = await sendMail(resetMail(u.email, u.username, link))
   if (!sent.ok) fail(502, 'mail_failed', 'Не удалось отправить письмо. Попробуйте через минуту.')
   return { ...done, to: maskEmail(u.email), ...(devCodesVisible() ? { dev_link: link } : {}) }

@@ -8,7 +8,7 @@
   function ico(id){ return '<svg><use href="#i-' + id + '"/></svg>'; }
   function svc(name){ var c = MC.CATALOG.services; for (var i = 0; i < c.length; i++) if (c[i].n === name) return c[i]; return null; }
   function svcImg(name, cls){ var s = svc(name); return s ? '<img class="' + (cls || 'ord-ico') + (s.d ? ' on-dark' : '') + '" src="' + s.l + '" alt="">' : ''; }
-  function svcHref(name){ var s = svc(name); return s ? BASE + s.h : BASE + 'catalog.html'; }
+  function svcHref(name){ var s = svc(name); return s ? BASE + s.h : BASE + 'catalog'; }
   var VCP = null, VMIN = 50, VMAX = 200;   // цены карты с сервера (курс и комиссия из админки)
   function total(u){ return VCP ? VCP.total(u) : MC.charged(u) * RATE; }
   function rate(){ return VCP ? VCP.rate : RATE; }
@@ -61,7 +61,7 @@
   var DOCS = [
     { name: 'Оферта', ver: '2.3', at: ago(12, 14), href: BASE + 'legal-files/offer.pdf', hist: ['2.2 — принята ' + fmtD(ago(190)), '2.0 — принята ' + fmtD(ago(310))] },
     { name: 'Политика обработки персональных данных', ver: '1.4', at: ago(12, 14), href: BASE + 'legal-files/privacy.pdf', hist: ['1.3 — принята ' + fmtD(ago(310))] },
-    { name: 'Тарифы и комиссии', ver: '1.0', at: ago(12, 14), href: BASE + 'tariffs.html', hist: [] }
+    { name: 'Тарифы и комиссии', ver: '1.0', at: ago(12, 14), href: BASE + 'tariffs', hist: [] }
   ];
   var SESSIONS = [
     { id: 's1', cur: 1, dev: 'Windows · Chrome', place: 'Москва', ip: '93.81.·.·', at: 'сейчас', icon: 'laptop' },
@@ -157,11 +157,11 @@
   function setCrumbs(id, param){
     var bar = document.querySelector('.crumbbar'); if (!bar) return;
     var ol = bar.querySelector('.cb-list'), back = bar.querySelector('.cb-back'), base = window.MC_BASE || '';
-    var items = [['Главная', base + 'index.html'], ['Личный кабинет', id === 'overview' ? null : '#overview']];
+    var items = [['Главная', base || './'], ['Личный кабинет', id === 'overview' ? null : '#overview']];
     if (id === 'order') { items.push(['Мои заказы', '#orders']); items.push(['Заказ ' + (param || ''), null]); }
     else if (CRUMB[id]) items.push([CRUMB[id], null]);
     ol.innerHTML = items.map(function(it){ return '<li>' + (it[1] ? '<a href="' + it[1] + '">' + it[0] + '</a>' : '<span aria-current="page">' + it[0] + '</span>') + '</li>'; }).join('');
-    if (back) back.setAttribute('href', id === 'order' ? '#orders' : id === 'overview' ? base + 'index.html' : '#overview');
+    if (back) back.setAttribute('href', id === 'order' ? '#orders' : id === 'overview' ? (base || './') : '#overview');
   }
   document.addEventListener('click', function(e){
     var b = e.target.closest('[data-go]'); if (!b || b.closest('.tk')) return;
@@ -251,7 +251,7 @@
     input.addEventListener('input', function(){
       var q = input.value.trim().toLowerCase(); if (q.length < 2){ out.innerHTML = ''; return; }
       var list = MC.CATALOG.services.filter(function(s){ return s.n.toLowerCase().indexOf(q) >= 0; }).slice(0, 8);
-      out.innerHTML = list.length ? list.map(function(s){ return '<a href="' + BASE + s.h + '"><img class="' + (s.d ? 'on-dark' : '') + '" src="' + s.l + '" alt=""><span>' + esc(s.n) + '</span><span class="c">' + esc(MC.CATALOG.catName[s.c]) + '</span></a>'; }).join('') : '<div class="none">Ничего не нашли — посмотрите <a href="' + BASE + 'catalog.html">каталог</a>.</div>';
+      out.innerHTML = list.length ? list.map(function(s){ return '<a href="' + BASE + s.h + '"><img class="' + (s.d ? 'on-dark' : '') + '" src="' + s.l + '" alt=""><span>' + esc(s.n) + '</span><span class="c">' + esc(MC.CATALOG.catName[s.c]) + '</span></a>'; }).join('') : '<div class="none">Ничего не нашли — посмотрите <a href="' + BASE + 'catalog">каталог</a>.</div>';
     });
   }
   svcSearch($('qSearch'), $('qRes')); svcSearch($('wSearch'), $('wRes'));
@@ -565,7 +565,7 @@
   var PSTAT = { succeeded: 'ok', pending: 'pending', canceled: 'failed', refunded: 'refunded' };
   var KYC = { none: 'basic', pending: 'pending', approved: 'full', rejected: 'more' };
   var EVT = { created: 'Заказ оплачен', status: 'Статус изменён', delivered: 'Выдано', note: 'Комментарий', refund: 'Возврат на баланс' };
-  function fail(e){ toast('Не получилось', e.message, 'err'); if (e.code === 'unauthorized') setTimeout(function(){ location.href = BASE + 'login.html'; }, 900); }
+  function fail(e){ toast('Не получилось', e.message, 'err'); if (e.code === 'unauthorized') setTimeout(function(){ location.href = BASE + 'login'; }, 900); }
   function applyUser(u){
     USER.email = u.email; USER.id = u.username || u.email; USER.phone = u.phone || 'не указан'; USER.rawPhone = u.phone;
     USER.name = u.name || u.username || u.email.split('@')[0]; USER.login = u.username; USER.tg = u.telegram || ''; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
@@ -587,7 +587,7 @@
   function setArr(a, b){ a.length = 0; [].push.apply(a, b); }
   function load(){
     return MC.api('GET', '/auth/me').then(function(r){
-      if (!r.user) { location.replace(BASE + 'login.html'); return false; }
+      if (!r.user) { location.replace(BASE + 'login'); return false; }
       applyUser(r.user);
       return Promise.all([MC.api('GET', '/orders'), MC.api('GET', '/payments'), MC.api('GET', '/notifications'), MC.api('GET', '/auth/sessions'), MC.api('GET', '/cards'), MC.api('GET', '/refunds'), MC.api('GET', '/me/documents').catch(function(){ return null; }), MC.api('GET', '/favorites').catch(function(){ return null; }), MC.api('GET', '/chats').catch(function(){ return null; }), MC.site()]).then(function(x){
         if (x[7]) setArr(FAVS, x[7].favorites); if (x[8]) { CHAT_UNREAD = x[8].unread; setArr(THREADS, x[8].threads); } if (x[9] && x[9].limits) { BONUS_KYC = x[9].limits.kyc_bonus_kop || 0; LIM_UNV = x[9].limits.unverified_kop; }
@@ -810,10 +810,10 @@
     var cat = null; MC.liveCatalog().then(function(c){ cat = c; draw(); }); draw();
     function price(slug){ var p = cat && cat.products.filter(function(x){ return x.slug === slug; })[0]; if (!p) return ''; return p.currency === 'usd' && p.from_cents ? 'от $' + (p.from_cents / 100) : p.from_kop ? 'от ' + MC.kop(p.from_kop) : 'по запросу'; }
     function draw(){
-      $('favList').innerHTML = FAVS.length ? FAVS.map(function(f){ var href = BASE + (f.slug === 'virtual-card' ? 'virtual-card.html' : 'service/' + f.slug + '/'); var s = svc(f.name), icon = f.icon || (s && s.l) || '';
+      $('favList').innerHTML = FAVS.length ? FAVS.map(function(f){ var href = BASE + (f.slug === 'virtual-card' ? 'virtual-card' : 'service/' + f.slug + '/'); var s = svc(f.name), icon = f.icon || (s && s.l) || '';
         return '<div class="fav"><a href="' + href + '" class="fav-main">' + (icon ? '<img class="ord-ico' + (s && s.d ? ' on-dark' : '') + '" src="' + esc(icon) + '" alt="">' : '<span class="ord-ico vc">' + ico('card') + '</span>') + '<span><b>' + esc(f.name) + '</b><span class="hint">' + (f.active ? price(f.slug) : 'сейчас недоступен') + '</span></span></a>' +
           '<div class="fav-act"><a class="btn btn-primary btn-sm" href="' + href + '">Оплатить</a><button type="button" class="icon-btn fav-on" data-unfav="' + esc(f.slug) + '" aria-label="Убрать из избранного">' + ico('heart') + '</button></div></div>'; }).join('')
-        : '<div class="empty"><span class="ico">' + ico('heart') + '</span><b>В избранном пусто</b><p>Нажмите ♡ на странице сервиса — он появится здесь, чтобы оплатить позже.</p><a class="btn btn-primary" href="' + BASE + 'catalog.html">Открыть каталог</a></div>';
+        : '<div class="empty"><span class="ico">' + ico('heart') + '</span><b>В избранном пусто</b><p>Нажмите ♡ на странице сервиса — он появится здесь, чтобы оплатить позже.</p><a class="btn btn-primary" href="' + BASE + 'catalog">Открыть каталог</a></div>';
       $('favList').querySelectorAll('[data-unfav]').forEach(function(b){ b.addEventListener('click', function(){ var sl = b.getAttribute('data-unfav'); MC.api('DELETE', '/favorites/' + encodeURIComponent(sl)).then(function(){ setArr(FAVS, FAVS.filter(function(x){ return x.slug !== sl; })); R.favs(); toast('Убрали из избранного', '', 'ok'); }, fail); }); });
     }
   };
@@ -960,7 +960,7 @@
   }
 
   /* ——— выход ——— */
-  function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} var to = function(){ location.href = BASE + 'login.html'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
+  function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} var to = function(){ location.href = BASE + 'login'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
   $('logout').addEventListener('click', logout); $('logoutM').addEventListener('click', logout);
 
   /* ——— шапка сайта: «Войти» → имя ——— */

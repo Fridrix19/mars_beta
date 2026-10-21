@@ -16,7 +16,7 @@ export default defineEventHandler(async (e) => {
     if (err?.message === 'insufficient_funds') fail(422, 'insufficient_funds', 'Баланс не может стать отрицательным.', { balance_kop: Number(err.detail) })
     throw err
   }
-  await q(`insert into notifications (user_id, title, body, link) values ($1, 'Изменение баланса', $2, '/dashboard.html#payments')`,
+  await q(`insert into notifications (user_id, title, body, link) values ($1, 'Изменение баланса', $2, '/dashboard#payments')`,
     [u.id, (amount > 0 ? '+' : '−') + (Math.abs(amount) / 100).toFixed(2).replace('.', ',') + ' ₽ · ' + comment])
   await audit(e, a, 'balance.adjust', u.id, { email: u.email, amount_kop: amount, comment })
   return { entry: row }

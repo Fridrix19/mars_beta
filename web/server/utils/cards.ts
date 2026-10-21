@@ -52,13 +52,13 @@ export async function fulfillCardOrder(orderId: string) {
       const sum = '$' + (o.price_cents / 100).toFixed(2).replace(/\.00$/, '')
       text = o.gift_to ? `Карта ${card.brand} •• ${card.last4} на ${sum} подарена ${o.gift_to}` + (friend ? ' — уже в её кабинете' : ' — появится у получателя после входа с этой почтой')
                        : `Карта ${card.brand} •• ${card.last4} выпущена, баланс ${sum}`
-      if (friend) await c.query(`insert into notifications (user_id, title, body, link) values ($1, 'Вам подарили карту', $2, '/dashboard.html#cards')`, [friend.id, `Виртуальная карта •• ${card.last4} на ${sum} — в разделе «Мои карты».`])
+      if (friend) await c.query(`insert into notifications (user_id, title, body, link) values ($1, 'Вам подарили карту', $2, '/dashboard#cards')`, [friend.id, `Виртуальная карта •• ${card.last4} на ${sum} — в разделе «Мои карты».`])
     }
     await c.query(`insert into card_topups (card_id, order_id, amount_cents) values ($1, $2, $3) on conflict (order_id) do nothing`, [card.id, o.id, o.price_cents])
     await c.query(`update orders set status = 'done', delivered_at = now(), updated_at = now(), delivery_enc = $2 where id = $1`,
       [o.id, encrypt(text + (o.gift_to && !cardId ? '.' : '. Реквизиты — в разделе «Мои карты».'))])
     await c.query(`insert into order_events (order_id, kind, status, text) values ($1, 'delivered', 'done', $2)`, [o.id, text])
-    await c.query(`insert into notifications (user_id, title, body, link) values ($1, $2, $3, '/dashboard.html#cards')`,
+    await c.query(`insert into notifications (user_id, title, body, link) values ($1, $2, $3, '/dashboard#cards')`,
       [o.user_id, cardId ? 'Карта пополнена' : o.gift_to ? 'Подарок оформлен' : 'Карта выпущена', text])
     return card
   })
@@ -69,7 +69,7 @@ export async function claimGiftCards(userId: string) {
   const u = await one(`select email from users where id = $1`, [userId])
   if (!u) return 0
   const rows = await q(`update cards set user_id = $1, claimed_at = now(), updated_at = now() where gift_to = $2 and claimed_at is null returning last4, balance_cents`, [userId, u.email])
-  for (const c of rows) await q(`insert into notifications (user_id, title, body, link) values ($1, 'Вам подарили карту', $2, '/dashboard.html#cards')`,
+  for (const c of rows) await q(`insert into notifications (user_id, title, body, link) values ($1, 'Вам подарили карту', $2, '/dashboard#cards')`,
     [userId, `Виртуальная карта •• ${c.last4} на $${(c.balance_cents / 100).toFixed(2).replace(/\.00$/, '')} — в разделе «Мои карты».`])
   return rows.length
 }
