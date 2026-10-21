@@ -254,7 +254,7 @@ window.MC = (function(){
   function uid(){ return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
   /* — контакты и действующие документы (правятся в админке → Настройки) — */
-  var CONTACTS = { email: 'support@marscap.ru', telegram: 'marscap_support', max: 'marscap_support' }, siteP = null;
+  var CONTACTS = { email: 'help@marscap.ru', telegram: 'marscapcard', max: 'marscap_support' }, siteP = null;
   function site(){ if (!siteP) siteP = isLive().then(function(on){ return on ? api('GET', '/site').catch(function(){ return null; }) : null; }); return siteP; }
   function applyContacts(){
     var c = CONTACTS, L = { tg: 'https://t.me/' + c.telegram, max: 'https://max.ru/' + c.max, mail: 'mailto:' + c.email }, T = { tg: '@' + c.telegram, max: c.max, mail: c.email };

@@ -64,8 +64,8 @@ async function test() { busy.value = 't'; try { await api('POST', '/settings/mai
     <div class="panel grid">
       <h2>Контакты на сайте</h2>
       <p class="muted" style="margin:0">Показываются в шапке, подвале, на странице поддержки и в кабинете. Для Telegram и Max — имя аккаунта без @.</p>
-      <div class="field"><label>Почта поддержки</label><InputText v-model="contacts.email" placeholder="support@marscap.ru" fluid /></div>
-      <div class="field"><label>Telegram</label><InputGroup><InputGroupAddon>t.me/</InputGroupAddon><InputText v-model="contacts.telegram" placeholder="marscap_support" /></InputGroup></div>
+      <div class="field"><label>Почта поддержки</label><InputText v-model="contacts.email" placeholder="help@marscap.ru" fluid /></div>
+      <div class="field"><label>Telegram</label><InputGroup><InputGroupAddon>t.me/</InputGroupAddon><InputText v-model="contacts.telegram" placeholder="marscapcard" /></InputGroup></div>
       <div class="field"><label>Max</label><InputGroup><InputGroupAddon>max.ru/</InputGroupAddon><InputText v-model="contacts.max" placeholder="marscap_support" /></InputGroup></div>
       <div><Button label="Сохранить контакты" :loading="busy === 'c'" @click="saveContacts" /></div>
     </div>
