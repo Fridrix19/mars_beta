@@ -63,7 +63,7 @@ async function changePw() {
     </aside>
     <main class="adm-main">
       <div v-if="me.admin.must_change" class="banner"><i class="pi pi-exclamation-triangle warn" />
-        <span>Вы вошли с временным паролем{{ me.admin.login === 'admin' ? ' admin/admin' : '' }}. Смените его, прежде чем работать дальше.</span>
+        <span>Вы вошли с временным паролем. Смените его, прежде чем работать дальше.</span>
         <Button size="small" label="Сменить пароль" @click="pw.open = true" />
       </div>
       <AdmCrumbs v-if="!me.admin.must_change" />

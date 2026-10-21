@@ -50,7 +50,6 @@
   MC.isLive().then(function(on){
     LIVE = on;
     document.documentElement.classList.toggle('mc-live', on);
-    $('otpDemo').hidden = on;
     if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard.html') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.username || r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
   });
 
@@ -241,7 +240,7 @@
     $('otpTitle').textContent = title; $('otpTarget').textContent = maskId(id);
     $('otpText').firstChild.textContent = 'Отправили письмо с 6 цифрами на ';
     alertBox('otpErr', ''); resetOtp('otpBoxes'); show('scrOtp'); startTimer(r.resend_after);
-    if (!LIVE) toast('Письмо отправлено', 'Прототип: код не приходит, введите любые 6 цифр.');
+    if (!LIVE) toast('Письмо отправлено', 'Сервис временно недоступен — попробуйте через пару минут.');
     else if (r.dev_code) toast('Код на стенде: ' + r.dev_code, 'Почта ещё не подключена — код показан здесь.');
     else toast('Письмо отправлено', 'Если его нет — проверьте «Спам».');
   }
@@ -284,7 +283,7 @@
     }, function(e){ busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-err'); alertBox('mfaErr', e.message); });
   });
   $('mfaSms').addEventListener('click', function(){ var id = parseLogin($('loginId').value); flow = 'login-otp'; requestCode({ purpose: 'login', id: id }, 'Код для входа', null, 'mfaErr'); });
-  $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Прототип: введите любые 6 цифр в поля выше.'); boxes('mfaBoxes')[0].focus(); });
+  $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Войдите по коду из письма.'); boxes('mfaBoxes')[0].focus(); });
 
   /* — успех — */
   function done(title, text, user){

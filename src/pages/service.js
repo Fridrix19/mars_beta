@@ -90,7 +90,7 @@
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
     emailHint.textContent = RCP.mode() === 'gift' ? 'Подписку оформим на аккаунт друга с этой почтой — пришлём ему письмо.' : 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
     status.className = 'calc-status ok';
-    var demoText = !payable(current) ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(totalRub(current)) + '.';
+    var demoText = !payable(current) ? 'Сервис временно недоступен — попробуйте через пару минут.' : 'Сервис временно недоступен — попробуйте через пару минут.';
     MC.isLive().then(function(on){
       if (!on || !payable(current)) { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;

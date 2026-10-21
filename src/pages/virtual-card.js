@@ -72,7 +72,7 @@
     emailHint.textContent = RCP.mode() === 'gift' ? 'Карта появится в кабинете друга, когда он войдёт с этой почтой.' : 'Сюда придут реквизиты и инструкция.';
     status.className = 'calc-status ok';
     MC.isLive().then(function(on){
-      if (!on) { status.textContent = 'Прототип: здесь откроется окно СБП на ' + rub(total(den)) + '.'; return; }
+      if (!on) { status.textContent = 'Сервис временно недоступен — попробуйте через пару минут.'; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;
       MC.checkout({ slug: 'virtual-card', usd: den, fields: {}, gift_to: RCP.gift() || undefined, title: (RCP.gift() ? 'Подарок: виртуальная карта' : 'Виртуальная карта') + ' · $' + den, back: location.pathname });
     });

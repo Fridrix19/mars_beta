@@ -1081,7 +1081,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
           <div class="alert alert-err" id="otpErr" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div id="otpErrText"></div></div>
           <button type="submit" class="btn btn-primary auth-submit" id="otpBtn" disabled>Подтвердить</button>
           <p class="auth-foot"><button type="button" class="auth-link" id="otpResend" disabled>Отправить ещё раз <span class="mono" id="otpTimer">через 0:59</span></button></p>
-          <p class="hint auth-center auth-demo" id="otpDemo">Прототип: подходит любой код, кроме 000000.</p>
+          <p class="hint auth-center auth-demo" id="otpDemo">Письма нет — проверьте папку «Спам».</p>
         </form>
 
         <!-- второй фактор -->
@@ -1175,7 +1175,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
       <div class="foot-col"><h4>Помощь</h4><a href="support.html">Поддержка</a><a href="faq.html">Ответы на вопросы</a><a href="contacts.html">Контакты</a></div>
       <div class="foot-col"><h4>Документы</h4><a href="legal-files/offer.pdf" data-doc="offer" target="_blank" rel="noopener">Оферта</a><a href="legal-files/privacy.pdf" data-doc="privacy" target="_blank" rel="noopener">Политика конфиденциальности</a><a href="tariffs.html" data-doc="tariffs">Тарифы и комиссии</a><a href="contacts.html#channels">Реквизиты</a></div>
     </div>
-    <div class="foot-bottom"><span>© 2026 Marscap · <span class="foot-legal">ООО Марс Капитал «Цифровые Решение», ИНН 9715523083</span></span><span>Прототип редизайна — данные и курс условные</span></div>
+    <div class="foot-bottom"><span>© 2026 Marscap · <span class="foot-legal">ООО Марс Капитал «Цифровые Решение», ИНН 9715523083</span></span></div>
   </div>
 </footer>
 <!-- мобильная навигация: нижний бар как в приложениях + лист «Ещё» -->
@@ -2167,7 +2167,6 @@ window.MC = (function(){
   MC.isLive().then(function(on){
     LIVE = on;
     document.documentElement.classList.toggle('mc-live', on);
-    $('otpDemo').hidden = on;
     if (on) MC.api('GET', '/auth/me').then(function(r){ if (r.user && NEXT !== 'dashboard.html') { goNext(); return; } if (r.user) toast('Вы уже вошли', String(r.user.username || r.user.email).replace(/[<>&"]/g, '') + ' · <a href="' + (window.MC_BASE || '') + 'dashboard.html">открыть кабинет</a>'); }).catch(function(){});
   });
 
@@ -2358,7 +2357,7 @@ window.MC = (function(){
     $('otpTitle').textContent = title; $('otpTarget').textContent = maskId(id);
     $('otpText').firstChild.textContent = 'Отправили письмо с 6 цифрами на ';
     alertBox('otpErr', ''); resetOtp('otpBoxes'); show('scrOtp'); startTimer(r.resend_after);
-    if (!LIVE) toast('Письмо отправлено', 'Прототип: код не приходит, введите любые 6 цифр.');
+    if (!LIVE) toast('Письмо отправлено', 'Сервис временно недоступен — попробуйте через пару минут.');
     else if (r.dev_code) toast('Код на стенде: ' + r.dev_code, 'Почта ещё не подключена — код показан здесь.');
     else toast('Письмо отправлено', 'Если его нет — проверьте «Спам».');
   }
@@ -2401,7 +2400,7 @@ window.MC = (function(){
     }, function(e){ busy(btn, false, 'Подтвердить'); $('mfaBoxes').classList.add('is-err'); alertBox('mfaErr', e.message); });
   });
   $('mfaSms').addEventListener('click', function(){ var id = parseLogin($('loginId').value); flow = 'login-otp'; requestCode({ purpose: 'login', id: id }, 'Код для входа', null, 'mfaErr'); });
-  $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Прототип: введите любые 6 цифр в поля выше.'); boxes('mfaBoxes')[0].focus(); });
+  $('mfaBackup').addEventListener('click', function(){ toast('Резервный код', 'Войдите по коду из письма.'); boxes('mfaBoxes')[0].focus(); });
 
   /* — успех — */
   function done(title, text, user){

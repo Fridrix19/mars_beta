@@ -965,7 +965,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
           <dl class="calc-total"><dt>Итого</dt><dd id="rowTotal">2 407 ₽</dd></dl>
           <button type="button" class="btn btn-primary" id="pay">Оплатить через СБП</button>
           <p class="calc-status" id="status" role="status"></p>
-          <p class="calc-note">Нажимая «Оплатить», вы принимаете <a data-doc="offer" href="../../legal-files/offer.pdf" target="_blank" rel="noopener">оферту</a>, <a data-doc="privacy" href="../../legal-files/privacy.pdf" target="_blank" rel="noopener">политику конфиденциальности</a> и <a data-doc="tariffs" href="../../tariffs.html" target="_blank" rel="noopener">тарифы</a>. Сумма в рублях — по курсу ЦБ на момент оплаты (в прототипе 80,2254 ₽).</p>
+          <p class="calc-note">Нажимая «Оплатить», вы принимаете <a data-doc="offer" href="../../legal-files/offer.pdf" target="_blank" rel="noopener">оферту</a>, <a data-doc="privacy" href="../../legal-files/privacy.pdf" target="_blank" rel="noopener">политику конфиденциальности</a> и <a data-doc="tariffs" href="../../tariffs.html" target="_blank" rel="noopener">тарифы</a>. Сумма в рублях — по курсу ЦБ на момент оплаты.</p>
         </aside>
       </div>
 
@@ -1052,7 +1052,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
       <div class="foot-col"><h4>Помощь</h4><a href="../../support.html">Поддержка</a><a href="../../faq.html">Ответы на вопросы</a><a href="../../contacts.html">Контакты</a></div>
       <div class="foot-col"><h4>Документы</h4><a href="../../legal-files/offer.pdf" data-doc="offer" target="_blank" rel="noopener">Оферта</a><a href="../../legal-files/privacy.pdf" data-doc="privacy" target="_blank" rel="noopener">Политика конфиденциальности</a><a href="../../tariffs.html" data-doc="tariffs">Тарифы и комиссии</a><a href="../../contacts.html#channels">Реквизиты</a></div>
     </div>
-    <div class="foot-bottom"><span>© 2026 Marscap · <span class="foot-legal">ООО Марс Капитал «Цифровые Решение», ИНН 9715523083</span></span><span>Прототип редизайна — данные и курс условные</span></div>
+    <div class="foot-bottom"><span>© 2026 Marscap · <span class="foot-legal">ООО Марс Капитал «Цифровые Решение», ИНН 9715523083</span></span></div>
   </div>
 </footer>
 <!-- мобильная навигация: нижний бар как в приложениях + лист «Ещё» -->
@@ -2084,7 +2084,7 @@ window.MC = (function(){
     email.removeAttribute('aria-invalid'); emailHint.className = 'hint';
     emailHint.textContent = RCP.mode() === 'gift' ? 'Подписку оформим на аккаунт друга с этой почтой — пришлём ему письмо.' : 'Отправим номер карты, срок, CVC и инструкцию по привязке к ' + SVC.short + '.';
     status.className = 'calc-status ok';
-    var demoText = !payable(current) ? 'Прототип: заявка на индивидуальный расчёт уйдёт в поддержку.' : 'Прототип: здесь откроется окно СБП на ' + rub(totalRub(current)) + '.';
+    var demoText = !payable(current) ? 'Сервис временно недоступен — попробуйте через пару минут.' : 'Сервис временно недоступен — попробуйте через пару минут.';
     MC.isLive().then(function(on){
       if (!on || !payable(current)) { status.textContent = on ? 'Индивидуальный расчёт — напишите в поддержку, посчитаем под ваш тариф.' : demoText; return; }
       status.textContent = 'Переходим к оплате…'; pay.disabled = true;

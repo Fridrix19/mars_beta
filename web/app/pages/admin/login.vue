@@ -18,7 +18,6 @@ async function submit() {
       <div class="field"><label for="p">Пароль</label><Password input-id="p" v-model="f.password" :feedback="false" toggle-mask fluid autocomplete="current-password" /></div>
       <Message v-if="f.err" severity="error" size="small">{{ f.err }}</Message>
       <Button type="submit" label="Войти" :loading="f.busy" />
-      <p class="muted" style="margin:0;font-size:13px">На время разработки: admin / admin. После входа смените пароль.</p>
     </form>
   </div>
 </template>

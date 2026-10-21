@@ -126,7 +126,7 @@
   }
   /* step-up: подтверждение кодом перед чувствительным действием */
   function stepUp(title, sub, onOk){
-    modal({ title: title, sub: sub || 'Код отправили на ' + USER.id + '. Прототип: подойдут любые 6 цифр, кроме 000000.', body: otpHtml('suBoxes') + '<p class="hint auth-center">Код действует 5 минут</p>', foot: [{ label: 'Отмена' }],
+    modal({ title: title, sub: sub || 'Код отправили на ' + USER.id + '.', body: otpHtml('suBoxes') + '<p class="hint auth-center">Код действует 5 минут</p>', foot: [{ label: 'Отмена' }],
       onOpen: function(){ wireOtp($('suBoxes'), function(code, box){ if (code === '000000'){ box.classList.add('is-err'); setTimeout(function(){ box.classList.remove('is-err'); box.querySelectorAll('input').forEach(function(x){ x.value = ''; x.classList.remove('is-filled'); }); box.querySelector('input').focus(); }, 500); return; } box.classList.add('is-ok'); setTimeout(function(){ closeModal(); onOk(); }, 350); }); } });
   }
 
@@ -188,7 +188,7 @@
     $('bellDot').hidden = !NOTIFS.some(function(n){ return n.unread && orderNotif(n); });
     $('bell').title = $('bellDot').hidden ? 'Мои заказы' : 'Есть изменения в заказах';
     var hl = document.querySelector('.head-login'); if (hl && hl.lastChild) hl.lastChild.textContent = USER.name;
-    $('uName').textContent = USER.name; $('uAvatar').textContent = USER.name.charAt(0).toUpperCase(); $('uId').textContent = USER.id; $('uId').title = demo ? 'Демо-режим: войдите, чтобы увидеть свои данные' : '';
+    $('uName').textContent = USER.name; $('uAvatar').textContent = USER.name.charAt(0).toUpperCase(); $('uId').textContent = USER.id; $('uId').title = demo ? 'Войдите, чтобы увидеть свои данные' : '';
     var hr = new Date().getHours(); $('hello').textContent = (hr < 5 ? 'Доброй ночи' : hr < 12 ? 'Доброе утро' : hr < 18 ? 'Добрый день' : 'Добрый вечер') + ', ' + USER.name;
   }
 
@@ -372,12 +372,12 @@
     else if (a === 'cancel') modal({ title: 'Отменить заказ ' + o.id + '?', sub: 'Заказ ещё не оплачен — отмена бесплатна.', foot: [{ label: 'Оставить' }, { label: 'Отменить заказ', cls: 'btn-primary', onClick: function(){ o.status = 'cancel'; o.tl = [o.tl[0], ['Отменён до оплаты', new Date(), 'err', 'Отменили вы']]; var p = pay(o.pay); if (p) p.status = 'failed'; counters(); R.order(o.id); toast('Заказ отменён', '', 'ok'); } }] });
     else if (a === 'repeat'){ if (o.kind === 'svc') location.href = svcHref(o.svc); else { W = { prod: o.kind === 'issue' ? 'issue' : 'topup', card: o.card || 'c1', usd: o.usd, step: 3 }; go('new'); } }
     else if (a === 'receipt') receipt(pay(o.pay));
-    else if (a === 'act') toast('Акт № ' + o.id.replace('MC-', 'А-'), 'Прототип: PDF сформируется на сервере и скачается.', 'ok');
+    else if (a === 'act') toast('Акт № ' + o.id.replace('MC-', 'А-'), 'Сформируем по запросу — напишите в поддержку.', 'ok');
     else if (a === 'support') go('support', 'new', { order: o.id });
   }
   function receipt(p){
     if (!p) return; var o = order(p.order);
-    modal({ title: 'Квитанция ' + p.id, sub: PST[p.status][0] + ' · ' + fmtD(p.at, true), body: '<dl class="kv"><div><dt>Получатель</dt><dd>Marscap</dd></div><div><dt>Назначение</dt><dd>' + esc(o ? o.title + ' · ' + o.id : p.order) + '</dd></div><div><dt>Способ</dt><dd>' + p.method + '</dd></div><div><dt>Сумма</dt><dd class="mono">' + rub(p.rubv) + '</dd></div><div><dt>Идентификатор СБП</dt><dd class="mono">A' + String(Math.abs(hash(p.id))).slice(0, 12) + '</dd></div></dl>', foot: [{ label: 'Закрыть' }, { label: 'Скачать PDF', cls: 'btn-primary', onClick: function(){ toast('Квитанция ' + p.id, 'Прототип: PDF скачается с сервера.', 'ok'); } }] });
+    modal({ title: 'Квитанция ' + p.id, sub: PST[p.status][0] + ' · ' + fmtD(p.at, true), body: '<dl class="kv"><div><dt>Получатель</dt><dd>Marscap</dd></div><div><dt>Назначение</dt><dd>' + esc(o ? o.title + ' · ' + o.id : p.order) + '</dd></div><div><dt>Способ</dt><dd>' + p.method + '</dd></div><div><dt>Сумма</dt><dd class="mono">' + rub(p.rubv) + '</dd></div><div><dt>Идентификатор СБП</dt><dd class="mono">A' + String(Math.abs(hash(p.id))).slice(0, 12) + '</dd></div></dl>', foot: [{ label: 'Закрыть' }, { label: 'Скачать PDF', cls: 'btn-primary', onClick: function(){ toast('Квитанция ' + p.id, 'Сформируем по запросу — напишите в поддержку.', 'ok'); } }] });
   }
   function hash(s){ var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h * 7919; }
 
@@ -460,7 +460,7 @@
   };
   $('kycStart').addEventListener('click', function(){
     if (LIVE) { $('kycFile').click(); return; }
-    modal({ title: 'Переход к проверке', sub: 'Откроется страница партнёра по верификации. Понадобятся паспорт и камера.', body: '<ul class="check-marks"><li>Данные не сохраняются у Marscap</li><li>Обычно 3–5 минут</li><li>Результат появится в кабинете автоматически</li></ul>', foot: [{ label: 'Позже' }, { label: 'Продолжить', cls: 'btn-primary', onClick: function(){ USER.kyc = 'pending'; R.kyc(); toast('Проверка запущена', 'Прототип: нажмите «Обновить статус», чтобы увидеть результат.'); } }] });
+    modal({ title: 'Переход к проверке', sub: 'Откроется страница партнёра по верификации. Понадобятся паспорт и камера.', body: '<ul class="check-marks"><li>Данные не сохраняются у Marscap</li><li>Обычно 3–5 минут</li><li>Результат появится в кабинете автоматически</li></ul>', foot: [{ label: 'Позже' }, { label: 'Продолжить', cls: 'btn-primary', onClick: function(){ USER.kyc = 'pending'; R.kyc(); toast('Проверка запущена', 'Статус обновится после проверки.'); } }] });
   });
   function addFiles(list){ if (LIVE) { kycUpload(list); return; } [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); if (kycFiles.length){ if (USER.kyc === 'basic' || USER.kyc === 'more') USER.kyc = 'pending'; R.kyc(); toast('Файлы отправлены на проверку', kycFiles.length + ' ' + MC.plural(kycFiles.length, ['файл', 'файла', 'файлов']), 'ok'); } }
   $('kycFile').addEventListener('change', function(){ addFiles(this.files); this.value = ''; });
@@ -556,7 +556,7 @@
     files.sort(function(a, b){ return new Date(b.at) - new Date(a.at); });
     $('docFiles').innerHTML = files.map(function(f){ return '<div class="docr">' + ico(f.act ? 'orders' : 'pay') + '<b>' + f.t + '</b><span>' + esc(f.s) + '</span><div class="r"><button type="button" class="icon-btn" ' + (f.pay ? 'data-rc="' + f.pay + '"' : 'data-actd="' + f.act + '"') + ' aria-label="Открыть">' + ico(f.pay ? 'eye' : 'dl') + '</button></div></div>'; }).join('');
     $('docFiles').querySelectorAll('[data-rc]').forEach(function(b){ b.addEventListener('click', function(){ receipt(pay(b.getAttribute('data-rc'))); }); });
-    $('docFiles').querySelectorAll('[data-actd]').forEach(function(b){ b.addEventListener('click', function(){ toast('Акт по заказу ' + b.getAttribute('data-actd'), 'Прототип: PDF скачается с сервера.', 'ok'); }); });
+    $('docFiles').querySelectorAll('[data-actd]').forEach(function(b){ b.addEventListener('click', function(){ toast('Акт по заказу ' + b.getAttribute('data-actd'), 'Сформируем по запросу — напишите в поддержку.', 'ok'); }); });
   };
 
 
