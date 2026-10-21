@@ -1,11 +1,43 @@
-// Отправка писем: log (в консоль — стенд без DNS) или Unisender Go
+// Отправка писем: log (в консоль — стенд без DNS), smtp (почтовый ящик, например Timeweb) или Unisender Go
+import nodemailer from 'nodemailer'
 type Mail = { to: string; subject: string; text: string; html?: string }
+
+// какой способ отправки реально работает: log, если для выбранного не хватает настроек
+export function mailMode(): 'log' | 'smtp' | 'unisender' {
+  const cfg = useRuntimeConfig()
+  if (cfg.mailProvider === 'unisender' && cfg.unisenderKey) return 'unisender'
+  if (cfg.mailProvider === 'smtp' && cfg.smtpUser && cfg.smtpPass) return 'smtp'
+  return 'log'
+}
+
+let smtp: nodemailer.Transporter | null = null
+function smtpTransport() {
+  const cfg = useRuntimeConfig()
+  const port = Number(cfg.smtpPort) || 465
+  return smtp ??= nodemailer.createTransport({
+    host: String(cfg.smtpHost), port, secure: port === 465,
+    auth: { user: String(cfg.smtpUser), pass: String(cfg.smtpPass) },
+    pool: true, maxConnections: 2, rateDelta: 1000, rateLimit: 4,   // Timeweb: не больше 5 писем в секунду
+    connectionTimeout: 15_000, greetingTimeout: 15_000, socketTimeout: 30_000,
+  })
+}
 
 export async function sendMail(m: Mail) {
   const cfg = useRuntimeConfig()
-  if (cfg.mailProvider !== 'unisender' || !cfg.unisenderKey) {
+  const mode = mailMode()
+  if (mode === 'log') {
     console.log(`[mail] → ${m.to} · ${m.subject}\n${m.text}`)
     return { ok: true, provider: 'log' as string, error: undefined as string | undefined }
+  }
+  if (mode === 'smtp') {
+    // отправитель — сам ящик: Timeweb не разрешает подменять адрес
+    try {
+      await smtpTransport().sendMail({ from: { name: String(cfg.mailFromName), address: String(cfg.smtpUser) }, to: m.to, subject: m.subject, text: m.text, ...(m.html ? { html: m.html } : {}) })
+      return { ok: true, provider: 'smtp' }
+    } catch (e: any) {
+      console.error('[mail] smtp', e?.code, e?.response || e?.message)
+      return { ok: false, provider: 'smtp', error: e?.response || e?.message || 'smtp_error' }
+    }
   }
   const res = await fetch(cfg.unisenderUrl + '/email/send.json', {
     method: 'POST',

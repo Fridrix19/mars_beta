@@ -56,5 +56,5 @@ export async function consumeCode(email: string, purpose: CodePurpose, code: str
 export function devCodesVisible() {
   const cfg = useRuntimeConfig()
   const dev = cfg.devCodes === true || String(cfg.devCodes) === 'true'
-  return dev && isStand() && !(cfg.mailProvider === 'unisender' && cfg.unisenderKey)
+  return dev && isStand() && mailMode() === 'log'
 }

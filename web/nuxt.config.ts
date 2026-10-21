@@ -31,7 +31,11 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: '',            // NUXT_DATABASE_URL (или DATABASE_URL)
     secret: '',                 // NUXT_SECRET — HMAC кодов и ключ шифрования выдач
-    mailProvider: 'log',        // NUXT_MAIL_PROVIDER: log | unisender
+    mailProvider: 'log',        // NUXT_MAIL_PROVIDER: log | unisender | smtp
+    smtpHost: 'smtp.timeweb.ru', // NUXT_SMTP_HOST — для smtp: почта Timeweb по умолчанию
+    smtpPort: 465,              // NUXT_SMTP_PORT — 465 (SSL) или 587 (STARTTLS)
+    smtpUser: '',               // NUXT_SMTP_USER — полный адрес ящика; отправитель = этот адрес
+    smtpPass: '',               // NUXT_SMTP_PASS — пароль ящика
     unisenderKey: '',           // NUXT_UNISENDER_KEY
     unisenderUrl: 'https://goapi.unisender.ru/ru/transactional/api/v1', // NUXT_UNISENDER_URL (или go1/go2 — как в кабинете)
     mailFrom: 'noreply@marscap.ru',

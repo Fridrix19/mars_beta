@@ -15,8 +15,9 @@ export default defineEventHandler(async (e) => {
     limits: await limitSettings(),
     users_total: (await one(`select count(*)::int n from users`)).n,
     mail: {
-      provider: cfg.mailProvider === 'unisender' && cfg.unisenderKey ? 'unisender' : 'log',
-      configured_provider: cfg.mailProvider, has_key: !!cfg.unisenderKey, from: cfg.mailFrom,
+      provider: mailMode(),
+      configured_provider: cfg.mailProvider, has_key: !!cfg.unisenderKey || !!cfg.smtpPass,
+      from: mailMode() === 'smtp' ? cfg.smtpUser : cfg.mailFrom,
       site_url: cfg.public.siteUrl || null, admin_notify: cfg.adminNotifyEmail || null,
       codes_on_screen: devCodesVisible(),
     },

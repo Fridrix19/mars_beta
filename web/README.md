@@ -20,7 +20,9 @@ npm run build && npm start   # или npm run dev
 |---|---|---|
 | `NUXT_DATABASE_URL` | — | строка подключения (Neon: `…?sslmode=require`) |
 | `NUXT_SECRET` | — (в проде обязателен) | HMAC кодов из писем и ключ AES-GCM для данных выдачи. Не менять после запуска |
-| `NUXT_MAIL_PROVIDER` | `log` | `log` — письма в консоль; `unisender` — Unisender Go |
+| `NUXT_MAIL_PROVIDER` | `log` | `log` — письма в консоль; `smtp` — почтовый ящик (например, Timeweb); `unisender` — Unisender Go |
+| `NUXT_SMTP_HOST`, `NUXT_SMTP_PORT` | `smtp.timeweb.ru`, `465` | для `smtp`: сервер и порт (465 — SSL, 587 — STARTTLS) |
+| `NUXT_SMTP_USER`, `NUXT_SMTP_PASS` | — | для `smtp`: полный адрес ящика и его пароль; отправитель писем — этот адрес (Timeweb не даёт подменять) |
 | `NUXT_UNISENDER_KEY`, `NUXT_UNISENDER_URL` | —, `go1…/api/v1` | ключ и адрес API из кабинета Unisender Go |
 | `NUXT_MAIL_FROM` | `noreply@marscap.ru` | отправитель (домен с SPF/DKIM) |
 | `NUXT_STAND` | `false` | `true` — тестовый стенд: тестовая оплата, коды на экране (`NUXT_DEV_CODES`), первый админ admin/admin. **В бою не задавать**: без него пополнение отвечает 501, пока не подключён настоящий провайдер |

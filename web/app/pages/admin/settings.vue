@@ -38,14 +38,14 @@ async function test() { busy.value = 't'; try { await api('POST', '/settings/mai
     <div class="panel grid">
       <h2>Отправка писем</h2>
       <dl class="kv">
-        <dt>Режим</dt><dd><Tag :value="s.mail.provider === 'unisender' ? 'Unisender Go — письма уходят' : 'log — письма НЕ уходят'" :severity="s.mail.provider === 'unisender' ? 'success' : 'danger'" /></dd>
+        <dt>Режим</dt><dd><Tag :value="s.mail.provider === 'unisender' ? 'Unisender Go — письма уходят' : s.mail.provider === 'smtp' ? 'Почтовый ящик (SMTP) — письма уходят' : 'log — письма НЕ уходят'" :severity="s.mail.provider === 'log' ? 'danger' : 'success'" /></dd>
         <dt>Отправитель</dt><dd class="mono">{{ s.mail.from }}</dd>
         <dt>Коды на экране</dt><dd>{{ s.mail.codes_on_screen ? 'да (стенд без почты)' : 'нет — только письмом' }}</dd>
         <dt>Адрес сайта в письмах</dt><dd class="mono">{{ s.mail.site_url || 'не задан (NUXT_PUBLIC_SITE_URL)' }}</dd>
         <dt>Уведомления команде</dt><dd class="mono">{{ s.mail.admin_notify || 'не заданы (NUXT_ADMIN_NOTIFY_EMAIL)' }}</dd>
       </dl>
-      <Message v-if="s.mail.provider !== 'unisender'" severity="warn" size="small">
-        Письма сейчас не отправляются: {{ s.mail.configured_provider !== 'unisender' ? 'NUXT_MAIL_PROVIDER не равен unisender' : 'нет NUXT_UNISENDER_KEY' }}. Поэтому коды показываются в окне на сайте. Задайте переменные в Render и перезапустите сервис.
+      <Message v-if="s.mail.provider === 'log'" severity="warn" size="small">
+        Письма сейчас не отправляются: {{ s.mail.configured_provider === 'smtp' ? 'не заданы NUXT_SMTP_USER или NUXT_SMTP_PASS' : s.mail.configured_provider === 'unisender' ? 'нет NUXT_UNISENDER_KEY' : 'NUXT_MAIL_PROVIDER — log' }}. Задайте почту в .env на сервере (smtp — ящик, unisender — ключ) и перезапустите сервис.
       </Message>
       <div class="field"><label>Тестовое письмо на адрес</label><div style="display:flex;gap:8px;flex-wrap:wrap"><InputText v-model="to" placeholder="you@gmail.com" style="flex:1;min-width:200px" /><Button label="Отправить" :loading="busy === 't'" :disabled="!to" @click="test" /></div></div>
     </div>
