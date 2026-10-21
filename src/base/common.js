@@ -172,10 +172,19 @@ window.MC = (function(){
   /* — сессия на любой странице: вместо «Войти» — имя и ссылка в кабинет — */
   var meP = null;
   function me(){ if (!meP) meP = isLive().then(function(on){ return on ? api('GET', '/auth/me').then(function(r){ return r.user; }, function(){ return null; }) : null; }); return meP; }
+  // имя в шапке запоминается (mc-user), чтобы на следующей странице показать его сразу, а не «Войти»
+  function rememberUser(name){ try { if (name) localStorage.setItem('mc-user', name); else localStorage.removeItem('mc-user'); } catch (e) {} }
   function initSession(){
     me().then(function(u){
-      if (!u) return;
-      var base = window.MC_BASE || '', name = u.name || u.username || u.email.split('@')[0];
+      var base = window.MC_BASE || '';
+      if (!u) {
+        // вышли или сессия истекла — вернуть «Войти», если имя показали из памяти
+        rememberUser(null);
+        document.querySelectorAll('.head-login.is-auth').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'login'; a.lastChild.textContent = 'Войти'; a.title = ''; a.classList.remove('is-auth'); });
+        return;
+      }
+      var name = u.name || u.username || u.email.split('@')[0];
+      rememberUser(name);
       document.querySelectorAll('.head-login').forEach(function(a){ if (!a.hasAttribute('data-go')) a.href = base + 'dashboard'; a.lastChild.textContent = name; a.title = u.email; a.classList.add('is-auth'); });
       document.querySelectorAll('.sheet-login').forEach(function(a){ a.href = base + 'dashboard'; a.lastChild.textContent = 'Личный кабинет'; });
     });
@@ -447,5 +456,5 @@ window.MC = (function(){
   initTrack();
   initNumbers();
 
-  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing, site: site, contacts: CONTACTS, docs: DOCS, applyDocs: applyDocs, recipient: recipient, initReviews: initReviews, initFav: initFav };
+  return { CATALOG: CATALOG, RATE: 80.2254, charged: charged, reduce: reduce, usd: usd, rub: rub, bump: bump, plural: plural, $: $, initShowcase: initShowcase, initReveal: initReveal, api: api, isLive: isLive, kop: kop, uid: uid, me: me, checkout: checkout, liveCatalog: liveCatalog, slugOf: slugOf, vcPricing: vcPricing, site: site, contacts: CONTACTS, docs: DOCS, applyDocs: applyDocs, recipient: recipient, initReviews: initReviews, initFav: initFav, rememberUser: rememberUser };
 })();

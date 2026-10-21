@@ -304,6 +304,7 @@
     // демо-сессия для прототипа; на сервере сессия — httpOnly-кука
     if (!LIVE) { try { localStorage.setItem('mc-session', JSON.stringify({ id: target, at: Date.now() })); } catch (e) {} }
     if (LIVE && (flow !== 'register' || NEXT !== 'dashboard')) setTimeout(goNext, reduce ? 300 : 1400);
+    if (LIVE && user) MC.rememberUser(user.name || user.username || user.email.split('@')[0]);
     if (LIVE && user) document.querySelectorAll('.head-login').forEach(function(h){ h.href = (window.MC_BASE || '') + 'dashboard'; h.lastChild.textContent = user.name || user.username || user.email.split('@')[0]; h.classList.add('is-auth'); });
     stopTimer(); show('scrDone');
   }

@@ -969,7 +969,7 @@
   }
 
   /* ——— выход ——— */
-  function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} var to = function(){ location.href = BASE + 'login'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
+  function logout(e){ if (e) e.preventDefault(); try { localStorage.removeItem('mc-session'); } catch (x) {} MC.rememberUser(null); var to = function(){ location.href = BASE + 'login'; }; if (LIVE) MC.api('POST', '/auth/logout').then(to, to); else to(); }
   $('logout').addEventListener('click', logout); $('logoutM').addEventListener('click', logout);
 
   /* ——— шапка сайта: «Войти» → имя ——— */
