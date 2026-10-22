@@ -63,12 +63,16 @@ test('вход в админку, права ролей, аудит', async () =
 test('KYC: фото, отказ с причиной, повтор, одобрение', async () => {
   const u = client(); const me = await user(u)
   const cookie = await (async () => { const r = await fetch(API + '/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: me.email, password: 'Secret123' }) }); return r.headers.get('set-cookie').split(';')[0] })()
-  const upload = async () => { const fd = new FormData(); fd.append('files', new Blob([Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex')], { type: 'image/png' }), 'passport.png'); return fetch(API + '/api/kyc', { method: 'POST', body: fd, headers: { cookie } }).then(r => r.json()) }
+  const upload = async (info = { full_name: 'Иванов Иван Иванович', doc_type: 'passport_ru', phone: '8 (900) 123-45-67' }) => { const fd = new FormData(); for (const k in info) fd.append(k, info[k]); fd.append('files', new Blob([Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex')], { type: 'image/png' }), 'passport.png'); return fetch(API + '/api/kyc', { method: 'POST', body: fd, headers: { cookie } }).then(r => r.json()) }
+  assert.equal((await upload({ doc_type: 'passport_ru', phone: '+79001234567' })).data.code, 'bad_name')
+  assert.equal((await upload({ full_name: 'Иванов Иван', doc_type: 'driver', phone: '+79001234567' })).data.code, 'bad_doc')
   assert.equal((await upload()).status, 'pending')
   const a = await admin()
   const queue = (await a('GET', '/api/admin/kyc')).body.submissions
   const sub = queue.find(x => x.email === me.email); assert.ok(sub)
   const d = await a('GET', '/api/admin/kyc/' + sub.id); assert.equal(d.body.files.length, 1)
+  assert.equal(d.body.submission.full_name, 'Иванов Иван Иванович'); assert.equal(d.body.submission.doc_type, 'passport_ru')
+  assert.equal(d.body.submission.contact_phone, '+79001234567'); assert.equal(d.body.submission.contact_email, me.email)
   const img = await a('GET', `/api/admin/kyc/${sub.id}/file/${d.body.files[0].id}`, null, true); assert.equal(img.status, 200); assert.equal(img.type, 'image/png')
   assert.equal((await client()('GET', `/api/admin/kyc/${sub.id}/file/${d.body.files[0].id}`, null, true)).status, 401)
   assert.equal((await a('POST', `/api/admin/kyc/${sub.id}/decide`, { action: 'reject' })).code, 'reason_required')
@@ -79,6 +83,8 @@ test('KYC: фото, отказ с причиной, повтор, одобре�
   const sub2 = (await a('GET', '/api/admin/kyc')).body.submissions.find(x => x.email === me.email)
   assert.equal((await a('POST', `/api/admin/kyc/${sub2.id}/decide`, { action: 'approve', birth_date: '1990-05-01' })).status, 200)
   assert.equal((await fetch(API + '/api/kyc', { headers: { cookie } }).then(r => r.json())).status, 'approved')
+  const prof = (await db.query(`select name, phone from users where id = $1`, [me.id])).rows[0]
+  assert.equal(prof.name, 'Иванов Иван Иванович', 'ФИО из заявки — в профиль'); assert.equal(prof.phone, '+79001234567')
 })
 
 test('заказы: ручная выдача, пул ключей, статус, возврат, заявки на возврат, корректировка', async () => {

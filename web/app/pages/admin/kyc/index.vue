@@ -10,6 +10,7 @@ watch(status, load); watch(period, load, { deep: true }); onMounted(load)
   <div class="toolbar"><AdmPeriod v-model="period" allow-all /><span class="muted">{{ rows.length }} заявок</span></div>
   <DataTable :value="rows" :loading="loading" row-hover :row-class="() => 'clickable'" @row-click="e => navigateTo('/admin/kyc/' + e.data.id)" size="small">
     <Column field="email" header="Пользователь" />
+    <Column field="full_name" header="ФИО"><template #body="{ data }">{{ data.full_name || '—' }}</template></Column>
     <Column header="Файлов"><template #body="{ data }">{{ data.files }}</template></Column>
     <Column header="Отправлено"><template #body="{ data }">{{ dt(data.created_at) }}</template></Column>
     <Column header="Статус"><template #body="{ data }"><Tag :value="KYC_ST[data.status][0]" :severity="KYC_ST[data.status][1]" /><div v-if="data.reason" class="muted">{{ data.reason }}</div></template></Column>

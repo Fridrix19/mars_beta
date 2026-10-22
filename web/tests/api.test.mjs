@@ -151,7 +151,7 @@ test('кабинет: профиль, сессии, смена пароля, KYC
   assert.equal((await client()('POST', '/api/auth/login', { email, password: 'Another123' })).status, 200)
 
   const cookie = await (async () => { const r = await fetch(API + '/api/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, password: 'Another123' }) }); return r.headers.get('set-cookie').split(';')[0] })()
-  const up = async (name, type, bytes) => { const fd = new FormData(); fd.append('files', new Blob([bytes], { type }), name); const r = await fetch(API + '/api/kyc', { method: 'POST', body: fd, headers: { cookie } }); return { status: r.status, body: await r.json() } }
+  const up = async (name, type, bytes) => { const fd = new FormData(); fd.append('full_name', 'Петров Пётр'); fd.append('doc_type', 'passport_foreign'); fd.append('files', new Blob([bytes], { type }), name); const r = await fetch(API + '/api/kyc', { method: 'POST', body: fd, headers: { cookie } }); return { status: r.status, body: await r.json() } }
   const bad = await up('x.png', 'image/png', Buffer.from('not a png')); assert.equal(bad.body.data.code, 'bad_type')
   const ok = await up('passport.png', 'image/png', Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex')); assert.equal(ok.status, 200)
   assert.equal((await up('again.png', 'image/png', Buffer.from('89504e470d0a1a0a', 'hex'))).body.data.code, 'kyc_pending')
@@ -162,6 +162,12 @@ test('кабинет: профиль, сессии, смена пароля, KYC
 
 test('карты: выпуск по заказу, реквизиты по коду, заморозка, пополнение', async () => {
   const call = client(), email = uniq(); const u = await register(call, email)
+  // без верификации выпуск карты закрыт — и напрямую, и через «пополнить и купить»
+  const p50a = await plan('virtual-card', '$50')
+  const no = await call('POST', '/api/orders', { plan_id: p50a, idem: 'card-nokyc-1' }); assert.equal(no.status, 403); assert.equal(no.code, 'kyc_required')
+  assert.equal((await call('POST', '/api/topups', { amount_kop: 10000_00, for_order: { plan_id: p50a } })).code, 'kyc_required')
+  await db.query(`update users set kyc_status = 'pending' where id = $1`, [u.id])
+  assert.match((await call('POST', '/api/orders', { plan_id: p50a, idem: 'card-nokyc-2' })).body.message, /на проверке/)
   await db.query(`update users set kyc_status = 'approved' where id = $1`, [u.id])
   await call('POST', `/api/topups/${(await call('POST', '/api/topups', { amount_kop: 30000_00 })).body.payment.id}/test`, {})
   const p50 = await plan('virtual-card', '$50')

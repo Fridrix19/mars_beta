@@ -296,6 +296,7 @@
       [needKyc() ? 'todo' : 'ok', 'Расширенная верификация', u >= 150 ? (needKyc() ? 'Нужна для сумм от $150 — паспорт, 3–5 минут' : USER.kyc === 'pending' ? 'На проверке — оплатить можно, зачислим после подтверждения' : 'Пройдена') : 'Не требуется для сумм до $150']
     ];
     if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [overLimit(total(u) * 100) ? 'todo' : 'ok', 'Лимит расходов', !USER.limit || USER.limit.limit_kop == null ? 'Без лимита' : overLimit(total(u) * 100) ? 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' — пройдите верификацию или уменьшите сумму' : 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' из ' + MC.kop(USER.limit.limit_kop)], [BAL >= payKop(total(u) * 100) ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL / 100 < payKop(total(u) * 100) / 100 ? ' — пополним на недостающее при оплате' : '')]];
+    if (LIVE && W.prod === 'issue') reqs.unshift([USER.kyc === 'full' ? 'ok' : 'todo', 'Верификация', USER.kyc === 'full' ? 'Пройдена' : USER.kyc === 'pending' ? 'Документы на проверке — выпуск откроется после одобрения' : 'Нужна для выпуска карты: ФИО, телефон или почта и документ']);
     if (LIVE && USER.bonus) reqs.push(['ok', 'Бонус', 'Спишем ' + MC.kop(Math.min(USER.bonus, Math.round(total(u) * 100))) + ' скидкой — к оплате ' + MC.kop(payKop(total(u) * 100)) + (USER.bonus > total(u) * 100 ? ', остаток бонуса сгорит' : '')]);
     else if (W.prod === 'issue') reqs.push(['ok', 'Лимит карт', 'У вас ' + CARDS.length + ' из 5 возможных']);
     $('wqReq').innerHTML = reqs.map(function(r){ return '<div class="req ' + r[0] + '">' + ico(r[0] === 'ok' ? 'check' : r[0] === 'todo' ? 'warn' : 'x') + '<div><b>' + r[1] + '</b><span>' + r[2] + '</span></div></div>'; }).join('');
@@ -465,13 +466,13 @@
     if (ff && !LIVE) ff.addEventListener('click', function(){ ff.classList.add('is-loading'); setTimeout(function(){ USER.kyc = 'full'; ORDERS.forEach(function(o){ if (o.status === 'action' && o.action && o.action.go === 'kyc'){ o.status = 'work'; o.tl.forEach(function(s){ if (s[2] === 'warn'){ s[1] = new Date(); s[2] = 'ok'; s[3] = 'Подтверждено'; } }); o.tl[o.tl.length - 1][2] = 'cur'; delete o.action; } }); NOTIFS.unshift({ t: 'Верификация пройдена', s: 'Лимиты открыты, заказы продолжены', at: new Date(), go: 'orders', unread: 1 }); R.kyc(); toast('Верификация пройдена', 'Заказы, ждавшие проверки, продолжены.', 'ok'); }, 1500); });
     var km = $('kycMore'); if (km) km.addEventListener('click', function(){ $('kycFile').click(); });
     $('kycStart').disabled = k === 'pending' || k === 'full';
-    if (LIVE) { $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы'; var kp = $('kycStatus').querySelector('p'); if (k === 'more') kp.textContent = USER.kycReason ? 'Причина отказа: ' + USER.kycReason + '. Загрузите документы ещё раз.' : 'Проверка не пройдена. Загрузите документы ещё раз.'; else if (k === 'pending') kp.textContent = 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). Покупки откроются сразу после одобрения.'; else if (k === 'basic') kp.textContent = 'Почта подтверждена. Для покупок загрузите фото паспорта (разворот с фото) и селфи с ним.'; }
+    if (LIVE) { $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы'; var kp = $('kycStatus').querySelector('p'); if (k === 'more') kp.textContent = USER.kycReason ? 'Причина отказа: ' + USER.kycReason + '. Загрузите документы ещё раз.' : 'Проверка не пройдена. Загрузите документы ещё раз.'; else if (k === 'pending') kp.textContent = 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). Покупки откроются сразу после одобрения.'; else if (k === 'basic') kp.textContent = 'Почта подтверждена. Чтобы выпустить карту и снять лимит, пройдите верификацию: ФИО, телефон или почта и документ.'; }
   };
   $('kycStart').addEventListener('click', function(){
-    if (LIVE) { $('kycFile').click(); return; }
+    if (LIVE) { kycForm(); return; }
     modal({ title: 'Переход к проверке', sub: 'Откроется страница партнёра по верификации. Понадобятся паспорт и камера.', body: '<ul class="check-marks"><li>Данные не сохраняются у Marscap</li><li>Обычно 3–5 минут</li><li>Результат появится в кабинете автоматически</li></ul>', foot: [{ label: 'Позже' }, { label: 'Продолжить', cls: 'btn-primary', onClick: function(){ USER.kyc = 'pending'; R.kyc(); toast('Проверка запущена', 'Статус обновится после проверки.'); } }] });
   });
-  function addFiles(list){ if (LIVE) { kycUpload(list); return; } [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); if (kycFiles.length){ if (USER.kyc === 'basic' || USER.kyc === 'more') USER.kyc = 'pending'; R.kyc(); toast('Файлы отправлены на проверку', kycFiles.length + ' ' + MC.plural(kycFiles.length, ['файл', 'файла', 'файлов']), 'ok'); } }
+  function addFiles(list){ if (LIVE) { kycForm(list); return; } [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); if (kycFiles.length){ if (USER.kyc === 'basic' || USER.kyc === 'more') USER.kyc = 'pending'; R.kyc(); toast('Файлы отправлены на проверку', kycFiles.length + ' ' + MC.plural(kycFiles.length, ['файл', 'файла', 'файлов']), 'ok'); } }
   $('kycFile').addEventListener('change', function(){ addFiles(this.files); this.value = ''; });
   var drop = $('kycDrop'); ['dragenter', 'dragover'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); }); }); ['dragleave', 'drop'].forEach(function(ev){ drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); if (ev === 'drop') addFiles(e.dataTransfer.files); }); });
 
@@ -690,11 +691,18 @@
       if (e.code === 'insufficient_funds') { var f = {}; for (var k in (fields || {})) f[k] = fields[k]; if (cardId) f.card_id = cardId; topupModal(e.data.shortfall_kop, { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: f, gift_to: giftTo || undefined, use_bonus: useBonus !== false }, function(r){ if (r.order_id) onOk(r.order_id); }); return; }
       if (e.code === 'docs_update_required') { load().then(function(){ docsModal(function(){ buy(pp, fields, cardId, btn, onOk, giftTo, useBonus); }); }); return; }
       if (e.code === 'limit_exceeded') { load().then(function(){ limitModal(e.message); }); return; }
-      if (e.code === 'kyc_required') { toast('Нужна верификация', 'Покупки открываются после проверки документов. Баланс можно пополнить уже сейчас.', 'err'); go('kyc'); return; }
+      if (e.code === 'kyc_required') { load().then(function(){ kycNeedModal(e.message); }); return; }
       fail(e);
     });
   }
+  // окно «нужна верификация» перед выпуском карты
+  function kycNeedModal(msg){
+    var pend = USER.kyc === 'pending';
+    modal({ title: pend ? 'Документы на проверке' : 'Нужна верификация', sub: msg || (pend ? 'Карту можно будет выпустить сразу после одобрения — обычно в течение рабочего дня.' : 'Выпуск карты доступен после верификации: ФИО, телефон или почта и документ, удостоверяющий личность.'),
+      foot: pend ? [{ label: 'Понятно' }] : [{ label: 'Позже' }, { label: 'Пройти верификацию', cls: 'btn-primary', onClick: function(){ go('kyc'); setTimeout(kycForm, 50); } }] });
+  }
   function livePay(btn){
+    if (W.prod === 'issue' && USER.kyc !== 'full') { kycNeedModal(); return; }
     cardPlan(W.usd).then(function(pp){ buy(pp, {}, W.prod === 'topup' ? W.card : null, btn, orderDone); }).catch(fail);
   }
   function orderDone(id){
@@ -841,6 +849,7 @@
   // подарок: виртуальная карта на почту друга
   var gUsd = 50;
   function giftModal(){
+    if (LIVE && USER.kyc !== 'full') { kycNeedModal(); return; }
     if (DENOMS.indexOf(gUsd) < 0) gUsd = DENOMS[0];
     modal({ title: 'Подарить карту другу', sub: 'Карта появится в кабинете друга, когда он войдёт или зарегистрируется с этой почтой. Письмо отправим сразу после оплаты.',
       body: (USER.bonus ? '<p class="hint">Бонус ' + MC.kop(USER.bonus) + ' спишется скидкой.</p>' : '') + '<div class="field"><label for="gEmail">Почта друга</label><input id="gEmail" type="email" inputmode="email" autocomplete="off" placeholder="friend@gmail.com"></div><div class="field"><label>Номинал</label><div class="q-denoms" id="gDen"></div></div><dl class="kv"><div><dt>К оплате</dt><dd class="mono" id="gSum"></dd></div><div><dt>На балансе</dt><dd class="mono">' + MC.kop(BAL) + '</dd></div></dl>',
@@ -859,14 +868,41 @@
   $('giftBtn').addEventListener('click', giftModal);
 
   // верификация: загрузка файлов на ручную проверку
-  function kycUpload(list){
+  // форма верификации: ФИО, документ, телефон и/или почта, фото документа и селфи с ним
+  function kycForm(preset){
+    var picked = [].slice.call(preset || []);
+    modal({ title: 'Верификация', sub: 'Нужна для выпуска карты и снятия лимита. Данные видит только модератор.',
+      body: '<div class="field"><label for="kName">ФИО — как в документе</label><input id="kName" autocomplete="name" placeholder="Иванов Иван Иванович"></div>' +
+        '<div class="field"><label for="kDoc">Документ, удостоверяющий личность</label><select id="kDoc"><option value="passport_ru">Паспорт РФ</option><option value="passport_foreign">Заграничный паспорт</option><option value="other">Иной документ</option></select></div>' +
+        '<div class="field"><label for="kPhone">Телефон</label><input id="kPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000-00-00" value="' + esc(USER.rawPhone || '') + '"></div>' +
+        '<div class="field"><label for="kMail">Почта</label><input id="kMail" type="email" inputmode="email" autocomplete="email" value="' + esc(USER.email || '') + '"><span class="hint">Телефон или почта — для связи по проверке.</span></div>' +
+        '<div class="field"><label>Фото</label><label class="drop" id="kDrop"><input type="file" hidden id="kFiles" accept="image/*,.pdf" multiple><svg><use href="#i-up"/></svg><b>Выберите файлы</b><span>Разворот документа с фотографией и селфи с документом · JPG, PNG, HEIC или PDF до 10 МБ</span></label><ul class="file-list" id="kList"></ul></div>' +
+        '<p class="alert alert-err" id="kErr" hidden></p>',
+      onOpen: function(){
+        function draw(){ $('kList').innerHTML = picked.map(function(f){ return '<li>' + ico('doc') + esc(f.name) + '<span class="mono">' + (f.size / 1024 / 1024).toFixed(1) + ' МБ</span></li>'; }).join(''); }
+        $('kFiles').addEventListener('change', function(){ picked = picked.concat([].slice.call(this.files)).slice(-4); this.value = ''; draw(); });
+        var d = $('kDrop'); ['dragenter', 'dragover'].forEach(function(ev){ d.addEventListener(ev, function(e){ e.preventDefault(); d.classList.add('over'); }); });
+        ['dragleave', 'drop'].forEach(function(ev){ d.addEventListener(ev, function(e){ e.preventDefault(); d.classList.remove('over'); if (ev === 'drop') { picked = picked.concat([].slice.call(e.dataTransfer.files)).slice(-4); draw(); } }); });
+        draw();
+      },
+      foot: [{ label: 'Отмена' }, { label: 'Отправить на проверку', cls: 'btn-primary', keep: true, onClick: function(btn){
+        var err = function(m){ var el = $('kErr'); el.textContent = m; el.hidden = !m; return false; };
+        var name = $('kName').value.trim().replace(/\s+/g, ' '), phone = $('kPhone').value.trim(), mail = $('kMail').value.trim();
+        if (!/^[A-Za-zА-Яа-яЁё'’-]+( [A-Za-zА-Яа-яЁё'’-]+){1,3}$/.test(name)) return err('Укажите ФИО как в документе: фамилия, имя и отчество (если есть).');
+        if (!phone && !mail) return err('Укажите телефон или почту для связи.');
+        if (picked.length < 2) return err('Нужно 2 фото: разворот документа с фотографией и селфи с документом.');
+        err(''); kycUpload(picked, { full_name: name, doc_type: $('kDoc').value, phone: phone, email: mail }, btn);
+        return false;
+      } }] });
+  }
+  function kycUpload(list, info, btn){
     list = [].slice.call(list || []);
-    if (list.length === 1) { toast('Нужно 2 фото', 'Выберите сразу оба файла: разворот паспорта и селфи с паспортом.', 'err'); return; }
-    var fd = new FormData(), n = 0; list.forEach(function(f){ fd.append('files', f); n++; }); if (!n) return;
+    var fd = new FormData(), n = 0; for (var k in (info || {})) fd.append(k, info[k]); list.forEach(function(f){ fd.append('files', f); n++; }); if (!n) return;
+    if (btn) btn.classList.add('is-loading');
     toast('Отправляем файлы', n + ' ' + MC.plural(n, ['файл', 'файла', 'файлов']));
     fetch((window.MC_API || '/api') + '/kyc', { method: 'POST', body: fd, credentials: 'same-origin' }).then(function(r){ return r.json().then(function(j){ if (!r.ok) { var e = new Error(j.message || 'Не удалось загрузить'); e.code = j.data && j.data.code; throw e; } return j; }); })
-      .then(function(){ [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); return load(); })
-      .then(function(){ R.kyc(); toast('Документы на проверке', 'Результат придёт в уведомления и на почту.', 'ok'); }, fail);
+      .then(function(){ closeModal(); [].forEach.call(list, function(f){ kycFiles.push({ n: f.name, s: (f.size / 1024 / 1024).toFixed(1) + ' МБ' }); }); return load(); })
+      .then(function(){ R.kyc(); toast('Документы на проверке', 'Результат придёт в уведомления и на почту.', 'ok'); }, function(e){ if (btn) btn.classList.remove('is-loading'); var el = $('kErr'); if (el && !$('modal').hidden) { el.textContent = e.message; el.hidden = false; } else fail(e); });
   }
 
   // профиль на сервере
@@ -916,6 +952,8 @@
   function runCheckout(){
     var o = null; try { o = JSON.parse(sessionStorage.getItem('mc-checkout') || 'null'); sessionStorage.removeItem('mc-checkout'); } catch (e) {}
     if (!o || !o.slug) return;
+    // со страницы карты всегда выпуск новой карты — без верификации сразу говорим, что нужно
+    if (o.slug === 'virtual-card' && USER.kyc !== 'full') { kycNeedModal(); return; }
     MC.api('GET', '/catalog/' + encodeURIComponent(o.slug)).then(function(r){
       var pl = r.plans, pp = null, sum = 0;
       if (o.slug === 'virtual-card') {
@@ -956,14 +994,14 @@
     }[k] || ['—', 'badge-plain', 0, ''];
     $('kycStatus').innerHTML = '<div class="row"><h3>Статус: ' + st[0] + '</h3>' + badge([st[0], st[1]]) + '</div><p>' + esc(st[3]) + '</p><div class="progress"><i style="--v:' + st[2] + '%"></i></div>' +
       (k === 'pending' ? '<button type="button" class="btn btn-ghost" id="kycFake">' + ico('refresh') + 'Обновить статус</button>' : '') + (USER.limit ? '<div class="lim-card lim-in">' + limHtml(false) + '</div>' : '');
-    $('kycLevels').innerHTML = '<div class="lvl ' + (k === 'full' ? 'ok' : 'cur') + '">' + ico(k === 'full' ? 'check' : 'shield') + '<b>Проверка личности</b><span>Фото разворота паспорта с фотографией и селфи с паспортом в руке. Данные видит только модератор.</span>' + badge(k === 'full' ? ['Пройдена', 'badge-ok'] : k === 'pending' ? ['На проверке', 'badge-warn'] : ['Снимает лимит', 'badge-info']) + '</div>';
+    $('kycLevels').innerHTML = '<div class="lvl ' + (k === 'full' ? 'ok' : 'cur') + '">' + ico(k === 'full' ? 'check' : 'shield') + '<b>Проверка личности</b><span>ФИО, телефон или почта, документ, удостоверяющий личность, и селфи с ним. Нужна для выпуска карты и снятия лимита.</span>' + badge(k === 'full' ? ['Пройдена', 'badge-ok'] : k === 'pending' ? ['На проверке', 'badge-warn'] : ['Снимает лимит', 'badge-info']) + '</div>';
     $('kycFiles').innerHTML = kycFiles.map(function(f){ return '<li>' + ico('doc') + esc(f.n) + '<span class="mono">' + f.s + '</span></li>'; }).join('');
     var ff = $('kycFake'); if (ff) ff.addEventListener('click', function(){ ff.classList.add('is-loading'); load().then(function(){ R.kyc(); }); });
     var can = k === 'basic' || k === 'more';
     $('kycStart').disabled = !can; $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы';
-    var drop = $('kycDrop'); if (drop) { drop.hidden = !can; }
+    var drop = $('kycDrop'); if (drop) { drop.hidden = true; }
     $('kycLvlH').textContent = 'Что нужно'; $('kycOr').hidden = true;
-    $('kycIntro').textContent = 'Загрузите 2 фото: разворот паспорта с фотографией и селфи, где вы держите паспорт рядом с лицом. Всё должно читаться, без бликов. Проверяет модератор Marscap вручную.';
+    $('kycIntro').textContent = 'Укажите ФИО как в документе, телефон или почту и загрузите 2 фото: разворот документа с фотографией и селфи с документом. Всё должно читаться, без бликов. Проверяет модератор Marscap вручную.';
     $('kycDropHint').textContent = 'Паспорт и селфи с паспортом · JPG, PNG, HEIC или PDF до 10 МБ, до 4 файлов';
     $('kycNote').textContent = 'Файлы хранятся в закрытом хранилище, их видит только модератор. Нужны один раз — для открытия покупок.';
   }

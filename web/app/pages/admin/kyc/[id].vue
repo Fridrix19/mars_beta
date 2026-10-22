@@ -7,6 +7,7 @@ const REASONS = ['Фото размыто или обрезано', 'Не вид
 async function load() { r.value = await api('GET', '/kyc/' + route.params.id) }
 onMounted(load)
 const s = computed(() => r.value?.submission)
+const DOC = { passport_ru: 'Паспорт РФ', passport_foreign: 'Заграничный паспорт', other: 'Иной документ' } as Record<string, string>
 const fileUrl = (f: any) => `/api/admin/kyc/${s.value.id}/file/${f.id}`
 async function decide(action: string) {
   busy.value = action
@@ -34,7 +35,11 @@ watchEffect(() => { const v = s.value ? s.value.email : ''; if (v) crumbLabel.va
       </div>
       <div class="grid" style="align-content:start">
         <div class="panel"><dl class="kv kv-narrow">
-          <dt>Имя</dt><dd>{{ s.name || '—' }}</dd><dt>Аккаунт с</dt><dd>{{ d(s.user_created) }}</dd><dt>Отправлено</dt><dd>{{ dt(s.created_at) }}</dd>
+          <dt>ФИО</dt><dd><b>{{ s.full_name || '—' }}</b></dd>
+          <dt>Документ</dt><dd>{{ DOC[s.doc_type] || '—' }}</dd>
+          <dt>Телефон</dt><dd class="mono">{{ s.contact_phone || '—' }}</dd>
+          <dt>Почта для связи</dt><dd class="mono">{{ s.contact_email || s.email }}</dd>
+          <dt>Имя в профиле</dt><dd>{{ s.name || '—' }}</dd><dt>Аккаунт с</dt><dd>{{ d(s.user_created) }}</dd><dt>Отправлено</dt><dd>{{ dt(s.created_at) }}</dd>
           <template v-if="can('users')"><dt>Профиль</dt><dd><NuxtLink :to="'/admin/users/' + s.user_id">открыть</NuxtLink></dd></template>
           <template v-if="s.status !== 'pending'"><dt>Решение</dt><dd>{{ dt(s.reviewed_at) }}{{ s.reason ? ' · ' + s.reason : '' }}</dd></template>
         </dl></div>

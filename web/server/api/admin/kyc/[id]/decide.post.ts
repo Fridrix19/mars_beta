@@ -11,6 +11,7 @@ export default defineEventHandler(async (e) => {
                                 where id::text = $1 and status = 'pending' returning *`, [getRouterParam(e, 'id'), approve ? 'approved' : 'rejected', approve ? null : reason, bd, a.id])).rows[0]
     if (!k) fail(409, 'already_reviewed', 'Заявка уже рассмотрена.')
     await c.query(`update users set kyc_status = $2, kyc_reason = $3 where id = $1`, [k.user_id, approve ? 'approved' : 'rejected', approve ? null : reason])
+    if (approve) await c.query(`update users set name = coalesce(nullif(name, ''), $2), phone = coalesce(nullif(phone, ''), $3) where id = $1`, [k.user_id, k.full_name, k.contact_phone])
     k.bonus = approve ? await grantKycBonus(k.user_id, c) : 0
     return k
   })

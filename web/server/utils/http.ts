@@ -33,6 +33,15 @@ export function hit(key: string) {
   const a = hits.get(key) || []; a.push(Date.now()); hits.set(key, a)
 }
 
+// телефон в формате +79001234567; пусто — null
+export function normPhone(v: unknown): string | null {
+  const d = String(v ?? '').replace(/\D/g, '')
+  if (!d) return null
+  const n = d.length === 11 && (d[0] === '8' || d[0] === '7') ? '7' + d.slice(1) : d.length === 10 ? '7' + d : d
+  if (n.length < 11 || n.length > 15) fail(422, 'bad_phone', 'Проверьте номер: +7 900 000-00-00.')
+  return '+' + n
+}
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 export function normEmail(v: unknown): string {
   const s = String(v ?? '').trim().toLowerCase()
