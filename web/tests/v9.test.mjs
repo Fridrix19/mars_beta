@@ -41,34 +41,16 @@ const F = { account_email: 'buyer@example.ru' }
 const verified = (id) => db.query(`update users set kyc_status = 'approved' where id = $1`, [id])
 const idem = () => crypto.randomUUID()
 
-test('лимит 15 000 ₽ без верификации: период с первой траты, сброс через месяц, верификация снимает', async () => {
+test('верификация обязательна для любой покупки, лимита нет; бонус за верификацию — один раз', async () => {
   const u = client(); const me = await register(u)
-  let m = (await u('GET', '/api/auth/me')).body.user
-  assert.equal(m.limit.limit_kop, 1500000); assert.equal(m.limit.spent_kop, 0); assert.equal(m.limit.resets_at, null)
+  let m
   await topup(u, 40000)
   const pl = await svcPlans(u), p100 = pl.find(p => p.price_cents === 10000), p50 = pl.find(p => p.price_cents === 5000)
-  const o1 = await u('POST', '/api/orders', { plan_id: p100.id, idem: idem(), fields: F }); assert.equal(o1.status, 200, JSON.stringify(o1.body))
-  m = (await u('GET', '/api/auth/me')).body.user
-  assert.equal(m.limit.spent_kop, o1.body.order.amount_kop); assert.ok(m.limit.resets_at)
-  const reset = new Date(m.limit.resets_at), since = new Date(m.limit.period_start)
-  assert.ok(Math.abs((reset - since) / 86400000 - 30) <= 1.1, 'обнуление через месяц')
-  const over = await u('POST', '/api/orders', { plan_id: p100.id, idem: idem(), fields: F })
-  assert.equal(over.status, 403); assert.equal(over.code, 'limit_exceeded'); assert.equal(over.body.data.remaining_kop, 1500000 - o1.body.order.amount_kop)
-  assert.match(over.body.message, /15\s000 ₽/)
-  // период истёк — следующая трата открывает новый
-  await db.query(`update users set limit_since = now() - interval '32 days' where id = $1`, [me.id])
-  assert.equal((await u('GET', '/api/auth/me')).body.user.limit.spent_kop, 0)
-  assert.equal((await u('POST', '/api/orders', { plan_id: p100.id, idem: idem(), fields: F })).status, 200)
-  // возврат возвращает лимит
+  const no = await u('POST', '/api/orders', { plan_id: p100.id, idem: idem(), fields: F })
+  assert.equal(no.status, 403); assert.equal(no.code, 'kyc_required'); assert.match(no.body.message, /верификац/)
+  assert.equal((await u('POST', '/api/topups', { amount_kop: 1000_00, for_order: { plan_id: p50.id, fields: F } })).code, 'kyc_required')
   const a = await owner()
-  const before = (await u('GET', '/api/auth/me')).body.user.limit.spent_kop
-  const last = (await db.query(`select id from orders where user_id = $1 order by created_at desc limit 1`, [me.id])).rows[0].id
-  assert.equal((await a('POST', `/api/admin/orders/${last}/refund`, { reason: 'тест' })).status, 200)
-  assert.ok((await u('GET', '/api/auth/me')).body.user.limit.spent_kop < before)
-  // список пользователей в админке — шкала лимита
-  const row = (await a('GET', '/api/admin/users?q=' + me.username)).body.users[0]
-  assert.equal(row.limit_kop, 1500000); assert.ok('spent_kop' in row && 'resets_at' in row)
-  // верификация: лимит снят (verified_kop = null) и бонус 500 ₽ — один раз
+  // верификация: покупки открыты, лимита нет, бонус 500 ₽ — один раз
   await db.query(`update users set kyc_status = 'pending' where id = $1`, [me.id])
   const sub = (await db.query(`insert into kyc_submissions (user_id, file_ids) values ($1, '{}') returning id`, [me.id])).rows[0].id
   assert.equal((await a('POST', `/api/admin/kyc/${sub}/decide`, { action: 'approve' })).status, 200)
@@ -91,6 +73,8 @@ test('лимит 15 000 ₽ без верификации: период с пе�
   // отказ от бонуса и остаток сгорает
   const keep = (await u('POST', '/api/orders', { plan_id: p50.id, idem: idem(), use_bonus: false, fields: F })).body.order
   assert.equal(keep.bonus_kop, 0); assert.equal((await u('GET', '/api/auth/me')).body.user.bonus_kop, 50000)
+  // лимита нет: покупки больше 15 000 ₽ за месяц проходят
+  for (let i = 0; i < 2; i++) assert.equal((await u('POST', '/api/orders', { plan_id: p100.id, idem: idem(), use_bonus: false, fields: F })).status, 200)
   // карточка в админке
   const card = (await a('GET', '/api/admin/users/' + me.id)).body
   assert.equal(card.user.bonus_kop, 50000); assert.ok(card.bonus.some(b => b.reason === 'kyc')); assert.equal(card.limit.limit_kop, null)
@@ -111,7 +95,7 @@ test('бонус больше цены: остаток сгорает; наст�
   const s = await a('POST', '/api/admin/settings/limits', { unverified_rub: '20 000', verified_rub: '', kyc_bonus_rub: 300 })
   assert.equal(s.body.unverified_kop, 2000000); assert.equal(s.body.verified_kop, null); assert.equal(s.body.kyc_bonus_kop, 30000)
   assert.equal((await client()('GET', '/api/site')).body.limits.unverified_kop, 2000000)
-  await a('POST', '/api/admin/settings/limits', { unverified_rub: 15000, verified_rub: '', kyc_bonus_rub: 500 })
+  await a('POST', '/api/admin/settings/limits', { unverified_rub: '', verified_rub: '', kyc_bonus_rub: 500 })
 })
 
 test('отзывы: только после исполнения, на странице товара и все вместе; модерация', async () => {

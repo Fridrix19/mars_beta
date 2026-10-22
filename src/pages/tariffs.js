@@ -14,8 +14,6 @@
     $('tfCardRow').textContent = 'номинал $' + v.min + '–' + v.max + ' + комиссия';
   });
   MC.site().then(function(s){
-    if (s && s.limits) { var L = s.limits, k = function(v){ return new Intl.NumberFormat('ru-RU').format(Math.round(v / 100)) + ' ₽'; };
-      $('tfLimit').textContent = L.unverified_kop == null ? 'без лимита' : 'до ' + k(L.unverified_kop) + ' в месяц';
-      $('tfLimitV').textContent = (L.verified_kop == null ? 'без лимита' : 'до ' + k(L.verified_kop) + ' в месяц') + (L.kyc_bonus_kop ? ' + бонус ' + k(L.kyc_bonus_kop) : ''); } var d = s && (s.documents || []).filter(function(x){ return x.kind === 'tariffs'; })[0]; if (d) $('tfVer').textContent = d.version + ' от ' + new Date(d.published_at).toLocaleDateString('ru-RU'); });
+    var d = s && (s.documents || []).filter(function(x){ return x.kind === 'tariffs'; })[0]; if (d) $('tfVer').textContent = d.version + ' от ' + new Date(d.published_at).toLocaleDateString('ru-RU'); });
   MC.initReveal();
 })();

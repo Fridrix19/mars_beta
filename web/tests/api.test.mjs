@@ -102,7 +102,7 @@ test('деньги: пополнение, KYC, недостача, покупк�
   assert.equal((await client()('POST', `/api/topups/${t.body.payment.id}/test`, {})).status, 401)
 
   const noKyc = await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-kyc-1', fields: { account_email: 'a@b.ru' } })
-  assert.equal(noKyc.code, 'insufficient_funds', 'без верификации покупки идут в пределах лимита')
+  assert.equal(noKyc.code, 'kyc_required', 'без верификации покупки закрыты')
   await db.query(`update users set kyc_status = 'approved' where id = $1`, [u.id])
 
   assert.equal((await call('POST', '/api/orders', { plan_id: chat, idem: 'idem-f-1', fields: {} })).code, 'bad_fields')
@@ -184,7 +184,8 @@ test('карты: выпуск по заказу, реквизиты по код
   const luhn = digits.reverse().reduce((s, d, i) => s + (i % 2 ? (d * 2 > 9 ? d * 2 - 9 : d * 2) : d), 0)
   assert.equal(luhn % 10, 0)
   assert.equal((await client()('GET', '/api/cards')).status, 401)
-  const other = client(); await register(other, uniq())
+  const other = client(); const ou = await register(other, uniq())
+  await db.query(`update users set kyc_status = 'approved' where id = $1`, [ou.id])   // чужую карту не пополнить и с верификацией
   assert.equal((await other('POST', `/api/cards/${id}/reveal-code`, {})).status, 404)
   // пополнение карты
   const p75 = await plan('virtual-card', '$75')

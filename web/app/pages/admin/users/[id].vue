@@ -9,7 +9,6 @@ async function saveBonus() {
   bon.busy = true
   try { await api('POST', `/users/${u.value.id}/bonus`, { amount_kop: Math.round((bon.rub || 0) * 100) * bon.sign, note: bon.note }); ok('Бонусный счёт изменён'); bon.open = false; await load() } finally { bon.busy = false }
 }
-async function resetLimit() { await api('POST', `/users/${u.value.id}/limit-reset`, {}); ok('Период лимита обнулён'); await load() }
 const BONUS: Record<string, string> = { grant: 'Начислен', spend: 'Скидка по заказу', burn: 'Сгорел остаток', refund: 'Возвращён', adjust: 'Корректировка' }
 async function load() { r.value = await api('GET', '/users/' + route.params.id) }
 onMounted(load)
@@ -39,8 +38,6 @@ watchEffect(() => { const v = u.value ? (u.value.username || u.value.email) : ''
     <div class="grid g3" style="margin-bottom:14px">
       <div class="kpi"><span class="k">Баланс</span><span class="v">{{ kop(u.balance_kop) }}</span></div>
       <div class="kpi"><span class="k">KYC</span><span class="v" style="font-size:18px"><Tag :value="KYC_ST[u.kyc_status][0]" :severity="KYC_ST[u.kyc_status][1]" /></span><span class="muted">{{ u.kyc_reason || '' }}</span></div>
-      <div class="kpi"><span class="k">Лимит расходов</span><AdmLimit :limit="r.limit.limit_kop" :spent="r.limit.spent_kop" :resets="r.limit.resets_at" />
-        <Button v-if="can('balance.adjust') && r.limit.resets_at" label="Обнулить период" size="small" text severity="secondary" style="justify-self:start;padding:2px 0" @click="resetLimit" /></div>
       <div class="kpi"><span class="k">Бонусный счёт</span><span class="v">{{ kop(u.bonus_kop) }}</span>
         <span v-if="can('balance.adjust')" style="display:flex;gap:4px"><Button label="Начислить" size="small" text @click="Object.assign(bon, { open: true, sign: 1, rub: null, note: '' })" /><Button v-if="u.bonus_kop" label="Списать" size="small" text severity="secondary" @click="Object.assign(bon, { open: true, sign: -1, rub: null, note: '' })" /></span></div>
       <div class="kpi"><span class="k">Заказов</span><span class="v">{{ r.orders.length }}</span></div>
@@ -94,7 +91,7 @@ watchEffect(() => { const v = u.value ? (u.value.username || u.value.email) : ''
       <template #footer><Button label="Отмена" severity="secondary" text @click="adj.open = false" /><Button :label="adj.sign > 0 ? 'Начислить' : 'Списать'" :loading="adj.busy" :disabled="!adj.rub || !adj.comment.trim()" @click="saveAdj" /></template>
     </Dialog>
     <Dialog v-model:visible="bon.open" modal :header="bon.sign > 0 ? 'Начислить бонус' : 'Списать бонус'" :style="{ width: 'min(420px, 94vw)' }">
-      <p class="muted" style="margin-top:0">Бонус — скидка при следующей оплате: списывается целиком, остаток сгорает. На балансе и лимите не отражается.</p>
+      <p class="muted" style="margin-top:0">Бонус — скидка при следующей оплате: списывается целиком, остаток сгорает. На балансе не отражается.</p>
       <div class="grid">
         <div class="field"><label>Сумма, ₽</label><InputNumber v-model="bon.rub" :min-fraction-digits="0" :max-fraction-digits="2" :min="0.01" locale="ru-RU" fluid /></div>
         <div class="field"><label>Комментарий (обязательно)</label><Textarea v-model="bon.note" rows="2" auto-resize fluid /></div>

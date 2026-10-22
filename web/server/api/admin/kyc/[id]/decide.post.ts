@@ -16,9 +16,8 @@ export default defineEventHandler(async (e) => {
     return k
   })
   const bonus = k.bonus
-  const lim = await limitSettings()
   await notifyUser(k.user_id, approve ? 'Верификация пройдена' : 'Верификация отклонена',
-    approve ? (lim.verified_kop == null ? 'Лимит расходов снят.' : 'Лимит расходов увеличен.') + (bonus ? ` Начислили бонус ${bonus / 100} ₽ — он станет скидкой при следующей оплате.` : '') : 'Причина: ' + reason + '. Загрузите документы ещё раз.', '/dashboard#kyc')
+    approve ? 'Покупки и выпуск карты открыты.' + (bonus ? ` Начислили бонус ${bonus / 100} ₽ — он станет скидкой при следующей оплате.` : '') : 'Причина: ' + reason + '. Загрузите документы ещё раз.', '/dashboard#kyc')
   await audit(e, a, approve ? 'kyc.approve' : 'kyc.reject', k.id, { user_id: k.user_id, reason })
   return { ok: true }
 })

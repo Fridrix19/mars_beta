@@ -216,7 +216,7 @@
     counters();
     var acts = [];
     ORDERS.forEach(function(o){ if (o.status === 'action') acts.push({ cls: '', ico: 'warn', b: o.title + ' · ' + o.id, s: o.action.text, btn: o.action.btn, go: o.action.go }); if (o.status === 'new') acts.push({ cls: 'info', ico: 'pay', b: 'Оплатите ' + o.title + ' · ' + o.id, s: 'К оплате ' + money(o) + ' — расчёт зафиксирован', btn: 'Оплатить', go: 'order:' + o.id }); });
-    if (LIVE && USER.kyc !== 'full') acts.unshift(USER.kyc === 'pending' ? { cls: 'info', ico: 'shield', b: 'Документы на проверке', s: 'Обычно до рабочего дня. После одобрения лимит расходов снимется', btn: 'Статус', go: 'kyc' } : { cls: '', ico: 'shield', b: USER.kyc === 'more' ? 'Верификация отклонена' : 'Пройдите верификацию', s: USER.kyc === 'more' ? (USER.kycReason || 'Загрузите документы ещё раз') : 'Без неё — покупки до ' + limText() + ' в месяц.' + (BONUS_KYC ? ' За верификацию — бонус ' + MC.kop(BONUS_KYC) : ''), btn: 'Пройти', go: 'kyc' });
+    if (LIVE && USER.kyc !== 'full') acts.unshift(USER.kyc === 'pending' ? { cls: 'info', ico: 'shield', b: 'Документы на проверке', s: 'Обычно до рабочего дня. После одобрения откроются покупки и выпуск карты', btn: 'Статус', go: 'kyc' } : { cls: '', ico: 'shield', b: USER.kyc === 'more' ? 'Верификация отклонена' : 'Пройдите верификацию', s: USER.kyc === 'more' ? (USER.kycReason || 'Загрузите документы ещё раз') : 'Без неё — покупки до ' + limText() + ' в месяц.' + (BONUS_KYC ? ' За верификацию — бонус ' + MC.kop(BONUS_KYC) : ''), btn: 'Пройти', go: 'kyc' });
     if (LIVE) ORDERS.filter(function(o){ return o.status === 'done' && !o.reviewed && Date.now() - new Date(o.done || o.created) < 14 * 864e5; }).slice(0, 1).forEach(function(o){ acts.push({ cls: 'info', ico: 'star', b: 'Как вам ' + o.title + '?', s: 'Оставьте отзыв — он поможет другим покупателям', btn: 'Оценить', go: 'order:' + o.id }); });
     if (LIVE && docsPending().length) acts.unshift({ cls: 'info', ico: 'doc', b: 'Обновились условия сервиса', s: docsPending().map(function(d){ return d.name + ', редакция ' + d.ver; }).join(' · ') + '. Примите их перед следующей покупкой', btn: 'Посмотреть', go: 'docs' });
     if (SESSIONS.some(function(s){ return s.sus; })) acts.push({ cls: 'err', ico: 'shield', b: 'Вход с нового устройства', s: 'Android · Chrome, Алматы. Если это не вы — завершите сессию и смените пароль', btn: 'Проверить', go: 'profile:sessions' });
@@ -267,7 +267,7 @@
 
   /* ===== Новый заказ ===== */
   var W = { prod: 'topup', card: 'c1', usd: 50, step: 1 }, newOrder = null;
-  function needKyc(){ return LIVE ? overLimit(total(W.usd) * 100) : W.usd >= 150 && USER.kyc !== 'full' && USER.kyc !== 'pending'; }
+  function needKyc(){ return LIVE ? USER.kyc !== 'full' : W.usd >= 150 && USER.kyc !== 'full' && USER.kyc !== 'pending'; }
   function wizShow(n){
     W.step = n;
     document.querySelectorAll('#wiz .wiz-pane').forEach(function(p){ p.hidden = +p.getAttribute('data-pane') !== n; });
@@ -295,8 +295,8 @@
       [USER.kyc === 'none' ? 'no' : 'ok', 'Базовая верификация', USER.kyc === 'none' ? 'Подтвердите телефон и почту' : 'Телефон и почта подтверждены'],
       [needKyc() ? 'todo' : 'ok', 'Расширенная верификация', u >= 150 ? (needKyc() ? 'Нужна для сумм от $150 — паспорт, 3–5 минут' : USER.kyc === 'pending' ? 'На проверке — оплатить можно, зачислим после подтверждения' : 'Пройдена') : 'Не требуется для сумм до $150']
     ];
-    if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [overLimit(total(u) * 100) ? 'todo' : 'ok', 'Лимит расходов', !USER.limit || USER.limit.limit_kop == null ? 'Без лимита' : overLimit(total(u) * 100) ? 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' — пройдите верификацию или уменьшите сумму' : 'Осталось ' + MC.kop(USER.limit.remaining_kop) + ' из ' + MC.kop(USER.limit.limit_kop)], [BAL >= payKop(total(u) * 100) ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL / 100 < payKop(total(u) * 100) / 100 ? ' — пополним на недостающее при оплате' : '')]];
-    if (LIVE && W.prod === 'issue') reqs.unshift([USER.kyc === 'full' ? 'ok' : 'todo', 'Верификация', USER.kyc === 'full' ? 'Пройдена' : USER.kyc === 'pending' ? 'Документы на проверке — выпуск откроется после одобрения' : 'Нужна для выпуска карты: ФИО, телефон или почта и документ']);
+    if (LIVE) reqs = [[docsPending().length ? 'todo' : 'ok', docsPending().length ? 'Обновились условия' : 'Условия приняты', docsPending().length ? 'Примите новую редакцию перед оплатой — раздел «Документы»' : 'Оферта, редакция ' + DOCS[0].ver], [BAL >= payKop(total(u) * 100) ? 'ok' : 'todo', 'Баланс', 'Сейчас ' + MC.kop(BAL) + (BAL / 100 < payKop(total(u) * 100) / 100 ? ' — пополним на недостающее при оплате' : '')]];
+    if (LIVE) reqs.unshift([USER.kyc === 'full' ? 'ok' : 'todo', 'Верификация', USER.kyc === 'full' ? 'Пройдена' : USER.kyc === 'pending' ? 'Документы на проверке — выпуск откроется после одобрения' : 'Обязательна для покупок: ФИО, телефон или почта и документ']);
     if (LIVE && USER.bonus) reqs.push(['ok', 'Бонус', 'Спишем ' + MC.kop(Math.min(USER.bonus, Math.round(total(u) * 100))) + ' скидкой — к оплате ' + MC.kop(payKop(total(u) * 100)) + (USER.bonus > total(u) * 100 ? ', остаток бонуса сгорит' : '')]);
     else if (W.prod === 'issue') reqs.push(['ok', 'Лимит карт', 'У вас ' + CARDS.length + ' из 5 возможных']);
     $('wqReq').innerHTML = reqs.map(function(r){ return '<div class="req ' + r[0] + '">' + ico(r[0] === 'ok' ? 'check' : r[0] === 'todo' ? 'warn' : 'x') + '<div><b>' + r[1] + '</b><span>' + r[2] + '</span></div></div>'; }).join('');
@@ -306,7 +306,7 @@
     $('wDocs').innerHTML =
       '<label class="check"><input type="checkbox" id="wAgree" checked><span class="box"></span><span>Подтверждаю параметры заказа и сумму ' + rub(total(W.usd)) + '<span class="sub">Оферта, редакция ' + DOCS[0].ver + ', уже принята' + (DOCS[0].at ? ' ' + fmtD(DOCS[0].at) : '') + ' — повторно соглашаться не нужно</span></span></label>' +
       '<label class="check"><input type="checkbox" id="wMail" checked><span class="box"></span><span>Отправить квитанцию на ' + esc(USER.email) + '</span></label>' +
-      (k && LIVE ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Сумма больше лимита</b>Без верификации можно тратить до ' + limText() + ' в месяц, осталось ' + MC.kop(USER.limit.remaining_kop) + '. Пройдите верификацию — лимит снимется.<div class="alert-actions"><button type="button" class="auth-link" data-go="kyc">Пройти сейчас</button></div></div></div>' : '') +
+      (k && LIVE ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Нужна верификация</b>' + (USER.kyc === 'pending' ? 'Документы на проверке — оплатить заказ можно будет сразу после одобрения.' : 'Покупки доступны после верификации: ФИО, телефон или почта и документ.') + (USER.kyc === 'pending' ? '' : '<div class="alert-actions"><button type="button" class="auth-link" data-go="kyc">Пройти сейчас</button></div>') + '</div></div>' : '') +
       (k && !LIVE ? '<div class="alert alert-warn">' + ico('warn') + '<div><b>Нужна расширенная верификация</b>Для сумм от $150 требуется подтверждение личности. Оплатить можно сейчас — заказ подождёт результата проверки, обычно 3–5 минут.<div class="alert-actions"><button type="button" class="auth-link" data-go="kyc">Пройти сейчас</button><button type="button" class="auth-link" id="wLess">Уменьшить до $100</button></div></div></div>' : '');
     var less = $('wLess'); if (less) less.addEventListener('click', function(){ W.usd = 100; wizShow(3); });
     $('wAgree').addEventListener('change', function(){ $('wNext4').disabled = !this.checked; }); $('wNext4').disabled = false;
@@ -466,7 +466,7 @@
     if (ff && !LIVE) ff.addEventListener('click', function(){ ff.classList.add('is-loading'); setTimeout(function(){ USER.kyc = 'full'; ORDERS.forEach(function(o){ if (o.status === 'action' && o.action && o.action.go === 'kyc'){ o.status = 'work'; o.tl.forEach(function(s){ if (s[2] === 'warn'){ s[1] = new Date(); s[2] = 'ok'; s[3] = 'Подтверждено'; } }); o.tl[o.tl.length - 1][2] = 'cur'; delete o.action; } }); NOTIFS.unshift({ t: 'Верификация пройдена', s: 'Лимиты открыты, заказы продолжены', at: new Date(), go: 'orders', unread: 1 }); R.kyc(); toast('Верификация пройдена', 'Заказы, ждавшие проверки, продолжены.', 'ok'); }, 1500); });
     var km = $('kycMore'); if (km) km.addEventListener('click', function(){ $('kycFile').click(); });
     $('kycStart').disabled = k === 'pending' || k === 'full';
-    if (LIVE) { $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы'; var kp = $('kycStatus').querySelector('p'); if (k === 'more') kp.textContent = USER.kycReason ? 'Причина отказа: ' + USER.kycReason + '. Загрузите документы ещё раз.' : 'Проверка не пройдена. Загрузите документы ещё раз.'; else if (k === 'pending') kp.textContent = 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). Покупки откроются сразу после одобрения.'; else if (k === 'basic') kp.textContent = 'Почта подтверждена. Чтобы выпустить карту и снять лимит, пройдите верификацию: ФИО, телефон или почта и документ.'; }
+    if (LIVE) { $('kycStart').textContent = k === 'more' ? 'Загрузить заново' : 'Загрузить документы'; var kp = $('kycStatus').querySelector('p'); if (k === 'more') kp.textContent = USER.kycReason ? 'Причина отказа: ' + USER.kycReason + '. Загрузите документы ещё раз.' : 'Проверка не пройдена. Загрузите документы ещё раз.'; else if (k === 'pending') kp.textContent = 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). Покупки откроются сразу после одобрения.'; else if (k === 'basic') kp.textContent = 'Почта подтверждена. Верификация обязательна: без неё нельзя оплачивать заказы и выпускать карту.'; }
   };
   $('kycStart').addEventListener('click', function(){
     if (LIVE) { kycForm(); return; }
@@ -579,7 +579,7 @@
   function applyUser(u){
     USER.email = u.email; USER.id = u.username || u.email; USER.phone = u.phone || 'не указан'; USER.rawPhone = u.phone;
     USER.name = u.name || u.username || u.email.split('@')[0]; USER.login = u.username; USER.tg = u.telegram || ''; USER.kyc = KYC[u.kyc_status] || 'basic'; USER.kycReason = u.kyc_reason; USER.since = u.created_at;
-    BAL = u.balance_kop || 0; USER.limit = u.limit || null; USER.bonus = u.bonus_kop || 0;
+    BAL = u.balance_kop || 0; USER.limit = null;   // лимита расходов нет: покупки — после верификации, дальше без ограничений USER.bonus = u.bonus_kop || 0;
     var hl = document.querySelector('.head-login'); if (hl && hl.lastChild) hl.lastChild.textContent = USER.name;
   }
   function mapOrder(o, events){
@@ -679,6 +679,7 @@
   }
   // покупка с баланса: pp = {plan_id, amount_cents}; недостача → пополнение под заказ; нет KYC → верификация
   function buy(pp, fields, cardId, btn, onOk, giftTo, useBonus){
+    if (LIVE && USER.kyc !== 'full') { if (btn) btn.classList.remove('is-loading'); closeModal(); kycNeedModal(); return; }
     if (btn) btn.classList.add('is-loading');
     var body = { plan_id: pp.plan_id, amount_cents: pp.amount_cents, fields: fields || {}, idem: MC.uid() };
     if (cardId) body.card_id = cardId;
@@ -698,11 +699,11 @@
   // окно «нужна верификация» перед выпуском карты
   function kycNeedModal(msg){
     var pend = USER.kyc === 'pending';
-    modal({ title: pend ? 'Документы на проверке' : 'Нужна верификация', sub: msg || (pend ? 'Карту можно будет выпустить сразу после одобрения — обычно в течение рабочего дня.' : 'Выпуск карты доступен после верификации: ФИО, телефон или почта и документ, удостоверяющий личность.'),
+    modal({ title: pend ? 'Документы на проверке' : 'Нужна верификация', sub: msg || (pend ? 'Покупки откроются сразу после одобрения — обычно в течение рабочего дня.' : 'Покупки и выпуск карты доступны после верификации: ФИО, телефон или почта и документ, удостоверяющий личность.'),
       foot: pend ? [{ label: 'Понятно' }] : [{ label: 'Позже' }, { label: 'Пройти верификацию', cls: 'btn-primary', onClick: function(){ go('kyc'); setTimeout(kycForm, 50); } }] });
   }
   function livePay(btn){
-    if (W.prod === 'issue' && USER.kyc !== 'full') { kycNeedModal(); return; }
+    if (USER.kyc !== 'full') { kycNeedModal(); return; }
     cardPlan(W.usd).then(function(pp){ buy(pp, {}, W.prod === 'topup' ? W.card : null, btn, orderDone); }).catch(fail);
   }
   function orderDone(id){
@@ -871,7 +872,7 @@
   // форма верификации: ФИО, документ, телефон и/или почта, фото документа и селфи с ним
   function kycForm(preset){
     var picked = [].slice.call(preset || []);
-    modal({ title: 'Верификация', sub: 'Нужна для выпуска карты и снятия лимита. Данные видит только модератор.',
+    modal({ title: 'Верификация', sub: 'Обязательна для покупок и выпуска карты. Данные видит только модератор.',
       body: '<div class="field"><label for="kName">ФИО — как в документе</label><input id="kName" autocomplete="name" placeholder="Иванов Иван Иванович"></div>' +
         '<div class="field"><label for="kDoc">Документ, удостоверяющий личность</label><select id="kDoc"><option value="passport_ru">Паспорт РФ</option><option value="passport_foreign">Заграничный паспорт</option><option value="other">Иной документ</option></select></div>' +
         '<div class="field"><label for="kPhone">Телефон</label><input id="kPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000-00-00" value="' + esc(USER.rawPhone || '') + '"></div>' +
@@ -952,8 +953,8 @@
   function runCheckout(){
     var o = null; try { o = JSON.parse(sessionStorage.getItem('mc-checkout') || 'null'); sessionStorage.removeItem('mc-checkout'); } catch (e) {}
     if (!o || !o.slug) return;
-    // со страницы карты всегда выпуск новой карты — без верификации сразу говорим, что нужно
-    if (o.slug === 'virtual-card' && USER.kyc !== 'full') { kycNeedModal(); return; }
+    // без верификации покупки закрыты — говорим сразу, до окна оплаты
+    if (USER.kyc !== 'full') { kycNeedModal(); return; }
     MC.api('GET', '/catalog/' + encodeURIComponent(o.slug)).then(function(r){
       var pl = r.plans, pp = null, sum = 0;
       if (o.slug === 'virtual-card') {
@@ -987,14 +988,14 @@
   // верификация на сервере: одна проверка (паспорт + селфи), ручная, отказ — с причиной
   function liveKyc(){
     var k = USER.kyc, st = {
-      basic: ['Не пройдена', 'badge-plain', 10, 'Без верификации можно тратить до ' + limText() + ' в месяц. Пройдите её — лимит снимется' + (BONUS_KYC ? ', а на бонусный счёт придёт ' + MC.kop(BONUS_KYC) + ' — скидка на следующую покупку' : '') + '.'],
-      pending: ['На проверке', 'badge-warn', 70, 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). После одобрения лимит снимется' + (BONUS_KYC ? ' и придёт бонус ' + MC.kop(BONUS_KYC) : '') + ' — пришлём письмо.'],
-      full: ['Пройдена', 'badge-ok', 100, 'Лимит расходов снят. Повторно проходить не нужно.'],
+      basic: ['Не пройдена', 'badge-plain', 10, 'Верификация обязательна: без неё нельзя оплачивать заказы и выпускать карту. Займёт пару минут.'],
+      pending: ['На проверке', 'badge-warn', 70, 'Документы у оператора. Обычно проверяем в течение рабочего дня (9–22 МСК). После одобрения откроются покупки и выпуск карты.'],
+      full: ['Пройдена', 'badge-ok', 100, 'Покупки и выпуск карты открыты. Повторно проходить не нужно.'],
       more: ['Отклонена', 'badge-err', 30, 'Причина: ' + (USER.kycReason || 'не указана') + '. Исправьте и загрузите документы ещё раз.']
     }[k] || ['—', 'badge-plain', 0, ''];
     $('kycStatus').innerHTML = '<div class="row"><h3>Статус: ' + st[0] + '</h3>' + badge([st[0], st[1]]) + '</div><p>' + esc(st[3]) + '</p><div class="progress"><i style="--v:' + st[2] + '%"></i></div>' +
       (k === 'pending' ? '<button type="button" class="btn btn-ghost" id="kycFake">' + ico('refresh') + 'Обновить статус</button>' : '') + (USER.limit ? '<div class="lim-card lim-in">' + limHtml(false) + '</div>' : '');
-    $('kycLevels').innerHTML = '<div class="lvl ' + (k === 'full' ? 'ok' : 'cur') + '">' + ico(k === 'full' ? 'check' : 'shield') + '<b>Проверка личности</b><span>ФИО, телефон или почта, документ, удостоверяющий личность, и селфи с ним. Нужна для выпуска карты и снятия лимита.</span>' + badge(k === 'full' ? ['Пройдена', 'badge-ok'] : k === 'pending' ? ['На проверке', 'badge-warn'] : ['Снимает лимит', 'badge-info']) + '</div>';
+    $('kycLevels').innerHTML = '<div class="lvl ' + (k === 'full' ? 'ok' : 'cur') + '">' + ico(k === 'full' ? 'check' : 'shield') + '<b>Проверка личности</b><span>ФИО, телефон или почта, документ, удостоверяющий личность, и селфи с ним. Обязательна для покупок и выпуска карты.</span>' + badge(k === 'full' ? ['Пройдена', 'badge-ok'] : k === 'pending' ? ['На проверке', 'badge-warn'] : ['Обязательна', 'badge-info']) + '</div>';
     $('kycFiles').innerHTML = kycFiles.map(function(f){ return '<li>' + ico('doc') + esc(f.n) + '<span class="mono">' + f.s + '</span></li>'; }).join('');
     var ff = $('kycFake'); if (ff) ff.addEventListener('click', function(){ ff.classList.add('is-loading'); load().then(function(){ R.kyc(); }); });
     var can = k === 'basic' || k === 'more';

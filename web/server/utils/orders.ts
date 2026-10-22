@@ -23,13 +23,13 @@ export async function prepareOrder(u: { id: string; email: string }, b: any) {
   // пополнение существующей карты: карта должна быть своей и активной
   // card_id — в теле или в полях (так шлёт кабинет при «пополнить и купить»)
   const cardId = b?.card_id ?? b?.fields?.card_id
-  // выпуск новой карты (в том числе в подарок) — только после одобренной верификации
-  if (plan.slug === 'virtual-card' && !cardId) {
+  // любая покупка (сервис, выпуск и пополнение карты, подарок) — только после одобренной верификации; лимита расходов нет
+  {
     const k = await one<{ kyc_status: string }>(`select kyc_status from users where id = $1`, [u.id])
     if (k?.kyc_status !== 'approved')
       fail(403, 'kyc_required', k?.kyc_status === 'pending'
-        ? 'Документы на проверке — карту можно будет выпустить сразу после одобрения.'
-        : 'Выпуск карты доступен после верификации: ФИО, телефон или почта и документ, удостоверяющий личность.', { kyc_status: k?.kyc_status })
+        ? 'Документы на проверке — покупки откроются сразу после одобрения.'
+        : 'Покупки и выпуск карты доступны после верификации: ФИО, телефон или почта и документ, удостоверяющий личность.', { kyc_status: k?.kyc_status })
   }
   if (plan.slug === 'virtual-card' && cardId) {
     const card = await one(`select id from cards where id::text = $1 and user_id = $2 and status = 'active' and (gift_to is null or claimed_at is not null)`, [String(cardId), u.id])
